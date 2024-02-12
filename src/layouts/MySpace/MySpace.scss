@@ -1,0 +1,89 @@
+.MySpaceWrapper{
+    box-sizing: border-box;
+}
+  
+.logo{
+    height: 48px;
+    margin: 0;
+    border-bottom: solid var(--divider-color) 1px;
+}
+.trigger {
+    padding: 0 24px;
+    font-size: 18px;
+    line-height: 64px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+  
+.trigger:hover {
+    color: var(--app-color);
+}
+  
+.sider-container {
+    display: block;
+    @media screen and (max-width : 992px) {
+        display: none;
+    }  
+}
+  
+.header {
+    backdrop-filter: blur(10px);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    padding: 0;
+    height: 56px;
+    border-bottom: solid var(--divider-color) 1px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+}
+  
+.header-right{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: row;
+    width: auto;
+    margin-right: 24px;
+}
+  
+.default-layout-ham{
+    display: block;
+    @media screen and (max-width : 992px) {
+        display: none;
+    }
+}
+  
+.not-default-layout-ham {
+    display: none;
+    color: var(--app-color);
+    @media screen and (max-width : 992px) {
+        display: block;
+    }
+}
+  
+.content {
+    margin-top: 56px;
+    box-sizing: border-box;
+    min-height: 100vh;
+    margin-left: 250px;
+    padding: 24px;
+    @media screen and (max-width : 992px) {
+        margin-left: 0px;
+        //padding: 16px;
+    }
+}
+  
+.footer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 24px;
+    @media screen and  (max-width : 992px) {
+        margin: 8px;
+    }
+}

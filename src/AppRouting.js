@@ -1,0 +1,215 @@
+import { Navigate, createBrowserRouter } from "react-router-dom";
+import MySpace from "./layouts/MySpace/MySpace";
+import Auth from "./pages/Auth/Auth";
+import NotFound from "./pages/NotFound/NotFound";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Patients from "./pages/Patients/Patients";
+import RendezVous from "./pages/RendezVous/RendezVous";
+import NewCommandeProduit from "./pages/NewCommandeProduit/NewCommandeProduit";
+import CommandesProduits from "./pages/CommandesProduits/CommandesProduits";
+import FicheProduit from "./pages/FicheProduit/FicheProduit";
+import EntreesProduits from "./pages/EntreesProduits/EntreesProduits";
+import ReceptionCommande from "./pages/ReceptionCommande/ReceptionCommande";
+import SituationStocks from "./pages/SituationStocks/SituationStocks";
+import Fournisseurs from "./pages/Fournisseurs/Fournisseurs";
+import SaisieInventaire from "./pages/SaisieInventaire/SaisieInventaire";
+import SortiesProduits from "./pages/SortiesProduits/SortiesProduits";
+import NewMouvementSortie from "./pages/NewMouvementSortie/NewMouvementSortie";
+import Accounts from "./pages/Accounts/Accounts";
+import NewAccount from "./pages/NewAccount/NewAccount";
+import Profil from "./pages/Profil/Profil";
+import DossierMedical from "./pages/DossierMedical/DossierMedical";
+import InfosCliniques from "./pages/InfosCliniques/InfosCliniques";
+import Consultation from "./pages/Consultation/Consultation";
+import Prescriptions from "./pages/Prescriptions/Prescriptions";
+import Ordonnance from "./pages/Ordonnance/Ordonnance";
+import Analyse from "./pages/Analyse/Analyse";
+import Imagerie from "./pages/Imagerie/Imagerie";
+import Home from "./pages/Home/Home";
+import Consultations from "./pages/Consultations/Consultations";
+import Visites from "./pages/Visites/Visites";
+import DossierAT from "./pages/DossierAT/DossierAT";
+
+export const router = createBrowserRouter(
+    [
+        {
+            path : "/",
+            element : <Navigate to={"/login"} />
+        },
+        {
+            path : "/login",
+            element : <Auth />
+        },
+        {
+            path : "/home",
+            element : <Home />
+        },
+        {
+            path : "*",
+            element : <NotFound />
+        },
+        {
+            path : "myspace",
+            element : <MySpace /> ,
+            children : [
+                {
+                    path : "",
+                    element : <Navigate to={"/myspace/dashboard"} />
+                },
+                {
+                    path : "dashboard",
+                    element : <Dashboard />,
+                },
+                {
+                    path : "rendez-vous",
+                    element : <RendezVous />
+                },
+                {
+                    path : "patients",
+                    children : [
+                        {
+                            path : "",
+                            element : <Patients />
+                        },
+                        {
+                            path : "dossier",
+                            children : [
+                                {
+                                    path : "" ,
+                                    element : <DossierMedical />
+                                } ,
+                                {
+                                    path : "consultation" ,
+                                    element  : <Consultation />
+                                } ,
+                                {
+                                    path : "infos-cliniques",
+                                    element : <InfosCliniques />
+                                },
+                                {
+                                    path : "prescriptions",
+                                    children : [
+                                        {
+                                            path : "",
+                                            element : <Prescriptions />
+                                        },
+                                        {
+                                            path : "ordonnance",
+                                            element : <Ordonnance />
+                                        },
+                                        {
+                                            path : "analyse",
+                                            element : <Analyse />
+                                        },
+                                        {
+                                            path : "imagerie",
+                                            element : <Imagerie />
+                                        },
+                                    ]
+                                },
+                            ]
+                        },
+                    ]
+                },
+                {
+                    path : "consultations",
+                    element : <Consultations />
+                },
+                {
+                    path : "visites",
+                    element : <Visites />
+                },
+                {
+                    path : "dossier-accident-travail",
+                    element : <DossierAT />
+                },
+                {
+                    path : "fiche-produit",
+                    element : <FicheProduit />
+                },
+                {
+                    path : "commandes-produits",
+                    children : [
+                        {
+                            path : "",
+                            element : <CommandesProduits/>
+                        },
+                        {
+                            path : "new-commande-produit",
+                            element : <NewCommandeProduit/>
+                        },
+                    ]
+                },
+                {
+                    path : "entrees-produits",
+                    children : [
+                        {
+                            path : "",
+                            element : <EntreesProduits/>
+                        },
+                        {
+                            path : "reception-commande",
+                            element : <ReceptionCommande/>
+                        },
+                    ]
+                },
+                {
+                    path : "sorties-produits",
+                    children : [
+                        {
+                            path : "",
+                            element : <SortiesProduits/>
+                        },
+                        {
+                            path : "new-mouvement-sortie",
+                            element : <NewMouvementSortie/>
+                        },
+                    ]
+                },
+                {
+                    path : "situation-stocks",
+                    element : <SituationStocks />
+                },
+                {
+                    path : "saisie-inventaire",
+                    element : <SaisieInventaire/>
+                },
+                {
+                    path : "fournisseurs",
+                    element : <Fournisseurs />
+                },
+                {
+                    path : "settings",
+                    children : [
+                        {
+                            path : "",
+                            element : <Navigate to={"/myspace/settings/accounts"} />
+                        },
+                        {
+                            path : "accounts",
+                            children : [
+                                {
+                                    path : "",
+                                    element : <Accounts />
+                                },
+                                {
+                                    path : "account",
+                                    element : <NewAccount />
+                                },
+                            ]
+                        },
+                        {
+                            path : "profil",
+                            element : <Profil />
+                        },
+                    ]
+                    
+                },
+                {
+                    path : "*",
+                    element : <NotFound />
+                },
+            ]
+        },
+    ]
+)

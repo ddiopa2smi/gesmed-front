@@ -1,0 +1,23 @@
+.container{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+
+    .home-card{
+        img {
+            width: 150px;
+            height: 150px;
+            @media screen and (max-width : 400px) {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    }
+    .home-card:hover{
+        cursor: pointer;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    }
+
+    
+}

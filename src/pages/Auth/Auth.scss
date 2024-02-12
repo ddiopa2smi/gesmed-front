@@ -1,0 +1,18 @@
+.AuthWrapper {
+    width: 100vw;
+    height: 100vh;
+    .AuthContainer{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        
+        @media screen and (max-width : 400px) {
+            width: 100%;
+        }
+        @media screen and (min-width : 400px) {
+            width: 350px;
+        }
+        
+    }
+}
