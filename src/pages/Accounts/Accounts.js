@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
 import useFetch from '../../utils/hooks/useFetch';
 import { endpoints } from '../../constants/endpoints.constants';
+import { Can } from '../../utils/contexts/AbilityContext';
+import { ability } from '../../utils/access';
 
 
 
@@ -39,29 +41,31 @@ function Accounts() {
                 
             <Flex justify="flex-end" align="center" flex={"auto"} wrap='wrap' >
                 <Space>
-                    <Dropdown
-                        menu={{
-                            items : [
-                                {
-                                    key : 'personnel-medical' ,
-                                    label : "Personnel médical" ,
-                                    onClick : (e)=>{onAdd(e.key)}
-                                } ,
-                                {
-                                    key : 'personnel-non-medical' ,
-                                    label : "Personnel non-médical" ,
-                                    onClick :  (e)=>{onAdd(e.key)}
-                                } ,
-                                {
-                                    key : 'personnel-pharmacie' ,
-                                    label : "Personnel pharmacie" ,
-                                    onClick :  (e)=>{onAdd(e.key)}
-                                } ,
-                            ] ,
-                        }}
-                    >
-                        <Button type='primary' icon={<PlusOutlined/>}>Nouveau</Button>
-                    </Dropdown>
+                    <Can I="create" an="account" >
+                        <Dropdown
+                            menu={{
+                                items : [
+                                    {
+                                        key : 'personnel-medical' ,
+                                        label : "Personnel médical" ,
+                                        onClick : (e)=>{onAdd(e.key)}
+                                    } ,
+                                    {
+                                        key : 'personnel-non-medical' ,
+                                        label : "Personnel non-médical" ,
+                                        onClick :  (e)=>{onAdd(e.key)}
+                                    } ,
+                                    {
+                                        key : 'personnel-pharmacie' ,
+                                        label : "Personnel pharmacie" ,
+                                        onClick :  (e)=>{onAdd(e.key)}
+                                    } ,
+                                ] ,
+                            }}
+                        >
+                            <Button type='primary' icon={<PlusOutlined/>}>Nouveau</Button>
+                        </Dropdown>
+                    </Can>
                 </Space>
             </Flex>
 
@@ -113,12 +117,16 @@ function Accounts() {
                                     render :  (record)=>(
                                         <Flex align='center' >
                                             <Space size="middle" >
-                                                <Tooltip title="Editer">
-                                                    <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEdit( "personnel-medical" , record)}} />
-                                                </Tooltip>
-                                                <Tooltip title="Supprimer">
-                                                    <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{onDelete(record)}} />
-                                                </Tooltip>
+                                                <Can  I="update" an="account">
+                                                    <Tooltip title="Editer">
+                                                        <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEdit( "personnel-medical" , record)}} />
+                                                    </Tooltip>
+                                                </Can>
+                                                <Can I="delete" an="account">
+                                                    <Tooltip title="Supprimer">
+                                                        <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{onDelete(record)}} />
+                                                    </Tooltip>
+                                                </Can>
                                             </Space>
                                         </Flex>
                                     )

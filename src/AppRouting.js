@@ -29,6 +29,8 @@ import Home from "./pages/Home/Home";
 import Consultations from "./pages/Consultations/Consultations";
 import Visites from "./pages/Visites/Visites";
 import DossierAT from "./pages/DossierAT/DossierAT";
+import Privileges from "./pages/Privileges/Privileges";
+import Privilege from "./pages/Privilege/Privilege";
 
 export const router = createBrowserRouter(
     [
@@ -195,6 +197,19 @@ export const router = createBrowserRouter(
                                 {
                                     path : "account",
                                     element : <NewAccount />
+                                },
+                            ]
+                        },
+                        {
+                            path : "privileges",
+                            children : [
+                                {
+                                    path : "",
+                                    element : <Privileges />
+                                },
+                                {
+                                    path : "privilege",
+                                    element : <Privilege />
                                 },
                             ]
                         },

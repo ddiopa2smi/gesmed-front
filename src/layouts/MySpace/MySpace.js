@@ -212,19 +212,19 @@ const MySpace = () => {
                             title: "Comptes" , 
                             onClick : ()=>{navigate("/myspace/settings/accounts")}
                         },
-                        {
-                            key: 'users',
-                            icon: <TeamOutlined  />,
-                            label: "Utilisateurs" , 
-                            title: "Utilisateurs" , 
-                            onClick : ()=>{navigate("/myspace/users")}
-                        },
+                        // {
+                        //     key: 'users',
+                        //     icon: <TeamOutlined  />,
+                        //     label: "Utilisateurs" , 
+                        //     title: "Utilisateurs" , 
+                        //     onClick : ()=>{navigate("/myspace/users")}
+                        // },
                         {
                             key: 'privileges',
                             icon: <SafetyOutlined  />,
                             label: "Privilèges" , 
                             title: "Privilèges" , 
-                            onClick : ()=>{navigate("/myspace/privileges")}
+                            onClick : ()=>{navigate("/myspace/settings/privileges")}
                         },
                         {
                             key: 'profil',   
@@ -336,6 +336,9 @@ const MySpace = () => {
                 setCurrentSelectedKeys("accounts");
                 break;
             case "privileges":
+                setCurrentSelectedKeys("privileges");
+                break;
+            case "privilege":
                 setCurrentSelectedKeys("privileges");
                 break;
             case "profil":

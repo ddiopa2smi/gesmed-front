@@ -123,6 +123,9 @@ export const getBreadCrumbLabel = (item) => {
         case "privileges":
             label = "Privilèges";
             break;
+        case "privilege":
+            label = "Privilège";
+            break;
         case "profil":
             label = "Mon profil";
             break;

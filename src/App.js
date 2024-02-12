@@ -8,6 +8,8 @@ import { ConfigProvider, theme} from 'antd';
 import { PRIMARY_COLOR } from './constants/app.constants.js';
 import { ThemeContext } from './utils/providers/ThemeProvider.js';
 import { router } from './AppRouting.js';
+import { AbilityContext } from './utils/contexts/AbilityContext.js';
+import { ability } from './utils/access.js';
 
 
 function App() {
@@ -35,7 +37,9 @@ function App() {
         }}
       >
         <div className="App">
-          <RouterProvider router={router} />
+          <AbilityContext.Provider value={ability} >
+            <RouterProvider router={router} />
+          </AbilityContext.Provider>
         </div>
       </ConfigProvider>
   );
