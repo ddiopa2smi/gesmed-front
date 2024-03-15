@@ -4,14 +4,16 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import ThemeProvider from './utils/providers/ThemeProvider';
+import { LoadingProvider } from './utils/providers/LoadingProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
-   
+    <LoadingProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </LoadingProvider>
   </React.StrictMode>
 );
 

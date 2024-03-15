@@ -43,7 +43,7 @@ const defineAbilitiesFor = (permissions) => {
     const { can, rules } = new AbilityBuilder();
 
     // Parcourir les autorisations récupérées de la base de données et les ajouter à l'objet Ability
-    permissions.forEach(permission => {
+    permissions.forEach((permission, key) => {
         console.log(permission)
       can(permission.action, permission.subject, permission.condition);
     });

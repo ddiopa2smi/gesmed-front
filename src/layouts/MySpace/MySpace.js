@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import "./MySpace.scss";
 import { Outlet, useLocation, useNavigate, /*useParams*/ } from 'react-router';
 //import { useDispatch, useSelector } from 'react-redux';
 import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined} from '@ant-design/icons';
-import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb} from 'antd';
+import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb, theme} from 'antd';
 //import { setLightMode , setDarkMode } from './../../reducers/theme.reducers';
 import {TbMoonStars} from "react-icons/tb";
 import {HiOutlineSun} from "react-icons/hi";
@@ -12,6 +12,8 @@ import { endpoints } from '../../constants/endpoints.constants';
 import { ThemeContext } from '../../utils/providers/ThemeProvider';
 import { Link } from 'react-router-dom';
 import { getBreadCrumbLabel } from '../../utils/helpers';
+import LoadingBar from 'react-top-loading-bar';
+import { LoadingContext } from '../../utils/providers/LoadingProvider';
 
 const { Header, Sider, Content } = Layout;
 const { Countdown } = Statistic;
@@ -19,7 +21,10 @@ const {Text} = Typography;
 
 const MySpace = () => {
     const {isDark , setLightMode , setDarkMode} = useContext(ThemeContext);
+    const {loadindRef} = useContext(LoadingContext);
+    const {token: { colorPrimary },} = theme.useToken();
     const space = sessionStorage.getItem("space");
+
     //const dispatch = useDispatch();
     //const sizes = useSelector((state)=>state.sizesRdx.sizes);
     const location = useLocation();
@@ -386,6 +391,7 @@ const MySpace = () => {
 
     return (
         <div className="MySpaceWrapper">
+            <LoadingBar color={colorPrimary} ref={loadindRef} />
             <Layout>  
                 <div className='sider-container' style={{height:"100vh"}} >
                     <Sider style={{
@@ -445,6 +451,7 @@ const MySpace = () => {
                         }
 
                         <div className='header-right' >
+                        
                             {
                                 isDark ?
                                 <Tooltip placement="bottomRight" title={<>Mode Sombre</>} >

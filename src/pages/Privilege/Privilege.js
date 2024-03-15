@@ -1,5 +1,5 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Dropdown, Flex, Form, Modal, Space, Tabs, Tag, Tooltip, Tree, Typography } from 'antd'
+import { DeleteOutlined, EditOutlined, PlusOutlined , CloseOutlined } from '@ant-design/icons'; 
+import { Button, Card, Dropdown, Flex, Form, Modal, Space, Tabs, Tag, Input , Tooltip, Tree, Typography, Select } from 'antd'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
@@ -25,7 +25,7 @@ function Privilege() {
     const treeList = [
         {
             title : "Compte",
-            key : "account",
+            key : "all-account",
             children : [
                 {
                     title : "Créer",
@@ -47,7 +47,7 @@ function Privilege() {
         },
         {
             title : "Guest",
-            key : "guest",
+            key : "all-guest",
             children : [
                 {
                     title : "Créer",
@@ -71,12 +71,38 @@ function Privilege() {
     
     
     const onCheck = (checkedKeys, info) => {
-        console.log('onCheck', checkedKeys, info);
+        //console.log('onCheck', checkedKeys, info);
         setPermissions(checkedKeys);
     };
 
     const valid = () => {
-        
+        //console.log(permissions)
+        let tmp = [];
+        if (permissions.length !== 0) {
+            for (let i = 0; i < permissions.length; i++) {
+                const element = permissions[i];
+                const splitElement = element.split("-");
+                const subject = splitElement[1];
+                const action = splitElement[0];
+                // if (action === "all") {
+                //     tmp.push({
+                //         action : action,
+                //         subject : subject
+                //     });
+                //     continue;
+                // }else{
+                //     tmp.push({
+                //         action : action,
+                //         subject : subject
+                //     });
+                // }
+                tmp.push({
+                    action : action,
+                    subject : subject
+                });
+            }
+        }
+        console.log(tmp);
     }
 
     return (
@@ -138,7 +164,7 @@ function Privilege() {
                     onValid={valid}
                 />
             </Form>
-            
+
         </Card>
     )
 }

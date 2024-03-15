@@ -10,10 +10,8 @@ const {Title} = Typography;
 
 function Consultations() {
     const {data , dataCopy , setDataCopy, isLoading , onRefresh} = useFetch(endpoints.consultations.LIST);
-    console.log(data)
-    const onEdit = (record) => {
 
-     
+    const onEdit = (record) => {     
     }
 
     const onDelete = (record) => {
