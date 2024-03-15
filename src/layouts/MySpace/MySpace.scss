@@ -36,7 +36,7 @@
     height: 56px;
     border-bottom: solid var(--divider-color) 1px;
     display: flex;
-    justify-content: space-between;
+    //justify-content: space-between;
     align-items: center;
     box-sizing: border-box;
     width: 100%;
@@ -65,12 +65,20 @@
         display: block;
     }
 }
+
+
+// .auto-complete{
+//     @media screen and (max-width : 992px) {
+//         display: none;
+//     }
+// }
   
 .content {
     margin-top: 56px;
     box-sizing: border-box;
     min-height: 100vh;
-    margin-left: 250px;
+   // margin-left: 250px;
+    margin-left: 20%;
     padding: 24px;
     @media screen and (max-width : 992px) {
         margin-left: 0px;

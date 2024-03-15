@@ -13,12 +13,14 @@ import PatientsAdvancedSearch from '../../components/specific/PatientsAdvancedSe
 import AddRv from '../../components/specific/AddRv/AddRv';
 import { deleteActions } from '../../actions/actions';
 import ExportFile from '../../components/common/ExportFile/ExportFile';
+import useSearch from '../../utils/hooks/useSearch';
 
 const {Title} = Typography;
 
 function Patients() {
     const navigate = useNavigate();
     const {data , dataCopy , setDataCopy , isLoading , onRefresh} = useFetch(endpoints.patients.LIST)
+    const {getColumnSearchProps} = useSearch()
     const patientsList = data;
     const [open , setOpen] = useState(false);
     const [operationType , setOperationType] = useState("");
@@ -125,17 +127,20 @@ function Patients() {
                         dataIndex: 'nom_patient',
                         key: 'nom_patient',
                         sorter: (a, b) => a.nom_patient.charCodeAt(0) - b.nom_patient.charCodeAt(0),
+                        ...getColumnSearchProps('nom_patient')
                     },
                     {
                         title: 'Prénom',
                         dataIndex: 'prenom_patient',
-                        key: 'prenom_patient'
+                        key: 'prenom_patient',
+                        ...getColumnSearchProps('prenom_patient')
                     },
                     {
                         title: 'Age',
                         dataIndex: 'age_patient',
                         key: 'age_patient',
-                        sorter: (a, b) => a.age_patient - b.age_patient
+                        sorter: (a, b) => a.age_patient - b.age_patient,
+                        ...getColumnSearchProps('age_patient')
                     },
                     {
                         title: 'Sexe',

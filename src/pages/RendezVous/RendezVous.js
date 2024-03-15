@@ -1,6 +1,6 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button, Card, Flex, Modal, Segmented, Space, Spin, Tag, Tooltip, Typography, message } from 'antd'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
 import useFetch from '../../utils/hooks/useFetch';
@@ -9,6 +9,7 @@ import {RiStethoscopeLine} from "react-icons/ri"
 import {AiOutlineFolder} from "react-icons/ai"
 import Examen from '../../components/specific/Examen/Examen';
 import { getActions } from '../../actions/actions';
+import useSearch from '../../utils/hooks/useSearch';
 
 
 const {Title} = Typography;
@@ -16,10 +17,13 @@ const {Title} = Typography;
 function RendezVous() {
     const navigate = useNavigate();
     const {data , dataCopy, setDataCopy , isLoading , error , onRefresh} = useFetch(endpoints.rendezVous.TODAY_LIST);
+    const {getColumnSearchProps} = useSearch()
     const [open , setOpen] = useState(false);
     const [currentRecord , setCurrentRecord] = useState(null);
     const [defaultExamPayload , setDefaultExamPayload] = useState(null);
     const [examActionLoading , setExamActionLoading] = useState(false);
+
+    const [segmentedValue , setSegmentedValue] = useState("attente");
 
     const handleExamenClinique = (record) => {
         setExamActionLoading(true);
@@ -46,6 +50,11 @@ function RendezVous() {
         sessionStorage.setItem("currentPatient",JSON.stringify(record));
     }
 
+    useEffect(() => {
+      
+    }, [segmentedValue])
+    
+
     return (
         <Card loading={isLoading} >
 
@@ -54,24 +63,21 @@ function RendezVous() {
             <Flex justify="flex-end" align="center" >
                 <Space>
                     <Segmented 
-                    defaultValue={null}
-                    options={[
-                        {
-                        value : false,
-                        label : "En attente"
-                        },
-                        {
-                        value : true,
-                        label : "Traités"
-                        }
-                    ]}
-                    
-                    onChange={(value)=>{
-                        //const filterData = data.filter((element)=> element.etat === value);
-                        const filterData = data.filter((element)=> element.effectue === value);
-                        setDataCopy(filterData)
-                        console.log(data)
-                    }}
+                        defaultValue={segmentedValue}
+                        options={[
+                            {
+                                value : "attente",
+                                label : "En attente"
+                            },
+                            {
+                                value : "traite",
+                                label : "Traités"
+                            }
+                        ]}
+                        
+                        onChange={(value)=>{
+                            setSegmentedValue(value)
+                        }}
                     
                     />
                     <Tooltip title="Actualiser" >
@@ -84,38 +90,44 @@ function RendezVous() {
 
             <DataTable 
                 dataSource={data}
-                dataSourceCopy={dataCopy}
+                dataSourceCopy = {segmentedValue === "attente" ? dataCopy.filter((element)=> element.effectue === false) : dataCopy.filter((element)=> element.effectue === true)}
                 setDataSourceCopy={setDataCopy}
                 columns={[
                     {
-                    title: 'N°',
-                    dataIndex: 'num_ordre',
-                    key: 'num_ordre'
+                        title: 'N°',
+                        dataIndex: 'num_ordre',
+                        key: 'num_ordre',
+                        ...getColumnSearchProps('num_ordre')
                     },
                     {
                         title: 'N° patient',
                         dataIndex: 'num_patient',
-                        key: 'num_patient'
+                        key: 'num_patient',
+                        ...getColumnSearchProps('num_patient')
                     },
                     {
                         title: 'Nom',
                         dataIndex: 'nom_patient',
-                        key: 'nom_patient'
+                        key: 'nom_patient',
+                        ...getColumnSearchProps('nom_patient')
                     },
                     {
                         title: 'Prénom',
                         dataIndex: 'prenom_patient',
-                        key: 'prenom_patient'
+                        key: 'prenom_patient',
+                        ...getColumnSearchProps('prenom_patient')
                     },
                     {
                         title: 'Age',
                         dataIndex: 'age_patient',
-                        key: 'age_patient'
+                        key: 'age_patient',
+                        ...getColumnSearchProps('age_patient')
                     },
                     {
                         title: 'Sexe',
                         dataIndex: 'sexe_patient',
-                        key: 'sexe_patient'
+                        key: 'sexe_patient',
+                        ...getColumnSearchProps('sexe_patient')
                     },
                     {
                         title: 'Examens',

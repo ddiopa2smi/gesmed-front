@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import "./MySpace.scss";
 import { Outlet, useLocation, useNavigate, /*useParams*/ } from 'react-router';
 //import { useDispatch, useSelector } from 'react-redux';
-import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined} from '@ant-design/icons';
-import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb, theme} from 'antd';
+import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined} from '@ant-design/icons';
+import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb, theme, AutoComplete, Input, Flex} from 'antd';
 //import { setLightMode , setDarkMode } from './../../reducers/theme.reducers';
 import {TbMoonStars} from "react-icons/tb";
 import {HiOutlineSun} from "react-icons/hi";
@@ -14,10 +14,16 @@ import { Link } from 'react-router-dom';
 import { getBreadCrumbLabel } from '../../utils/helpers';
 import LoadingBar from 'react-top-loading-bar';
 import { LoadingContext } from '../../utils/providers/LoadingProvider';
+import logo from './../../assets/logo.png'
 
 const { Header, Sider, Content } = Layout;
 const { Countdown } = Statistic;
 const {Text} = Typography;
+
+
+const mockVal = (str, repeat = 1) => ({
+    value: str.repeat(repeat),
+});
 
 const MySpace = () => {
     const {isDark , setLightMode , setDarkMode} = useContext(ThemeContext);
@@ -389,6 +395,16 @@ const MySpace = () => {
 	},[route , location])
 
 
+    // const [value, setValue] = useState('');
+    // const [options, setOptions] = useState([]);
+    // const [anotherOptions, setAnotherOptions] = useState([]);
+    // const getPanelValue = (searchText) =>
+    //     !searchText ? [] : [mockVal(searchText), mockVal(searchText, 2), mockVal(searchText, 3)];
+    // const onSelect = (data) => {
+    //     console.log('onSelect', data);
+    // };
+
+
     return (
         <div className="MySpaceWrapper">
             <LoadingBar color={colorPrimary} ref={loadindRef} />
@@ -410,7 +426,8 @@ const MySpace = () => {
                         trigger={null} 
                         collapsible 
                         collapsed={collapsed}
-                        width={250}
+                        //width={250}
+                        width={"20%"}
                     >
                             
                         {menu}
@@ -434,51 +451,70 @@ const MySpace = () => {
                             backgroundColor : isDark ? 'rgba(78, 78, 78, 0.3)' : 'rgb(255 255 255 /0.3)'
                         }}
                     >
-
-                        {
-                            React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-                                className: 'trigger default-layout-ham',
-                                onClick: () => setCollapsed(!collapsed),
-
-                            })
-                        }
-
-                        {
-                            React.createElement(MenuFoldOutlined, {
-                                className: 'trigger not-default-layout-ham',
-                                onClick: () => setOpen(true),
-                            })
-                        }
-
-                        <div className='header-right' >
-                        
-                            {
-                                isDark ?
-                                <Tooltip placement="bottomRight" title={<>Mode Sombre</>} >
-                                    <Button shape='circle' type='text' icon={<TbMoonStars size={24} /> } onClick={()=> handleLightMode()} />
-                                </Tooltip>
-                                :
-                                <Tooltip placement="bottomRight" title={<>Mode clair</>}  >
-                                    <Button shape='circle' type='text' icon={<HiOutlineSun size={24} /> } onClick={()=> handleDarkMode()} />
-                                </Tooltip>
-                            }   &nbsp;&nbsp;&nbsp;
-
-                            <Tooltip placement="bottomRight" title={<>Notifications</>}  >
-                                <Button shape='circle' type='text' icon={<BellOutlined style={{fontSize : 24}} /> } onClick={()=>{setOpenDrawer(true)}} /> 
-                            </Tooltip>
-                            &nbsp;&nbsp;&nbsp;
-
-                            <Dropdown
-                                menu={{
-                                    items : profilMenu ,
-                                }}
-                            >
-                                <Avatar size={"default"} icon={<UserOutlined/>} style={{ cursor:'pointer'}} /> 
-                            </Dropdown>
-                            &nbsp;
-                            <Text>  { userConnected ? userConnected?.username : ""} </Text>
-                            
+                        <div style={{display:"flex",justifyContent:"center",alignItems:"center",width : "25%"}} >
+                            <h3>GESMED</h3>
                         </div>
+                        <div style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between"}} >
+                            <Flex align='center' >
+                                {
+                                    React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                                        className: 'trigger default-layout-ham',
+                                        onClick: () => setCollapsed(!collapsed),
+
+                                    })
+                                }
+
+                                {
+                                    React.createElement(MenuFoldOutlined, {
+                                        className: 'trigger not-default-layout-ham',
+                                        onClick: () => setOpen(true),
+                                    })
+                                }
+
+
+                                {/* <AutoComplete
+                                    className='auto-complete'
+                                    options={options}
+                                    style={{
+                                        width: 350,
+                                    }}
+                                    onSelect={onSelect}
+                                    onSearch={(text) => setOptions(getPanelValue(text))}
+                                    
+                                    placeholder="Rechercher..."
+                                /> */}
+                            </Flex>
+                            <div className='header-right' >
+                            
+                                {
+                                    isDark ?
+                                    <Tooltip placement="bottomRight" title={<>Mode Sombre</>} >
+                                        <Button shape='circle' type='text' icon={<TbMoonStars size={24} /> } onClick={()=> handleLightMode()} />
+                                    </Tooltip>
+                                    :
+                                    <Tooltip placement="bottomRight" title={<>Mode clair</>}  >
+                                        <Button shape='circle' type='text' icon={<HiOutlineSun size={24} /> } onClick={()=> handleDarkMode()} />
+                                    </Tooltip>
+                                }   &nbsp;&nbsp;&nbsp;
+
+                                <Tooltip placement="bottomRight" title={<>Notifications</>}  >
+                                    <Button shape='circle' type='text' icon={<BellOutlined style={{fontSize : 24}} /> } onClick={()=>{setOpenDrawer(true)}} /> 
+                                </Tooltip>
+                                &nbsp;&nbsp;&nbsp;
+
+                                <Dropdown
+                                    menu={{
+                                        items : profilMenu ,
+                                    }}
+                                >
+                                    <Avatar size={"default"} icon={<UserOutlined/>} style={{ cursor:'pointer'}} /> 
+                                </Dropdown>
+                                &nbsp;
+                                <Text>  { userConnected ? userConnected?.username : ""} </Text>
+                                
+                            </div>
+                        </div>
+                       
                     </Header>
                     
                     <Content className='content'>

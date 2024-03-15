@@ -29,7 +29,6 @@ function DossierMedical() {
     const patient = data?.patient;
     const listConsultation = data?.listConsultation;
     const listPrescription = data?.listPrescription;
-    console.log(data)
 
     // const [patient , setPatient] = useState(null);
     // const [listConsultation , setListConsultation] = useState([]);
