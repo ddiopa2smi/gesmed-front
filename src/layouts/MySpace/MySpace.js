@@ -448,7 +448,8 @@ const MySpace = () => {
                     <Header
                         className='header'
                         style={{
-                            backgroundColor : isDark ? 'rgba(78, 78, 78, 0.3)' : 'rgb(255 255 255 /0.3)'
+                            backgroundColor : isDark ? 'rgba(78, 78, 78, 0.3)' : 'rgba(255,255,255, 0.7)'
+                            //rgb(255 255 255 /0.3)
                         }}
                     >
                         <div style={{display:"flex",justifyContent:"center",alignItems:"center",width : "25%"}} >
