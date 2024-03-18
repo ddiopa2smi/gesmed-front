@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react'
-import { defaultSizes , mobileSizes } from '../../constants/sizes.constants';
-import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Form, Input, InputNumber, Radio, Row, Select, Tabs, Typography, message } from 'antd';
+import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Form, Input, InputNumber, Modal, Radio, Row, Select, Tabs, Typography, message } from 'antd';
 import { useNavigate } from 'react-router';
-import { EditOutlined, HomeOutlined, PlusCircleFilled, PlusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, HomeOutlined, DeleteOutlined, PlusCircleFilled, PlusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import TextArea from 'antd/es/input/TextArea';
-import Modal from '../../components/Modal/Modal';
-import VolatileTable from '../../components/VolatileTable/VolatileTable';
 import { getActions, postActions, putActions } from '../../actions/actions';
-import AddPoste from '../../components/AddPoste/AddPoste';
-import AddTypeMaladie from '../../components/AddTypeMaladie/AddTypeMaladie';
-import AddStructure from '../../components/AddStructure/AddStructure';
+import AddPoste from '../../components/specific/AddPoste/AddPoste';
+import AddTypeMaladie from '../../components/specific/AddTypeMaladie/AddTypeMaladie';
+import AddStructure from '../../components/specific/AddStructure/AddStructure';
 import { endpoints } from '../../constants/endpoints.constants';
+import DataTable from '../../components/common/DataTable/DataTable';
 
 const {Title , Text} = Typography;
 const {Option} = Select;
 
 function InfosCliniques() {
     const navigate = useNavigate();
-    const currentObject  = JSON.parse(sessionStorage.getItem("currentObject"));
+    const currentObject  = JSON.parse(sessionStorage.getItem("currentPatient"));
     const [initInfosConsultation , setInitInfosConsultation] = useState(null);
     const [form] = Form.useForm();
-    const [colSizes , setColSizes] = useState(defaultSizes);
     const [loading , setLoading] = useState(false);
+    const [suscribe , setSuscribe] = useState(null);
 
     // Hospitalisation
     const [isAddHospitalisationModalVisible,setIsAddHospitalisationModalVisible] = useState(false);
@@ -228,7 +226,7 @@ function InfosCliniques() {
         }
        
         useEffect(()=>{
-            getActions(endpoints.maladies.list)
+            getActions(endpoints.maladies.LIST)
             .then((response)=>{
                 setListMaladies(response.data)
             })
@@ -237,11 +235,10 @@ function InfosCliniques() {
             <Form
                 layout='vertical'
                 form={maladieform}
-                name="maladie_form"
                 onFinish={onFinish}
             >
                 <Row gutter={[24,24]} >
-                    <Col span={colSizes.size1} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                         <Form.Item 
                             label="Maladies"
                             name="code_maladie" 
@@ -264,8 +261,8 @@ function InfosCliniques() {
                         </Form.Item>
                     </Col>
                 </Row>
-                <Row gutter={10} >
-                    <Col span={colSizes.size1} >
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                         <Form.Item 
                             label="Observation"
                             name="observation" 
@@ -276,7 +273,7 @@ function InfosCliniques() {
                     </Col>
                 </Row>
                 <Row>
-                    <Col span={colSizes.size1}>
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                         <div style={{display:"flex",justifyContent:"center",alignItems:"center"}} >
                             <Button type='primary' htmlType='submit' >Valider</Button>
                         </div> 
@@ -292,20 +289,50 @@ function InfosCliniques() {
         return(
             <Card bordered>
                 
-                <Row>
-                    <Col span={colSizes.size1}>
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                         <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center"}} >
                             <Button type='primary' onClick={()=>{setIsModalVisible(true)}} >Ajouter</Button>
                         </div> 
                     </Col>
                 </Row> 
                 <br/>
-                <Row gutter={10} >
-                    <Col span={colSizes.size1} >
-                        <VolatileTable 
-                            tableType="listMaladies"
-                            data={data} 
-                            setData={setData}       
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
+                        <DataTable 
+                            dataSourceCopy={data}
+                            setDataSourceCopy={setData}
+                            columns={[
+                                {
+                                    title: 'Code',
+                                    dataIndex: 'code_maladie',
+                                    key: 'code_maladie'
+                                },
+                                {
+                                    title: 'Maladie',
+                                    dataIndex: 'lib_maladie',
+                                    key: 'lib_maladie',
+                                },
+                                {
+                                    title: 'Observation',
+                                    dataIndex: 'observation',
+                                    key: 'observation'
+                                },
+                                {
+                                    width : 'auto' ,
+                                    render :  (item)=>(
+                                        <div style={{width:"100%",display:"flex",justifyContent:"center",alignItems:"center"}} >
+                                            <DeleteOutlined 
+                                                style={{color:"red"}} 
+                                                onClick={()=>{
+                                                    const temp = data.filter((element)=>element.code_maladie !== item.code_maladie);
+                                                    setData(temp);
+                                                }} 
+                                            />
+                                        </div>
+                                    )
+                                }
+                            ]}
                         />
                     </Col>
                 </Row>
@@ -393,7 +420,7 @@ function InfosCliniques() {
         ];
 
         const getAllStructures = () =>{
-        getActions(endpoints.structures.list)
+        getActions(endpoints.structures.LIST)
             .then((response)=>{
                 setStructures(response.data)
             })
@@ -411,30 +438,30 @@ function InfosCliniques() {
                     name="hospitalisation_form"
                     onFinish={onFinish}
                 >
-                    <Row gutter={10} >
-                        <Col span={colSizes.size3} >
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={24} md={24} lg={12} xl={12} >
                             <Form.Item 
                                 label="Date entrée"
                                 name="date_entree" 
                                 initialValue={null}
                             >
-                                <DatePicker placeholder='Sélectionner'  format="YYYY-MM-DD" />
+                                <DatePicker placeholder='Sélectionner'  format="DD-MM-YYYY" />
                             </Form.Item>
                         </Col>
-                        <Col span={colSizes.size3} >
+                        <Col xs={24} sm={24} md={24} lg={12} xl={12} >
                             <Form.Item 
                                 label="Date de sortie"
                                 name="date_sortie" 
                                 initialValue={null}
                             >
-                                <DatePicker placeholder='Sélectionner' format="YYYY-MM-DD" />
+                                <DatePicker placeholder='Sélectionner' format="DD-MM-YYYY" />
                             </Form.Item>
                         </Col>
                         
                     </Row>
 
                     <Row  gutter={10} align={"middle"} >
-                        <Col span={colSizes.size2} >
+                        <Col xs={24} sm={24} md={24} lg={18} xl={18} >
                             <Form.Item 
                                 label="Structures"
                                 name="code_structure" 
@@ -455,7 +482,7 @@ function InfosCliniques() {
                                 </Select>
                             </Form.Item>
                         </Col>
-                        <Col span={colSizes.size4}>
+                        <Col xs={24} sm={24} md={24} lg={8} xl={8}>
                             <div style={{width:"100%",height:"100%",display:"flex",justifyContent:"center",alignItems:"center"}} >
                                 <Dropdown
                                     menu={{items,}}
@@ -507,8 +534,8 @@ function InfosCliniques() {
                             </Form.Item>
                         </Col>
                     </Row> */}
-                    <Row gutter={10} >
-                        <Col span={colSizes.size1} >
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                             <Form.Item 
                                 label="Motif"
                                 name="motif" 
@@ -519,7 +546,7 @@ function InfosCliniques() {
                     </Row>
                     
                     <Row>
-                        <Col span={colSizes.size1}>
+                        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                             <div style={{display:"flex",justifyContent:"center",alignItems:"center"}} >
                                 <Button type='primary' htmlType='submit' >Valider</Button>
                             </div> 
@@ -531,8 +558,10 @@ function InfosCliniques() {
 
                 <Modal
                     title={ operationType === "add" && "Ajouter une structure" || operationType === "update" && "Mettre à jour la structure "}
-                    isModalVisible={isModalVisible1}
-                    setIsModalVisible={setIsModalVisible1}
+                    open={isModalVisible1}
+                    onCancel={()=>{setIsModalVisible1(false)}}
+                    footer={null}
+                    destroyOnClose
                 >
                     <AddStructure isModalVisible={isModalVisible1} setIsModalVisible={setIsModalVisible1} operationType={operationType} refresh={getAllStructures} itemSelected={structureSelected} />
                 </Modal>
@@ -544,20 +573,63 @@ function InfosCliniques() {
         
         return(
             <Card bordered>
-                <Row>
-                    <Col span={colSizes.size1}>
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                         <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center"}} >
                             <Button type='primary' onClick={()=>{setIsModalVisible(true)}} >Ajouter</Button>
                         </div> 
                     </Col>
                 </Row> 
                 <br/>
-                <Row gutter={10} >
-                    <Col span={colSizes.size1} >
-                        <VolatileTable 
-                            tableType="listHospitalisations"
-                            data={data}   
-                            setData={setData}     
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
+                        <DataTable 
+                            dataSourceCopy={data}
+                            setDataSourceCopy={setData}
+                            columns={[
+                                // {
+                                //     title: 'Numéro',
+                                //     dataIndex: 'num_hosto',
+                                //     key: 'num_hosto',
+                                //     render: (text) => <div className='table-data'>
+                                //         {truncate(text,15)}
+                                //     </div>
+                                // },
+                                {
+                                    title: 'Code Structure',
+                                    dataIndex: 'code_structure',
+                                    key: 'code_structure'
+                                },
+                                {
+                                    title: 'Date entrée',
+                                    dataIndex: 'date_entree',
+                                    key: 'date_entree'
+                                },
+                                {
+                                    title: 'Date sortie',
+                                    dataIndex: 'date_sortie',
+                                    key: 'date_sortie'
+                                },
+                                {
+                                    title: 'Motif',
+                                    dataIndex: 'motif',
+                                    key: 'motif'
+                                },
+                                {
+                                    width : 'auto' ,
+                                    render :  (item)=>(
+                                        <div style={{width:"100%",display:"flex",justifyContent:"center",alignItems:"center"}} >
+                                            <DeleteOutlined 
+                                                style={{color:"red"}}
+                                                onClick={()=>{
+                                                    const temp = data.filter((element)=>element.num_hosto !== item.num_hosto);
+                                                    setData(temp);
+                                                }} 
+                                            />
+                                        </div>
+                                    )
+                                }
+                            ]}
                         />
                     </Col>
                 </Row>
@@ -568,34 +640,30 @@ function InfosCliniques() {
     const AntecedentsFamiliaux = () => {
         return (
             <Card bordered>
-                <Row>
-                    <Col span={colSizes.size1} >
-                        <Row gutter={10}>
-                            <Col span={colSizes.size4} >
-                                <Form.Item 
-                                    label="Père"
-                                    name="ant_pere" 
-                                >
-                                    <TextArea rows={4} />
-                                </Form.Item>
-                            </Col>
-                            <Col span={colSizes.size4} >
-                                <Form.Item 
-                                    label="Mère"
-                                    name="ant_mere" 
-                                >
-                                    <TextArea rows={4} />
-                                </Form.Item>
-                            </Col>
-                            <Col span={colSizes.size4} >
-                                <Form.Item 
-                                    label="Autres"
-                                    name="ant_autres"
-                                >
-                                    <TextArea rows={4} />
-                                </Form.Item>
-                            </Col>
-                        </Row>
+                <Row gutter={[24,24]}>
+                    <Col xs={24} sm={24} md={24} lg={8} xl={8} >
+                        <Form.Item 
+                            label="Père"
+                            name="ant_pere" 
+                        >
+                            <TextArea rows={4} />
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={24} lg={8} xl={8} >
+                        <Form.Item 
+                            label="Mère"
+                            name="ant_mere" 
+                        >
+                            <TextArea rows={4} />
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={24} lg={8} xl={8} >
+                        <Form.Item 
+                            label="Autres"
+                            name="ant_autres"
+                        >
+                            <TextArea rows={4} />
+                        </Form.Item>
                     </Col>
                 </Row>
             </Card> 
@@ -688,7 +756,7 @@ function InfosCliniques() {
         ];
         
         const getAllMaladiesPro = () => {
-            getActions(endpoints.maladiesProfessionelles.list)
+            getActions(endpoints.maladiesProfessionelles.LIST)
             .then((response)=>{
                 setMaladiesPro(response.data)
             })
@@ -715,8 +783,8 @@ function InfosCliniques() {
                     }
                     }}
                 >
-                    <Row gutter={10} >
-                        <Col span={colSizes.size4} >
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={24} md={24} lg={8} xl={8} >
                             <Form.Item 
                                 label="Date déclaration"
                                 name="date_dec" 
@@ -726,8 +794,8 @@ function InfosCliniques() {
                         </Col>
                         
                     </Row>
-                    <Row gutter={10}>
-                        <Col span={colSizes.size2} >
+                    <Row gutter={[24,24]}>
+                        <Col xs={24} sm={24} md={24} lg={18} xl={18} >
                             <Form.Item 
                                 label="Type Maladie"
                                 name="code_mp" 
@@ -753,7 +821,7 @@ function InfosCliniques() {
                                 </Select>
                             </Form.Item>
                         </Col>
-                        <Col span={colSizes.size4}>
+                        <Col xs={24} sm={24} md={24} lg={18} xl={18}>
                             <div style={{width:"100%",height:"100%", display:"flex",justifyContent:"center",alignItems:"center"}} >
                                 <Dropdown
                                     menu={{items,}}
@@ -767,8 +835,8 @@ function InfosCliniques() {
                             </div>
                         </Col>
                     </Row> 
-                    <Row gutter={10}>
-                        <Col span={colSizes.size4} >
+                    <Row gutter={[24,24]}>
+                        <Col xs={24} sm={24} md={24} lg={8} xl={8} >
                             <Form.Item 
                                 label="Numéro au tableau"
                                 name="num_tab"
@@ -776,7 +844,7 @@ function InfosCliniques() {
                                 <InputNumber disabled />
                             </Form.Item>
                         </Col>
-                        <Col span={colSizes.size2} >
+                        <Col xs={24} sm={24} md={24} lg={18} xl={18} >
                             <Form.Item 
                                 label="Description maladie"
                                 name="description_mp" 
@@ -786,8 +854,8 @@ function InfosCliniques() {
                         </Col>
                         
                     </Row> 
-                    <Row gutter={10}>
-                        <Col span={colSizes.size1} >
+                    <Row gutter={[24,24]}>
+                        <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                             <Form.Item 
                                 label="Observations"
                                 name="observation" 
@@ -798,7 +866,7 @@ function InfosCliniques() {
                     </Row> 
                     
                     <Row>
-                        <Col span={colSizes.size1}>
+                        <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                             <div style={{display:"flex",justifyContent:"center",alignItems:"center"}} >
                                 <Button type='primary' htmlType='submit' >Valider</Button>
                             </div> 
@@ -808,8 +876,10 @@ function InfosCliniques() {
 
                 <Modal
                     title={(operationType === "add" && "Ajouter un poste") || (operationType === "update" && "Mettre les données à jour")}
-                    isModalVisible={isModalVisible1}
-                    setIsModalVisible={setIsModalVisible1}
+                    open={isModalVisible1}
+                    onCancel={()=>{setIsModalVisible1(false)}}
+                    footer={null}
+                    destroyOnClose
                 >
                     <AddTypeMaladie isModalVisible={isModalVisible1} setIsModalVisible={setIsModalVisible1} operationType={operationType} refresh={getAllMaladiesPro} itemSelected={selectedMaladiePro} />
                 </Modal>
@@ -822,20 +892,60 @@ function InfosCliniques() {
         
         return (
             <Card bordered >
-                <Row>
-                    <Col span={colSizes.size1}>
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                         <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center"}} >
                             <Button type='primary' onClick={()=>{setIsModalVisible(true)}} >Ajouter</Button>
                         </div> 
                     </Col>
                 </Row> 
                 <br/>
-                <Row gutter={10} >
-                    <Col span={colSizes.size1} >
-                        <VolatileTable 
-                            tableType="listMaladiesProf"
-                            data={data}
-                            setData={setData}        
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
+                        <DataTable 
+                            dataSourceCopy={data}
+                            setDataSourceCopy={setData}  
+                            columns={[
+                                {
+                                    title: 'Date MP',
+                                    dataIndex: 'date_dec',
+                                    key: 'date_dec'
+                                },
+                                {
+                                    title: 'Type MP',
+                                    dataIndex: 'type_mp',
+                                    key: 'type_mp'
+                                },
+                                {
+                                    title: 'N° Tab',
+                                    dataIndex: 'num_tab',
+                                    key: 'num_tab'
+                                },
+                                {
+                                    title: 'Type MP',
+                                    dataIndex: 'type_mp',
+                                    key: 'type_mp'
+                                },
+                                {
+                                    title: 'Observation',
+                                    dataIndex: 'observation',
+                                    key: 'observation'
+                                },
+                                {
+                                    width : 'auto' ,
+                                    render :  (item)=>(
+                                        <div style={{width:"100%",display:"flex",justifyContent:"center",alignItems:"center"}} >
+                                            <DeleteOutlined 
+                                                style={{color:"red"}}
+                                                onClick={()=>{
+                                                    const temp = data.filter((element)=>element.code_mp !== item.code_mp);
+                                                    setData(temp);
+                                                }}  
+                                            />
+                                        </div>
+                                    )
+                                }
+                            ]}      
                         />
                     </Col>
                 </Row>
@@ -930,7 +1040,7 @@ function InfosCliniques() {
         ];
         
         const getAllPostes = () => {
-            getActions(endpoints.postes.list)
+            getActions(endpoints.postes.LIST)
             .then((response)=>{
                 setPostes(response.data)
             })
@@ -957,8 +1067,8 @@ function InfosCliniques() {
                     }
                     }}
                 >
-                    <Row gutter={10} >
-                        <Col span={colSizes.size3} >
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={24} md={24} lg={12} xl={12} >
                             <Form.Item 
                                 label="Date début"
                                 name="date_deb" 
@@ -966,7 +1076,7 @@ function InfosCliniques() {
                                 <DatePicker placeholder='Sélectionner'  format="DD-MM-YYYY" />
                             </Form.Item>
                         </Col>
-                        <Col span={colSizes.size3} >
+                        <Col xs={24} sm={24} md={24} lg={12} xl={12} >
                             <Form.Item 
                                 label="Date fin"
                                 name="date_fin" 
@@ -975,8 +1085,8 @@ function InfosCliniques() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Row gutter={10} >
-                        <Col span={colSizes.size2} >
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={24} md={24} lg={18} xl={18} >
                             <Form.Item 
                                 label="Poste"
                                 name="code_poste" 
@@ -998,7 +1108,7 @@ function InfosCliniques() {
                                 </Select>
                             </Form.Item>
                         </Col>
-                        <Col span={colSizes.size4}>
+                        <Col xs={24} sm={24} md={24} lg={8} xl={8}>
                             <div style={{width:"100%",height:"100%",display:"flex",justifyContent:"center",alignItems:"center"}} >
                                 <Dropdown
                                     menu={{items,}}
@@ -1012,8 +1122,8 @@ function InfosCliniques() {
                             </div>
                         </Col>
                     </Row>
-                    <Row gutter={10}>
-                        <Col span={colSizes.size3} >
+                    <Row gutter={[24,24]}>
+                        <Col xs={24} sm={24} md={24} lg={12} xl={12} >
                             <Form.Item 
                                 label="Nature travail"
                                 name="nature_poste" 
@@ -1021,7 +1131,7 @@ function InfosCliniques() {
                                 <TextArea disabled rows={4} />
                             </Form.Item>
                         </Col>
-                        <Col span={colSizes.size3} >
+                        <Col xs={24} sm={24} md={24} lg={12} xl={12} >
                             <Form.Item 
                                 label="Risques liées"
                                 name="risques_poste" 
@@ -1031,8 +1141,8 @@ function InfosCliniques() {
                         </Col>
                     </Row>
 
-                    <Row>
-                        <Col span={colSizes.size1}>
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                             <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center"}} >
                                 <Button type='primary' htmlType='submit' >Valider</Button>
                             </div> 
@@ -1044,8 +1154,10 @@ function InfosCliniques() {
 
                 <Modal
                     title={(operationType === "add" && "Ajouter un poste") || (operationType === "update" && "Mettre les données à jour")}
-                    isModalVisible={isModalVisible1}
-                    setIsModalVisible={setIsModalVisible1}
+                    open={isModalVisible1}
+                    onCancel={()=>{setIsModalVisible1(false)}}
+                    footer={null}
+                    destroyOnClose
                 >
                     <AddPoste isModalVisible={isModalVisible1} setIsModalVisible={setIsModalVisible1} operationType={operationType} refresh={getAllPostes} />
                 </Modal>
@@ -1057,20 +1169,65 @@ function InfosCliniques() {
         
         return (
             <Card bordered>
-                <Row>
-                    <Col span={colSizes.size1}>
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                         <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center"}} >
                             <Button type='primary' onClick={()=>{setIsModalVisible(true)}} >Ajouter</Button>
                         </div> 
                     </Col>
                 </Row> 
                 <br/>
-                <Row gutter={10} >
-                    <Col span={colSizes.size1} >
-                        <VolatileTable 
-                            tableType="listPatientsPosts"
-                            data={data}        
-                            setData={setData}
+                <Row gutter={[24,24]} >
+                    <Col xs={24} sm={24} md={24} lg={24} xl={24} >
+                        <DataTable 
+                            dataSourceCopy={data}        
+                            setDataSourceCopy={setData}
+                            columns={[
+                                {
+                                    title: 'Code poste',
+                                    dataIndex: 'code_poste',
+                                    key: 'code_poste'
+                                },
+                                {
+                                    title: 'Poste',
+                                    dataIndex: 'lib_poste',
+                                    key: 'lib_poste'
+                                },
+                                {
+                                    title: 'Nature poste',
+                                    dataIndex: 'nature_poste',
+                                    key: 'nature_poste'
+                                },
+                                {
+                                    title: 'Risques poste',
+                                    dataIndex: 'risques_poste',
+                                    key: 'risques_poste'
+                                },
+                                {
+                                    title: 'Date Début',
+                                    dataIndex: 'date_deb',
+                                    key: 'date_deb'
+                                },
+                                {
+                                    title: 'Date Fin',
+                                    dataIndex: 'date_fin',
+                                    key: 'date_fin'
+                                },
+                                {
+                                    width : 'auto' ,
+                                    render :  (item)=>(
+                                        <div style={{width:"100%",display:"flex",justifyContent:"center",alignItems:"center"}} >
+                                            <DeleteOutlined 
+                                                style={{color:"red"}}
+                                                onClick={()=>{
+                                                    const temp = data.filter((element)=>element.code_poste !== item.code_poste);
+                                                    setData(temp);
+                                                }}  
+                                            />
+                                        </div>
+                                    )
+                                }
+                            ]}
                         />
                     </Col>
                 </Row>
@@ -1127,12 +1284,13 @@ function InfosCliniques() {
         payload.listPatientsPostes = patientsPostsData;
         //payload.numpat =currentObject.num_patient;
         console.log(payload);
-        putActions(endpoints.dossierMedical.infosCliniquesUpdate,payload)
+        putActions(endpoints.dossierMedical.INFOS_CLINIQUES_UPDATE,payload)
         .then((response)=>{
             if (response.data && response.data !== undefined && response.data.Updated === true) {
                 message.success("Infos cliniques mises à jour avec succès");
                 form.resetFields();
-                getInfosCliniques();
+                setSuscribe(Date.now())
+               // getInfosCliniques();
             }
             else {
                 message.error("Une erreur s'est produite, veuillez réessayer svp");
@@ -1147,32 +1305,28 @@ function InfosCliniques() {
     })
   }
 
+ 
 
-  const getInfosCliniques = () => {
-    getActions(`${endpoints.dossierMedical.infosCliniques}?numpat=${currentObject.num_patient}`)
-    .then((response)=>{
-        //console.log(response.data)
-        setInitInfosConsultation(response.data);
-        setHospitalisationsData(response.data.listHospitalisations);
-        setMaladiesData(response.data.listMaladies);
-        setMaladiesProfData(response.data.listMaladiesProf);
-        setPatientsPostsData(response.data.listPatientsPostes);
-    })
-  }
+
+  
 
   useEffect(()=>{
-    if (window.screen.width < 1008) {
-        setColSizes(mobileSizes);
-    }
-    else
-    {
-        setColSizes(defaultSizes);
+    const getInfosCliniques = () => {
+        getActions(`${endpoints.dossierMedical.INFOS_CLINIQUES}?numpat=${currentObject.num_patient}`)
+        .then((response)=>{
+            //console.log(response.data)
+            setInitInfosConsultation(response.data);
+            setHospitalisationsData(response.data.listHospitalisations);
+            setMaladiesData(response.data.listMaladies);
+            setMaladiesProfData(response.data.listMaladiesProf);
+            setPatientsPostsData(response.data.listPatientsPostes);
+        })
     }
     getInfosCliniques();
-  },[])
+  },[suscribe])
   return (
       <Card className='InfosCliniquesWrapper' loading={initInfosConsultation === null ? true : false} >
-        <Breadcrumb
+        {/* <Breadcrumb
           items={[
             {
               title : <a onClick={()=>{navigate("/myspace/home")}} ><HomeOutlined/></a>
@@ -1190,11 +1344,14 @@ function InfosCliniques() {
               title : "Infos cliniques"
             } ,
           ]}
-        /> <br/>
+        /> <br/> */}
         
         <div style={{display:'flex',justifyContent:"space-between",alignItems:"center",flexDirection:"row"}} >
             <Title level={5}> Infos cliniques du Patient N° {currentObject.num_patient } / {currentObject.prenom_patient} {currentObject.nom_patient}  </Title> <br/>
-            <Button className='button-cancel'  type="ghost"  onClick={()=>{navigate(-1)}}>Fermer</Button>
+            <div>
+                <Button type="link" ghost  onClick={()=>{setSuscribe(Date.now())}}>Actualiser</Button>
+                <Button type="primary"   onClick={()=>{navigate(-1)}}>Fermer</Button>
+            </div>
         </div>
         <br/>
         <Form
@@ -1204,7 +1361,7 @@ function InfosCliniques() {
             onFinish={onFinish}
             initialValues={initInfosConsultation}
         >
-          <Tabs  tabPosition={window.screen.width < 1008 ? 'top' : 'right'}  defaultActiveKey="1" items={items} /> <br/>
+          <Tabs defaultActiveKey="1" items={items} /> <br/>
           <Row>
               <Col span={12} offset={6}>
                   <div style={{display:"flex",justifyContent:"center",alignItems:"center"}} >
@@ -1217,8 +1374,10 @@ function InfosCliniques() {
 
         <Modal
             title="Ajouter un antécedant médical"
-            isModalVisible={isAddAntedecedentMedicalModalVisible}
-            setIsModalVisible={setIsAddAntedecedentMedicalModalVisible}
+            open={isAddAntedecedentMedicalModalVisible}
+            onCancel={()=>{setIsAddAntedecedentMedicalModalVisible(false)}}
+            footer={null}
+            destroyOnClose
         >
                 <AddAntecedentMedical 
                     maladiesData={maladiesData}
@@ -1230,8 +1389,10 @@ function InfosCliniques() {
 
         <Modal
             title="Ajouter une hospitalisation"
-            isModalVisible={isAddHospitalisationModalVisible}
-            setIsModalVisible={setIsAddHospitalisationModalVisible}
+            open={isAddHospitalisationModalVisible}
+            onCancel={()=>{setIsAddHospitalisationModalVisible(false)}}
+            footer={null}
+            destroyOnClose
         >
                 <AddHospitalisation 
                     hospitalisationsData={hospitalisationsData}
@@ -1243,8 +1404,10 @@ function InfosCliniques() {
 
         <Modal
             title="Ajouter une maladie professionelle"
-            isModalVisible={isAddMaladieProfessionnelleModalVisible}
-            setIsModalVisible={setIsAddMaladieProfessionnelleModalVisible}
+            open={isAddMaladieProfessionnelleModalVisible}
+            onCancel={()=>{setIsAddMaladieProfessionnelleModalVisible(false)}}
+            footer={null}
+            destroyOnClose
         >
                 <AddMaladieProf 
                     maladiesProfData={maladiesProfData}
@@ -1256,8 +1419,10 @@ function InfosCliniques() {
 
         <Modal
             title="Ajouter un rique lié au poste"
-            isModalVisible={isAddPatientPostModalVisible}
-            setIsModalVisible={setIsAddPatientPostModalVisible}
+            open={isAddPatientPostModalVisible}
+            onCancel={()=>{setIsAddPatientPostModalVisible(false)}}
+            footer={null}
+            destroyOnClose
         >
                 <AddRisqueLieAuPoste 
                     patientsPostsData={patientsPostsData}
