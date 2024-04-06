@@ -18,19 +18,6 @@ function CommandesProduits() {
 
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to="/myspace/dashboard" > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : "Commandes Produits"
-                    }
-                ]}
-            /> 
-
-            <br/>
-
             <Title level={3} >Liste des bons de commandes produits</Title>
 
             <Flex justify="flex-end" align="center" >

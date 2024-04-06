@@ -14,20 +14,6 @@ function ReceptionCommande() {
     const [form] = Form.useForm();
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to={"/myspace/dashboard"} > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : <Link to={"/myspace/entrees-produits"} > Entrées produits </Link>
-                    } ,
-                    {
-                        title : "Réception de commandes"
-                    }
-                ]}
-            /> 
-            <br/>
             <Title level={3} > Réception de commande  </Title>
             <br/>
             <Form

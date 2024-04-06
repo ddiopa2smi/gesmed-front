@@ -4,6 +4,7 @@ import { Breadcrumb, Button, Card, Flex, Space, Tooltip, Typography } from 'antd
 import React from 'react'
 //import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
+import useFetch from '../../utils/hooks/useFetch';
 
 
 
@@ -12,6 +13,7 @@ const {Title} = Typography;
 function Fournisseurs() {
     // const navigate = useNavigate();
     
+    const {data , dataCopy : listFournisseurs , onRefresh : refreshListFournisseurs , isLoading : listLoading} = useFetch();
 
     // const onAdd = () => {
         
@@ -19,18 +21,7 @@ function Fournisseurs() {
 
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to="/myspace/dashboard" > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : "Liste des fournisseurs"
-                    }
-                ]}
-            /> 
-
-            <br/>
+           
 
             <Title level={3} >Liste des fournisseurs</Title>
 

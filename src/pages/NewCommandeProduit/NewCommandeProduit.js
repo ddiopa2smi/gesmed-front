@@ -18,21 +18,6 @@ function NewCommandeProduit() {
     
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <a onClick={()=>{navigate("/myspace/dashboard")}} > <HomeOutlined/> </a>
-                    } ,
-                    {
-                        title : <a onClick={()=>{navigate(-1)}} > Commandes produits </a>
-                    } ,
-                    {
-                        title : "Nouveaux commandes produits"
-                    }
-                ]}
-            /> 
-
-            <br/>
             <Form
                 layout='vertical'
                 form={form}

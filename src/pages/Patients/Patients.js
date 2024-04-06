@@ -120,7 +120,8 @@ function Patients() {
                     {
                         title: 'N°',
                         dataIndex: 'num_patient',
-                        key: 'num_patient'
+                        key: 'num_patient',
+                        ...getColumnSearchProps('num_patient')
                     },
                     {
                         title: 'Nom',

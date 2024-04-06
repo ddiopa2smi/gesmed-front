@@ -19,19 +19,6 @@ function EntreesProduits() {
 
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to="/myspace/dashboard" > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : "Mouvement des entrées"
-                    }
-                ]}
-            /> 
-
-            <br/>
-
             <Title level={3} >Mouvement des entrées</Title>
 
             <Flex justify="flex-end" align="center" >

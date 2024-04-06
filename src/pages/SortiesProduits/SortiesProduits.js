@@ -19,19 +19,6 @@ function SortiesProduits() {
 
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to="/myspace/dashboard" > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : "Mouvement des sorties"
-                    }
-                ]}
-            /> 
-
-            <br/>
-
             <Title level={3} >Mouvement des sorties</Title>
 
             <Flex justify="flex-end" align="center" >

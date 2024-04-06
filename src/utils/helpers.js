@@ -20,6 +20,21 @@ export const deletePopup =() => {
         //color: colorTextBase ,
     })
 }
+
+export const logoutPopup =() => {
+    return Swal.fire({
+        title: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+        icon: 'question',
+        iconColor : 'var(--app-color)' ,
+        showCancelButton: true,
+        cancelButtonColor: '#d33',
+        cancelButtonText:'Non',
+        confirmButtonColor: 'var(--app-color)',
+        confirmButtonText: 'Oui' ,
+        //background: colorBgElevated ,
+        //color: colorTextBase ,
+    })
+}
  
 export const printPDF = (url) => {
     printJS({

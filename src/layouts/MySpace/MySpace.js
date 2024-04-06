@@ -11,7 +11,7 @@ import { postActions } from '../../actions/actions';
 import { endpoints } from '../../constants/endpoints.constants';
 import { ThemeContext } from '../../utils/providers/ThemeProvider';
 import { Link } from 'react-router-dom';
-import { getBreadCrumbLabel } from '../../utils/helpers';
+import { getBreadCrumbLabel, logoutPopup } from '../../utils/helpers';
 import LoadingBar from 'react-top-loading-bar';
 import { LoadingContext } from '../../utils/providers/LoadingProvider';
 import logo from './../../assets/logo.png'
@@ -51,19 +51,23 @@ const MySpace = () => {
     
 
     const  logout = () => {
-        postActions(`${endpoints.users.DISCONNECT}`, userConnected)
-        .then((response)=>{
-            console.log(response.data);
-            if (response.data.Disconnect === true) {
-                sessionStorage.clear();
-                navigate("/" , {replace : true});
-                message.success("Déconnexion éffectuée avec succès");
-            }
-            else {
-                message.error("Erreur de déconnexion")
+        logoutPopup()
+        .then((result)=>{
+            if(result.isConfirmed){
+                postActions(`${endpoints.users.DISCONNECT}`, userConnected)
+                .then((response)=>{
+                    console.log(response.data);
+                    if (response.data.Disconnect === true) {
+                        sessionStorage.clear();
+                        navigate("/" , {replace : true});
+                        message.success("Déconnexion éffectuée avec succès");
+                    }
+                    else {
+                        message.error("Erreur de déconnexion")
+                    }
+                })
             }
         })
-       
     }
     
     const profilMenu = [
@@ -523,7 +527,7 @@ const MySpace = () => {
                         <br/>
                         <Outlet />
                         <div className='footer'>
-                            <Text> Powered by &nbsp; <a style={{color:"var(--app-color)"}} href='https://a2smi.tech/' target="_blank" rel="noreferrer" > A2SMI </a></Text>
+                            <Text> Réalisé par &nbsp; <a style={{color:"var(--app-color)"}} href='https://a2smi.tech/' target="_blank" rel="noreferrer" > A2SMI </a></Text>
                         </div>
                     </Content>
 

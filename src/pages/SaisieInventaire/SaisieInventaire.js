@@ -14,17 +14,6 @@ function SaisieInventaire() {
     const [form] = Form.useForm();
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to={"/myspace/dashboard"} > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : "Saisie inventaire"
-                    }
-                ]}
-            /> 
-            <br/>
             <Title level={3} > Saisie inventaire  </Title>
             <br/>
             <Form

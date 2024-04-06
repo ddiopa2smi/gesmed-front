@@ -16,7 +16,7 @@ const {Title} = Typography;
 
 
 function DossierMedical() {
-    const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
+    const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));  
     const {state} = useLocation();
     //const currentPatient = state?.currentPatient;
     const currentPatient = JSON.parse(sessionStorage.getItem("currentPatient"));

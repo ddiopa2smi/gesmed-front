@@ -1,10 +1,12 @@
 import { Col, Form, Input, Row, Select, DatePicker, message } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getActions, postActions, putActions } from './../../../actions/actions';
 import { endpoints } from '../../../constants/endpoints.constants';
 import FormFooter from '../../common/FormFooter/FormFooter';
 import useFetch from '../../../utils/hooks/useFetch';
 import dayjs from "dayjs"
+import axios from 'axios';
+import { API_URL } from '../../../constants/environment.constants';
 
 const {TextArea} = Input;
 const { Option } = Select;
@@ -15,9 +17,9 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
     const [typePatient , setTypePatient] = useState(null);
     const [matriculeToSearch , setMatriculeToSearch] = useState(null);
     const [listBeneficiaires, setListBeneficiaires] = useState([]);
-    const {data , isLoading } = useFetch(endpoints.patients.LIST_TYPE)
-    const listTypePatients = data;
-    const listTypePatientsLoading = isLoading;
+    const [benefLuiMeme, setBenefLuiMeme] = useState(null);
+    const {data : listTypePatients , isLoading : listTypePatientsLoading } = useFetch(endpoints.patients.LIST_TYPE)
+   
 
      
     const save = () => {
@@ -27,15 +29,31 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
             setFormLoading(true);
             switch (operationType) {
                 case "add":
+                        values.num_patient = values.benef;
                         values.datenaiss_patient = new Date(values.datenaiss_patient).toISOString();
+                        console.log(values)
                         postActions(endpoints.patients.ADD,values)
                         .then((response)=>{
-                            setFormLoading(false);
+                            //setFormLoading(false);
 
-                            message.success("Nouveau patient ajouté avec succès");
-                            setOpen(false);
-                            form.resetFields();
-                            onRefresh();
+                            if (response.data.Added) {
+                                message.success("Nouveau patient ajouté avec succès");
+                                setFormLoading(false)
+                                setOpen(false);
+                                form.resetFields();
+                                onRefresh();
+                            }
+                            else {
+                                message.warning("Patient déja ajouté")
+                            }
+
+                            
+                        })
+                        .finally(()=>{
+                            // setFormLoading(false)
+                            // setOpen(false);
+                            // form.resetFields();
+                            // onRefresh();
                         })
                         
                     break;
@@ -62,25 +80,31 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
     }
 
    
-
-    const handleAdvancedSearch = (e) => {
-        setMatriculeToSearch(e.target.value);
-        const value = e.target.value ;
-        if (value) {   
-            getActions(`/api/Participant/Patient/${value}`)
-            .then((response)=>{
-                if (response !== undefined) {
-                    getActions(`/api/Benef/list/${response.data.numcont}`)
-                    .then((res)=>{
-                        
-                        const data = res.data ;
-                        console.log(data);
-                        setListBeneficiaires(data);
-                    })
-                }
-            })
-        }
+    const handleMatricule = (e) => {
+        setMatriculeToSearch(e.target.value)
     }
+
+    
+
+    useEffect(()=>{
+        const searchPatientByMatricule = (value) => {
+            if (value && value !== null) { 
+                getActions(`/api/Participant/Patient/${value}`)
+                .then((response)=>{
+                    setBenefLuiMeme(response.data)
+                    if (response.data) {
+                        getActions(`/api/Benef/list/${response.data.numcont}`)
+                        .then((res)=>{
+                            const data = res.data ;
+                            console.log(data);
+                            setListBeneficiaires(data);
+                        })
+                    }
+                })
+            }
+        }
+        searchPatientByMatricule(matriculeToSearch)
+    },[matriculeToSearch])
 
     return (
         <Form
@@ -88,12 +112,38 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
             layout="vertical"
             onFinish={save}
             preserve={false}
+            onValuesChange={(changedValues , values)=>{
+                if (changedValues.benef) {
+                    //console.log(changedValues)
+                    let benefSelected = null; 
+                    for (let i = 0; i < listBeneficiaires.length; i++) {
+                        const element = listBeneficiaires[i];
+                        if (element.matribenef === changedValues.benef) {
+                            benefSelected = element;
+                            break;
+                        }
+                    }
+                    
+                    //console.log(benefSelected)
+                    //console.log(benefLuiMeme)
+                    if (changedValues.benef === benefLuiMeme.matipm) {
+                        form.setFieldValue("nom_patient",benefLuiMeme?.nom)
+                        form.setFieldValue("prenom_patient",benefLuiMeme?.prenom)
+                    }else{
+                        form.setFieldValue("nom_patient",benefSelected?.nom)
+                        form.setFieldValue("prenom_patient",benefSelected?.prenoms)
+                    }
+                    form.setFieldValue("sexe_patient",benefSelected?.sexe)
+                    form.setFieldValue("datenaiss_patient", dayjs(new Date(benefSelected.datenaiss)))
+                }
+                
+            }}
         >
-            <Row gutter={[24,24]} >
-                <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+            <Row gutter={[8,8]} >
+                <Col xs={24} sm={8} md={8} lg={8} xl={8}>
                     <Form.Item 
                         name="type_patient" 
-                        label="Type de patient"
+                        label="Type patient"
                         rules={[
                             {
                             required: true,
@@ -122,18 +172,19 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                 </Col>
                 {
                     // Must fixed the search of patients when enter the matricule later 
+                    //Fixed
                     typePatient === 1 && 
                     <>
-                        <Col xs={24} sm={12} md={4} lg={4} xl={4} >
+                        <Col xs={24} sm={4} md={4} lg={4} xl={4} >
                             <Form.Item
                                 name="matricule"
                                 label="Matricule"
                                 //initialValue={(currentRecord && currentRecord.num_patient)||null}
                             >
-                                <Input  value={matriculeToSearch} onChange={(e)=> handleAdvancedSearch(e) } />
+                                <Input  value={matriculeToSearch} onBlur={(e)=> handleMatricule(e) } />
                             </Form.Item>
                         </Col>
-                        <Col xs={24} sm={12} md={8} lg={8} xl={8} >
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12} >
                             <Form.Item 
                                 name="benef" 
                                 label="Patient"
@@ -145,20 +196,21 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                                 ]}
                                 initialValue={currentRecord?.benef}
                             >
-                                    <Select
-                                        style={{width:'100%',background:"transparent"}}
-                                        showSearch
-                                        placeholder="Patient"
-                                        optionFilterProp="children" 
-                                        filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                    >     
-                                        {
-                                            listBeneficiaires.map((item , key)=>{
-                                                <Option key={key}  value={item.codebenef} > {item.matribenef} - {item.prenoms} </Option>
-                                            })
-                                        }
-                                                    
-                                    </Select>
+                                <Select
+                                    style={{width:'100%',background:"transparent"}}
+                                    showSearch
+                                    placeholder="Patient"
+                                    optionFilterProp="children" 
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    onFocus={()=>{console.log("focus select")}}
+                                >    
+                                    {
+                                        listBeneficiaires?.map((item,key)=>(
+                                            <Option key={key}  value={item?.matribenef} > {item?.matribenef} - {item?.prenoms} </Option>
+                                        ))
+                                    }
+                                                
+                                </Select>
                             </Form.Item>
                         </Col>
                     </>
@@ -281,12 +333,6 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                     <Form.Item
                         name="tel_patient"
                         label="Téléphone"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Champ obligatoire',
-                            },
-                        ]}
                         initialValue={currentRecord?.tel_patient}
                     >
                         <Input/>
@@ -297,10 +343,10 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                         name="email_patient"
                         label="Email"
                         rules={[
-                            {
-                                required: true,
-                                message: 'Champ obligatoire',
-                            },
+                            // {
+                            //     required: true,
+                            //     message: 'Champ obligatoire',
+                            // },
                             {
                                 type: "email",
                                 message: 'Entrer un email svp',
@@ -315,12 +361,6 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                     <Form.Item
                         name="contact"
                         label="Contact"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Champ obligatoire',
-                            },
-                        ]}
                         initialValue={currentRecord?.contact}
                     >
                         <Input/>

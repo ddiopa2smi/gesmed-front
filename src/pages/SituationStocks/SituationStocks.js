@@ -20,19 +20,6 @@ function SituationStocks() {
 
     return (
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to="/myspace/dashboard" > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : "Situation des stocks"
-                    }
-                ]}
-            /> 
-
-            <br/>
-
             <Title level={3} >Situation des stocks</Title>
 
             <Flex justify="flex-end" align="center" >
