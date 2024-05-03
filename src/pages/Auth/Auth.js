@@ -190,7 +190,7 @@ function Auth() {
                 size="large"
                 style={{width:"100%"}}
               >
-                Connexion
+                Se connecter
               </Button>
             </Form>
           </div>
