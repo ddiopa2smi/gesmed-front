@@ -10,7 +10,7 @@ import { ThemeContext } from './utils/providers/ThemeProvider.js';
 import { router } from './AppRouting.js';
 import { AbilityContext } from './utils/contexts/AbilityContext.js';
 import { ability } from './utils/access.js';
-
+import fr_FR from "antd/es/locale/fr_FR"
 
 function App() {
 
@@ -20,6 +20,7 @@ function App() {
 
   return (
       <ConfigProvider 
+        locale={fr_FR}
         theme={{
             //algorithm : currentTheme,
             algorithm : isDark ? theme.darkAlgorithm : theme.defaultAlgorithm ,
