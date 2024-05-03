@@ -1,5 +1,5 @@
 import React , {PureComponent} from 'react'
-import { Card, Col, Row , Avatar , List , Typography, Breadcrumb} from 'antd';
+import { Card, Col, Row , Avatar , List , Typography, Breadcrumb, Empty} from 'antd';
 import { PushpinOutlined, SnippetsOutlined, TeamOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -126,7 +126,7 @@ function MedicalDashboard() {
           </Col>
           <Col  xs={24} sm={24} md={8} lg={8} xl={8}>
             <Card title="Liste des médécins actifs" extra={<Link>Voir plus</Link>} >
-                <List
+                {/* <List
                     itemLayout="horizontal"
                     dataSource={data}
                     renderItem={(item) => (
@@ -137,7 +137,8 @@ function MedicalDashboard() {
                         />
                     </List.Item>
                     )}
-                />
+                /> */}
+                <Empty />
             </Card>
           </Col>
           
