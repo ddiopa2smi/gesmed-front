@@ -7,6 +7,8 @@ import axios from "axios";
 import { API_URL } from "../../constants/environment.constants";
 import image1 from "./../../assets/auth-img-1.jpg"
 import image2 from "./../../assets/auth-img-2.jpg"
+import Title from "antd/es/typography/Title";
+import { Link } from "react-router-dom";
 
 const { Text } = Typography;
 
@@ -24,7 +26,6 @@ function Auth() {
       .validateFields()
       .then((values) => {
         axios.post(`${API_URL}/api/User/Connect`, values).then((response) => {
-          setLoading(false);
           if (response.data.username !== null) {
             sessionStorage.setItem(
               "userConnected",
@@ -35,17 +36,19 @@ function Auth() {
             message.success("Bienvenue dans votre espace de gestion");
             form.resetFields();
           } else {
-            setLoading(false);
             message.error("Login et/ou mot de passe incorrect(s)");
           }
         });
       })
       .catch((info) => {
-        setLoading(false);
         console.log("Validate Failed:", info);
         message.error(info.message);
         message.error("Veuillez svp renseigner toutes les informations");
-      });
+      })
+      .finally(()=>{
+        setLoading(false)
+      })
+      ;
   };
 
   return (
@@ -123,16 +126,16 @@ function Auth() {
       </Carousel>
       <div className="authWrapper" >
         
-        <Card className="AuthContainer">
-          <Text>
-            <h3>Bienvenue sur votre espace de gestion </h3>
-          </Text>
+        <Card className="AuthContainer" bordered={false} style={{boxShadow : "none"}} >
+          <Title level={2} >
+            Bienvenue sur votre espace de gestion 
+          </Title>
           <br/>
 
-          <div style={{margin:8}} bordered>
-            <Text>
+          <div style={{margin:0}}>
+            <Title level={4} >
               Veuillez vous authentifier pour continuer
-            </Text>
+            </Title>
             <br/>
             <br/>
             <Form
@@ -154,6 +157,7 @@ function Auth() {
                 <Input
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Identifiant"
+                  size="large"
                 />
               </Form.Item>
               <Form.Item
@@ -169,25 +173,25 @@ function Auth() {
                 <Input.Password
                   prefix={<LockOutlined className="site-form-item-icon" />}
                   placeholder="Mot de passe"
+                  size="large"
                 />
               </Form.Item>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+              <Link style={{textAlign:"end",color:"var(--app-color)"}}>Mot de passe oublié</Link>
+
+              <br/>
+              <br/>
+
+              <Button
+                loading={loading}
+                type="primary"
+                htmlType="submit"
+                className="login-form-button"
+                size="large"
+                style={{width:"100%"}}
               >
-                <Button
-                  loading={loading}
-                  type="primary"
-                  htmlType="submit"
-                  className="login-form-button"
-                >
-                  Connexion
-                </Button>
-              </div>
+                Connexion
+              </Button>
             </Form>
           </div>
         </Card>
