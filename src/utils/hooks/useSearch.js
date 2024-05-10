@@ -25,15 +25,15 @@ function useSearch() {
             onKeyDown={(e) => e.stopPropagation()}
         >
             <Input
-            ref={searchInput}
-            placeholder={`Search ${dataIndex}`}
-            value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            style={{
-                marginBottom: 8,
-                display: 'block',
-            }}
+                ref={searchInput}
+                placeholder={`Rechercher ${dataIndex}`}
+                value={selectedKeys[0]}
+                onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                style={{
+                    marginBottom: 8,
+                    display: 'block',
+                }}
             />
             <Space>
             <Button
@@ -76,18 +76,22 @@ function useSearch() {
         </div>
         ),
         filterIcon: (filtered) => (
-        <SearchOutlined
-            style={{
-            color: filtered ? '#1677ff' : undefined,
-            }}
-        />
+            <SearchOutlined
+                style={{
+                color: filtered ? '#1677ff' : undefined,
+                }}
+            />
         ),
-        onFilter: (value, record) =>
-        record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+        onFilter: (value, record) => {
+            //console.log(record)
+            if (record !== null && record !== undefined) {
+                record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+            }
+        } ,
         onFilterDropdownOpenChange: (visible) => {
-        if (visible) {
-            setTimeout(() => searchInput.current?.select(), 100);
-        }
+            if (visible) {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
         },
         render: (text) =>
         searchedColumn === dataIndex ? (

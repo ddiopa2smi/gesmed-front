@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import DataTable from '../../components/common/DataTable/DataTable';
 import { deletePopup, formatDate, printPDF } from '../../utils/helpers';
 import useObjectFetch from '../../utils/hooks/useObjectFetch';
+import BackButton from '../../components/common/BackButton/BackButton';
 
 const {Title} = Typography;
 
@@ -58,7 +59,7 @@ function Prescriptions() {
             key: 'qte_presc',
             sorter: (a, b) => a.qte_presc - b.qte_presc
         } ,
-        Table.EXPAND_COLUMN ,
+        //Table.EXPAND_COLUMN ,
         {
             width : 'auto' ,
             render :  (record)=>(
@@ -204,7 +205,7 @@ function Prescriptions() {
     const onEdit = (record , prescriptionType) => {
         navigate(`/myspace/patients/dossier/prescriptions/${prescriptionType}`);
         sessionStorage.setItem("editPrescription", JSON.stringify(record));
-        console.log(record)
+        //console.log(record)
     }
 
     const onDelete = (record) => {
@@ -227,12 +228,15 @@ function Prescriptions() {
     return (
         dataCopy &&
         <Card loading={isLoading} >
-            
+            <Flex align='flex-start' justify='space-between' >
+                <BackButton />
+            </Flex>
+            <br/>
             <Flex align='center' justify='space-between' >
                 <Title level={4} >Liste des {getTitleByType(prescription.codepresc).type2} de la consultation N° {prescription.numcons} </Title>            
 
                 <Space>
-                    <Button type='ghost' className='button-close' onClick={()=>{navigate(-1);}}  >Retour</Button> 
+                    {/* <Button type='ghost' className='button-close' onClick={()=>{navigate(-1);}}  >Retour</Button>  */}
 
                     {
                         prescription.medecin === userConnected.username && <Button type='primary' onClick={onAdd}  > Nouvelle {getTitleByType(prescription.codepresc).type1}  </Button> 
@@ -250,6 +254,7 @@ function Prescriptions() {
                 }) || []}
                 tableLoading={isLoading}
                 columns={getColumnsByCodePresc(prescription.codepresc)}
+                rowKey={(record)=>record.codepresc}
             />
 
         </Card>

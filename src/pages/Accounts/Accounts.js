@@ -23,6 +23,7 @@ function Accounts() {
     const personnelMedicalList = usersListWithoutOwnAccount.filter(element=>element?.perim === 'MED');
     const personnelPharmacieList = usersListWithoutOwnAccount.filter(element=>element?.perim === 'PH');
     
+    //console.log(usersListWithoutOwnAccount)
 
     const onAdd = (type) => {
         navigate("/myspace/settings/accounts/account",{replace : false , state : { type : type}});

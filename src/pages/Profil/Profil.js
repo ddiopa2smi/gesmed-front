@@ -52,6 +52,15 @@ function Profil() {
                     <Button type='primary' disabled={!disabled} onClick={()=>{setDisabled(false)}} > Modifier <EditOutlined/> </Button>
                 </div>
             </div> */}
+            {/* <Card style={{backgroundImage : `url('${require("./../../assets/bg-monprofil.jpg")}')`,backgroundSize: "100% 100%" , backgroundRepeat : "no-repeat", height :250}} >
+                <Button>Changer photo</Button>
+            </Card> */}
+            <Card style={{backgroundColor: "var(--app-color)",height :250}} >
+                <Button>Changer photo</Button>
+            </Card>
+            <div style={{marginTop : -25 , padding : 8, backgroundColor : "white"}} >
+                <Avatar size={{ xs: 32, sm: 32, md: 48, lg: 64, xl: 64}} icon={<UserOutlined/>} />
+            </div>
             <Space direction="horizontal" align='center' wrap>
                 <Avatar size={{ xs: 32, sm: 32, md: 48, lg: 64, xl: 64}} icon={<UserOutlined/>} />
                 <Space direction="horizontal" align='center' wrap>

@@ -1,5 +1,5 @@
 import React, { useState , useEffect } from 'react'
-import { Modal, Button, Card,Col,DatePicker,Form,Row,Typography, message, Space, Tooltip, Spin} from "antd"
+import { Modal, Button, Card,Col,DatePicker,Form,Row,Typography, message, Space, Tooltip, Spin, Flex} from "antd"
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router';
 import TextArea from 'antd/es/input/TextArea';
@@ -13,6 +13,7 @@ import { DeleteOutlined } from '@ant-design/icons';
 import DataTable from '../../components/common/DataTable/DataTable';
 import AddAnalyse from '../../components/specific/AddAnalyse/AddAnalyse';
 import AddImagerie from '../../components/specific/AddImagerie/AddImagerie';
+import BackButton from '../../components/common/BackButton/BackButton';
 
 const {Title} = Typography;
 
@@ -84,7 +85,10 @@ function Imagerie() {
   
   return (
     <Card>
-        
+        <Flex align='flex-start' justify='space-between' >
+            <BackButton />
+        </Flex>
+        <br/>
         <Title level={4} >Prescription Imagerie du patient N° {currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>  
 
 

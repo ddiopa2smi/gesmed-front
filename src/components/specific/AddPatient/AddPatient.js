@@ -91,8 +91,8 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
             if (value && value !== null) { 
                 getActions(`/api/Participant/Patient/${value}`)
                 .then((response)=>{
-                    setBenefLuiMeme(response.data)
-                    if (response.data) {
+                    if (response?.data) {
+                        setBenefLuiMeme(response.data)
                         getActions(`/api/Benef/list/${response.data.numcont}`)
                         .then((res)=>{
                             const data = res.data ;
@@ -162,7 +162,7 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                                 loading={listTypePatientsLoading}
                             >     
                                 {
-                                    listTypePatients.map((item , key)=>(
+                                    listTypePatients.map((item , key)=>( item.code_pat !== 1 &&
                                         <Option key={key}  value={item.code_pat} > {item.type_pat} </Option>
                                     ))
                                 }

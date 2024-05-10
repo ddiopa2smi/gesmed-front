@@ -151,12 +151,21 @@ const MySpace = () => {
                     onClick : ()=>{navigate("/myspace/visites")}
                     
                 },
+                
                 space === "smed" && {
                     key: 'dossier-accident-travail',
                     icon: <FolderOutlined  />,
                     label: "Dossier AT" , 
                     title: "Dossier AT" , 
                     onClick : ()=>{navigate("/myspace/dossier-accident-travail")}
+                    
+                },
+                {
+                    key: 'facturation',
+                    icon: <ApartmentOutlined  />,
+                    label: "Facturation" , 
+                    title: "Facturation" , 
+                    onClick : ()=>{navigate("/myspace/facturation")}
                     
                 },
                 space === "spharma" && {

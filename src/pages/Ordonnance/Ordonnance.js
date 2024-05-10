@@ -13,6 +13,7 @@ import DataTable from '../../components/common/DataTable/DataTable';
 import useFetch from '../../utils/hooks/useFetch';
 import Posologie from '../../components/specific/Posologie/Posologie';
 import { deletePopup } from '../../utils/helpers';
+import BackButton from '../../components/common/BackButton/BackButton';
 const { Search } = Input;
 const {TextArea} = Input;
 const { Option } = Select;
@@ -106,16 +107,20 @@ const Ordonnance = () => {
 
     return(
         <Card>
+            <Flex align='flex-start' justify='space-between' >
+                <BackButton />
+            </Flex>
+            <br/>
             
-            <Flex align='center' justify='space-between' >
-                <Title level={4} >Prescription ordonnance du patient N° {currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>  
+            {/* <Flex align='center' justify='space-between' >
 
                 <Space>
                     <Button className="button-close" type="ghost" ghost onClick={()=>{navigate(-1);}}  >Retour </Button>  
                 </Space>
                 
-            </Flex>
-            
+            </Flex> */}
+            <Title level={4} >Prescription ordonnance du patient N° {currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>  
+
             
             <br/>
 

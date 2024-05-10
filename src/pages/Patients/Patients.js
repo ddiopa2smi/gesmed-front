@@ -27,6 +27,9 @@ function Patients() {
     const [currentRecord , setCurrentRecord] = useState(null);
 
 
+    //console.log(data)
+
+
     const onAdd = () => {
         setOperationType("add");
         setOpen(true);
@@ -135,6 +138,12 @@ function Patients() {
                         dataIndex: 'prenom_patient',
                         key: 'prenom_patient',
                         ...getColumnSearchProps('prenom_patient')
+                    },
+                    {
+                        title: 'Téléphone',
+                        dataIndex: 'tel_patient',
+                        key: 'tel_patient',
+                        ...getColumnSearchProps('tel_patient')
                     },
                     {
                         title: 'Age',

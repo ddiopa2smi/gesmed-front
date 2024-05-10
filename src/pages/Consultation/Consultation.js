@@ -1,4 +1,4 @@
-import {Modal ,Card , Row , Col , Form,  Input , InputNumber , Typography , Select , Button, DatePicker, message, Flex, Divider, Space } from 'antd'
+import {Modal ,Card , Row , Col , Form,  Input , InputNumber , Typography , Select , Button, DatePicker, message, Flex, Divider, Space, Dropdown } from 'antd'
 import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
@@ -10,6 +10,10 @@ import useFetch from '../../utils/hooks/useFetch';
 import AddPathologie from '../../components/specific/AddPathologie/AddPathologie';
 import AddMotif from '../../components/specific/AddMotif/AddMotif';
 import AddRegion from '../../components/specific/AddRegion/AddRegion';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import BackButton from '../../components/common/BackButton/BackButton';
+import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
+import { printPDF } from '../../utils/helpers';
 const {Title , Text} = Typography;
 const { TextArea } = Input;
 const {Option} = Select;
@@ -113,7 +117,7 @@ function Consultation() {
                         setLoading(false);
                         message.success("Consultation enrégistreé avec succès");
                         form.resetFields();
-                        navigate(-1);
+                        //navigate(-1);
                     })
                 }
                 else {
@@ -130,23 +134,100 @@ function Consultation() {
     }
 
     
-   
+   //console.log(initConsultation)
 
     return (
         <Card>
-            
+            <Flex justify='flex-start' align='center' >
+                <BackButton />
+            </Flex>
             <Flex justify='space-between' align='center' >
                 <Title level={4} >Consultation médical {initConsultation.numcons}  </Title>
                 <Space align="center" >
-                    <Button 
-                        type="link"  
-                        onClick={()=>{ 
+                    <ReloadButton 
+                        onRefresh={()=>{ 
                             return;
-                        }} 
+                        }}
+                    />
+                    
+                    <Dropdown
+                        disabled={initConsultation?.medecin !== null ? false : true}
+                        menu={{
+                            items : [
+                                {
+                                    key: '1',
+                                    label: (
+                                        <span onClick={()=>{printPDF(`/api/Print/smed/Consultation/${initConsultation.numcons}/certificat`)}} >
+                                        Certificat Médical
+                                        </span>
+                                    ),
+                                },
+                                {
+                                    key: '2',
+                                    label: (
+                                        <span onClick={()=>{console.log("Bulletin médical")}}>
+                                        Bulletin de visite
+                                        </span>
+                                    ),
+                                    disabled : true
+                                },
+                                {
+                                    key: '3',
+                                    label: (
+                                        <span onClick={()=>{console.log("Aptitude")}}>
+                                        Certificat d'aptitude
+                                        </span>
+                                    ),
+                                    disabled : true
+                                }
+                            ]
+                        }}
+                        trigger={['click']}
                     >
-                        Actualiser
-                    </Button>
-                    <Button type='default' onClick={()=>{navigate(-1);}}  >Retour</Button>
+                        <Button 
+                            type="primary"
+                        >
+                            Imprimer
+                        </Button>
+                    </Dropdown> 
+                    
+                    <Dropdown
+                        disabled={initConsultation?.medecin !== null ? false : true}
+                        menu={{items : [
+                            {
+                                label: <span> Ordonnance </span> ,
+                                key: '0',
+                                onClick : ()=>{
+                                    // nettoyer la prescription en mémoire
+                                    sessionStorage.removeItem("editPrescription");
+                                    navigate(`/myspace/patients/dossier/prescriptions/ordonnance`);
+                                }
+                            },
+                            {
+                                label: <span> Analyse </span> ,
+                                key: '1',
+                                onClick : ()=>{
+                                    sessionStorage.removeItem("editPrescription");
+                                    navigate(`/myspace/patients/dossier/prescriptions/analyse`);
+                                }
+                            },
+                            {
+                                label: <span> Imagerie </span>,
+                                key: '2',
+                                onClick : ()=>{
+                                    sessionStorage.removeItem("editPrescription");
+                                    navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
+                                }
+                            }, 
+                        ]}}
+                        trigger={['click']}
+                    >
+                        <Button 
+                            type="primary"
+                        >
+                            Prescrire
+                        </Button>
+                    </Dropdown>
                 </Space>
             </Flex>
            

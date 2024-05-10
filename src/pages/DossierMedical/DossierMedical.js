@@ -1,15 +1,18 @@
 import React, { useState } from 'react'
-import { Button, Card, Col, Descriptions, Dropdown, Flex, Row, Space, Table, Tabs, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Collapse, Descriptions, Dropdown, Flex, Row, Space, Table, Tabs, Tooltip, Typography, message } from 'antd';
 import { useLocation, useNavigate } from 'react-router';
 import { DeleteOutlined, EditOutlined, PrinterOutlined, ReloadOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { getActions } from '../../actions/actions';
+import { deleteActions, getActions } from '../../actions/actions';
 import { codesPrescriptions } from '../../constants/app.constants';
 import DataTable from '../../components/common/DataTable/DataTable';
-import { formatDate, printPDF } from '../../utils/helpers';
+import { deletePopup, formatDate, printPDF } from '../../utils/helpers';
 import { Link } from 'react-router-dom';
 import useObjectFetch from '../../utils/hooks/useObjectFetch';
 import { endpoints } from '../../constants/endpoints.constants';
 import NotSpecified from '../../components/common/NotSpecified/NotSpecified';
+import useSearch from '../../utils/hooks/useSearch';
+import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
+import BackButton from '../../components/common/BackButton/BackButton';
 
 const {Title} = Typography;
 
@@ -23,6 +26,7 @@ function DossierMedical() {
     const navigate = useNavigate();
     const [loading , setLoading] = useState(true);
     // const currentObject  = JSON.parse(sessionStorage.getItem("currentObject"));
+    const {getColumnSearchProps} = useSearch();
 
     const getDossierPatient = useObjectFetch(`${endpoints.dossierMedical.DOSSIER}?numpat=${currentPatient.num_patient}`);
     const {data , isLoading , onRefresh ,error } = useObjectFetch(`${endpoints.dossierMedical.DOSSIER}?numpat=${currentPatient.num_patient}`);
@@ -121,11 +125,30 @@ function DossierMedical() {
         })
     }
 
-    const onEdit = (record) => {
+    const onEditConsultation = (record) => {
         doConsultation(record.numrv)
     }
-    const onDelete = (record) => {
+    
+    const onDeleteConsultation = (record) => {
 
+    }
+    const onEditPrescription = (record , prescriptionType) => {
+        navigate(`/myspace/patients/dossier/prescriptions/${prescriptionType}`);
+        sessionStorage.setItem("editPrescription", JSON.stringify(record));
+    }
+    const onDeletePrescription = (record) => {
+        deletePopup()
+        .then((result)=>{
+            if (result.isConfirmed) {
+                deleteActions(`${endpoints.prescriptions.DELETE}/${record?.numpresc}`)
+                .then((response)=>{
+                    if (response.data.Deleted === true) {
+                        message.success("Ligne retirée avec succès");
+                        onRefresh()
+                    }
+                })
+            }
+        })
     }
     // const handlePrescriptionInStorage = (value) => {
     //     switch (value) {
@@ -154,28 +177,11 @@ function DossierMedical() {
         //sessionStorage.setItem("initConsultation", JSON.stringify(item));
     }
 
-    
-    return (
-        data &&
-        <Card bordered={false} >
-            
-            <Row gutter={[24,24]}>
-                <Col sxs={24} sm={24} md={12} lg={12} xl={12} >
-                    <Title level={5} >Dossier Médical Patient N°{currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>
-                </Col>
-                <Col xs={24} sm={24} md={12} lg={12} xl={12} offset={0}>
-                    <Flex justify="flex-end" align="center" wrap="nowrap" >
-                        <Space>
-                            <Button type="link"  onClick={()=>{onRefresh()}} >Actualiser</Button>  
-                            <Button type="primary"  onClick={()=>{/*getConsultationData(listConsultation[0].numrv) */ doConsultation(listConsultation[0].numrv) }} disabled={listConsultation.length === 0 ? true : false} >Consultation</Button> 
-                            <Button type='ghost' style={{backgroundColor:"lightblue",color:"black"}} onClick={()=>{navigate("/myspace/patients/dossier/infos-cliniques") /*message.info("En cours de développement") */ }} >Infos cliniques</Button>  
-                        </Space>
-                    </Flex> 
-                </Col>
-            </Row>
-            <br/>
-
-            <Row gutter={[24,24]} >
+    const collapseItems = [
+        {
+            key : "1",
+            label : "Voir les infos patient",
+            children : <Row gutter={[24,24]} >
                 <Col xs={24} sm={24} md={12} lg={12} xl={12}> 
                     <Card
                         title="Infos Patient"
@@ -194,7 +200,7 @@ function DossierMedical() {
                                 { patient?.sexe_patient  || <NotSpecified/>}
                             </Descriptions.Item>
                             <Descriptions.Item label="Date de naissance">
-                                { formatDate(patient.datenaiss_patient) || <NotSpecified/>}
+                                { patient?.datenaiss_patient && formatDate(patient?.datenaiss_patient) || <NotSpecified/>}
                             </Descriptions.Item>
                             <Descriptions.Item label="Age">
                                 { `${patient?.age_patient} an(s)` || <NotSpecified/>}
@@ -218,161 +224,411 @@ function DossierMedical() {
                     </Card>
                 </Col>
             </Row> 
+        }
+    ]
+    
+    return (
+        !data ?
+        <Card loading /> :
+        <Card bordered={false} loading={isLoading} >
+            <Flex justify='flex-start' align='center' >
+                <BackButton />
+            </Flex>
+            <br/>
+            <Row gutter={[24,24]}>
+                <Col sxs={24} sm={24} md={12} lg={12} xl={12} >
+                    <Title level={5} >Dossier Médical Patient N°{currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12} offset={0}>
+                    <Flex justify="flex-end" align="center" wrap="nowrap" >
+                        <Space>
+                            {/* <Button type="link"  onClick={()=>{onRefresh()}} >Actualiser</Button>  */}
+                            <ReloadButton onRefresh={()=>{onRefresh()}} /> 
+                            <Button type="primary"  onClick={()=>{/*getConsultationData(listConsultation[0].numrv) */ doConsultation(listConsultation[0].numrv) }} disabled={listConsultation.length === 0 ? true : false} >Consultation</Button> 
+                            <Button type='ghost' style={{backgroundColor:"lightblue",color:"black"}} onClick={()=>{navigate("/myspace/patients/dossier/infos-cliniques") /*message.info("En cours de développement") */ }} >Infos cliniques</Button>  
+                        </Space>
+                    </Flex> 
+                </Col>
+            </Row>
+            <br/>
+
+            <Collapse items={collapseItems} defaultActiveKey={['1']}  />
+
+            
             <br/>
             {/* <Row gutter={[24,24]} >
                 <Col span={sizes.col.size1}> 
                 <Tabs defaultActiveKey={"1"} items={items} />
                 </Col>
             </Row> */}
-            <Title level={3} > Liste des consultations </Title>
-            <DataTable 
-                dataSourceCopy={listConsultation}
-                tableLoading={isLoading}
-                rowKey={(record)=>record.numcons}
-                columns={[
+            <Tabs 
+                defaultActiveKey={"1"} 
+                items={[
                     {
-                        title: 'N° Cons.',
-                        dataIndex: 'numcons',
-                        key: 'numcons',
-                    },
-                    {
-                        title: 'Date cons',
-                        dataIndex: 'datecons',
-                        key: 'datecons',
-                        render: (record) => <div className='table-data'>
-                            {formatDate(record)}
-                        </div>
-                    },
-                    {
-                        title: 'Médécin',
-                        dataIndex: 'medecin',
-                        key: 'medecin',
-                        sorter: (a, b) => a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0) ,
-                        //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
-                    },
-                    {
-                        title: 'Tension',
-                        dataIndex: 'tension',
-                        key: 'tension',
-                        sorter: (a, b) => a.tension - b.tension,
-                    },
-                    {
-                        title: 'Temp (°C) ',
-                        dataIndex: 'temp',
-                        key: 'temp',
-                        sorter: (a, b) => a.temp - b.temp,
-                    },
-                    {
-                        title: 'Poids (Kg) ',
-                        dataIndex: 'poids',
-                        key: 'poids',
-                        sorter: (a, b) => a.poids - b.poids
-                    },
-                    {
-                        title: 'Taille (cm) ',
-                        dataIndex: 'taille',
-                        key: 'taille',
-                        sorter: (a, b) => a.taille - b.taille
-                    },
-                    //Table.EXPAND_COLUMN ,
-                    {
-                        width : 'auto' ,
-                        render :  (record)=>(
-                            <Flex justify="center" align="center" >
-                                <Space>
+                        key : "1",
+                        label : "Consultations",
+                        children : <React.Fragment>
+                            <Title level={4} > Liste des consultations de {currentPatient.prenom_patient} {currentPatient.nom_patient}  </Title>
+                            <br/>
+                            <DataTable 
+                                dataSourceCopy={listConsultation}
+                                tableLoading={isLoading}
+                                rowKey={(record)=>record.numcons}
+                                columns={[
                                     {
-                                        record?.medecin !== null && 
-                                        <>
-                                            <Dropdown
-                                                menu={{items : [
+                                        title: 'N° Cons.',
+                                        dataIndex: 'numcons',
+                                        key: 'numcons',
+                                    },
+                                    {
+                                        title: 'Date cons',
+                                        dataIndex: 'datecons',
+                                        key: 'datecons',
+                                        ...getColumnSearchProps("datecons"),
+                                        render: (record) => <div className='table-data'>
+                                            {formatDate(record)}
+                                        </div>
+                                    },
+                                    {
+                                        title: 'Médécin',
+                                        dataIndex: 'medecin',
+                                        key: 'medecin',
+                                        ...getColumnSearchProps("medecin"),
+                                        sorter: (a, b) => a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0) ,
+                                        //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
+                                    },
+                                    {
+                                        title: 'Tension',
+                                        dataIndex: 'tension',
+                                        key: 'tension',
+                                        sorter: (a, b) => a.tension - b.tension,
+                                    },
+                                    {
+                                        title: 'Temp (°C) ',
+                                        dataIndex: 'temp',
+                                        key: 'temp',
+                                        sorter: (a, b) => a.temp - b.temp,
+                                    },
+                                    {
+                                        title: 'Poids (Kg) ',
+                                        dataIndex: 'poids',
+                                        key: 'poids',
+                                        sorter: (a, b) => a.poids - b.poids
+                                    },
+                                    {
+                                        title: 'Taille (cm) ',
+                                        dataIndex: 'taille',
+                                        key: 'taille',
+                                        sorter: (a, b) => a.taille - b.taille
+                                    },
+                                    //Table.EXPAND_COLUMN ,
+                                    {
+                                        width : 'auto' ,
+                                        render :  (record)=>(
+                                            <Flex justify='flex-start' align="center" >
+                                                <Space>
                                                     {
-                                                        label: <span> Ordonnances </span> ,
-                                                        key: '0',
-                                                        onClick : ()=>{
-                                                            handlePrescriptions( codesPrescriptions.ORD ,record);
-                                                        }
-                                                    },
-                                                    {
-                                                        label: <span> Analyses </span> ,
-                                                        key: '1',
-                                                        onClick : ()=>{
-                                                            handlePrescriptions( codesPrescriptions.ANA ,record);
-                                                        }
-                                                    },
-                                                    {
-                                                        label: <span> Imageries </span>,
-                                                        key: '2',
-                                                        onClick : ()=>{
-                                                            handlePrescriptions( codesPrescriptions.IMG ,record);
-                                                        }
-                                                    }, 
-                                                ]}}
-                                                trigger={['click']}
-                                            >
-                                                <Tooltip title="Prescriptions" >
-                                                    <UnorderedListOutlined  />
-                                                </Tooltip>
-                                            </Dropdown>
+                                                        record?.medecin !== null && 
+                                                        <>
+                                                            <Dropdown
+                                                                menu={{items : [
+                                                                    {
+                                                                        label: <span> Ordonnances </span> ,
+                                                                        key: '0',
+                                                                        onClick : ()=>{
+                                                                            handlePrescriptions( codesPrescriptions.ORD ,record);
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        label: <span> Analyses </span> ,
+                                                                        key: '1',
+                                                                        onClick : ()=>{
+                                                                            handlePrescriptions( codesPrescriptions.ANA ,record);
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        label: <span> Imageries </span>,
+                                                                        key: '2',
+                                                                        onClick : ()=>{
+                                                                            handlePrescriptions( codesPrescriptions.IMG ,record);
+                                                                        }
+                                                                    }, 
+                                                                ]}}
+                                                                trigger={['click']}
+                                                            >
+                                                                <Tooltip title="Prescriptions" >
+                                                                    <UnorderedListOutlined  />
+                                                                </Tooltip>
+                                                            </Dropdown>
 
-                                            <Dropdown
-                                                menu={{
-                                                    items : [
-                                                        {
-                                                            key: '1',
-                                                            label: (
-                                                                <span onClick={()=>{printPDF(`/api/Print/smed/Consultation/${record.numcons}/certificat`)}} >
-                                                                Certificat Médical
-                                                                </span>
-                                                            ),
-                                                        },
-                                                        {
-                                                            key: '2',
-                                                            label: (
-                                                                <span onClick={()=>{console.log("Bulletin médical")}}>
-                                                                Bulletin de visite
-                                                                </span>
-                                                            ),
-                                                            disabled : true
-                                                        },
-                                                        {
-                                                            key: '3',
-                                                            label: (
-                                                                <span onClick={()=>{console.log("Aptitude")}}>
-                                                                Certificat d'aptitude
-                                                                </span>
-                                                            ),
-                                                            disabled : true
-                                                        }
-                                                    ]
-                                                }}
-                                                trigger={['click']}
-                                            >
-                                                <Tooltip title="Imprimer" >
-                                                    <Button type='link' icon={<PrinterOutlined/> }/>
-                                                </Tooltip>
-                                            </Dropdown> 
-                                        </>
+                                                            <Dropdown
+                                                                menu={{
+                                                                    items : [
+                                                                        {
+                                                                            key: '1',
+                                                                            label: (
+                                                                                <span onClick={()=>{printPDF(`/api/Print/smed/Consultation/${record.numcons}/certificat`)}} >
+                                                                                Certificat Médical
+                                                                                </span>
+                                                                            ),
+                                                                        },
+                                                                        {
+                                                                            key: '2',
+                                                                            label: (
+                                                                                <span onClick={()=>{console.log("Bulletin médical")}}>
+                                                                                Bulletin de visite
+                                                                                </span>
+                                                                            ),
+                                                                            disabled : true
+                                                                        },
+                                                                        {
+                                                                            key: '3',
+                                                                            label: (
+                                                                                <span onClick={()=>{console.log("Aptitude")}}>
+                                                                                Certificat d'aptitude
+                                                                                </span>
+                                                                            ),
+                                                                            disabled : true
+                                                                        }
+                                                                    ]
+                                                                }}
+                                                                trigger={['click']}
+                                                            >
+                                                                <Tooltip title="Imprimer" >
+                                                                    <Button type='link' icon={<PrinterOutlined/> }/>
+                                                                </Tooltip>
+                                                            </Dropdown> 
+                                                        </>
+                                                    }
+                                
+                                                    {
+                                                        record.medecin === userConnected.username &&
+                                                        <Tooltip title="Editer">
+                                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditConsultation(record)}} />
+                                                        </Tooltip>
+                                                    }
+                                
+                                                    {
+                                                        record.medecin === userConnected.username &&
+                                                        <Tooltip title="Supprimer">
+                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeleteConsultation(record) }} />
+                                                        </Tooltip>
+                                                    }
+                                                </Space>
+                                            </Flex>
+                                        )
                                     }
-                
+                                ]}
+                            />
+                        </React.Fragment>
+                    },
+                    {
+                        key : "2",
+                        label : "Ordonnances",
+                        children : <React.Fragment>
+                            <Title level={4} > Liste des ordonnances de {currentPatient.prenom_patient} {currentPatient.nom_patient}  </Title>
+                            <br/>
+                            <DataTable 
+                                dataSourceCopy={
+                                    listPrescription.filter(element => element.codepresc === codesPrescriptions.ORD ) || []
+                                }
+                                tableLoading={isLoading}
+                                rowKey={(record)=>record.numpresc}
+                                columns={[
                                     {
-                                        record.medecin === userConnected.username &&
-                                        <Tooltip title="Editer">
-                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEdit(record)}} />
-                                        </Tooltip>
-                                    }
-                
+                                        title: 'N° ord.',
+                                        dataIndex: 'numpresc',
+                                        key: 'numpresc',
+                                    },
                                     {
-                                        record.medecin === userConnected.username &&
-                                        <Tooltip title="Supprimer">
-                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDelete(record) }} />
-                                        </Tooltip>
+                                        title: 'Date presc',
+                                        dataIndex: 'datepresc',
+                                        key: 'datepresc',
+                                        // ...getColumnSearchProps("datepresc"),
+                                        render: (record) => <div className='table-data'>
+                                            {formatDate(record)}
+                                        </div>
+                                    },
+                                    {
+                                        title: 'Prescripteur',
+                                        dataIndex: 'prescripteur',
+                                        key: 'prescripteur',
+                                        // ...getColumnSearchProps("medecin"),
+                                        sorter: (a, b) => a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0) ,
+                                        //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
+                                    },
+                                    {
+                                        width : 'auto' ,
+                                        render :  (record)=>(
+                                            <Flex justify="center" align="center" >
+                                                <Space>
+                                                    {
+                                                        record?.medecin !== null && 
+                                                        <Tooltip title="Imprimer" >
+                                                            <Button type='link' icon={<PrinterOutlined/> } onClick={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/ordonnance`)}} />
+                                                        </Tooltip> 
+                                                    }
+                                
+                                                    {
+                                                        // record.medecin === userConnected.username &&
+                                                        <Tooltip title="Editer">
+                                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditPrescription(record,"ordonnance")}} />
+                                                        </Tooltip>
+                                                    }
+                                
+                                                    {
+                                                        // record.medecin === userConnected.username &&
+                                                        <Tooltip title="Supprimer">
+                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeletePrescription(record) }} />
+                                                        </Tooltip>
+                                                    }
+                                                </Space>
+                                            </Flex>
+                                        )
                                     }
-                                </Space>
-                            </Flex>
-                        )
+                                ]}
+                            />
+                        </React.Fragment>
+                    },
+                    {
+                        key : "3",
+                        label : "Analyses",
+                        children : <React.Fragment>
+                            <Title level={4} > Liste des analyses de {currentPatient.prenom_patient} {currentPatient.nom_patient}  </Title>
+                            <br/>
+                            <DataTable 
+                                dataSourceCopy={
+                                    listPrescription.filter(element => element.codepresc === codesPrescriptions.ANA ) || []
+                                }
+                                tableLoading={isLoading}
+                                rowKey={(record)=>record.numpresc}
+                                columns={[
+                                    {
+                                        title: 'N° analyse.',
+                                        dataIndex: 'numpresc',
+                                        key: 'numpresc',
+                                    },
+                                    {
+                                        title: 'Date presc',
+                                        dataIndex: 'datepresc',
+                                        key: 'datepresc',
+                                        // ...getColumnSearchProps("datepresc"),
+                                        render: (record) => <div className='table-data'>
+                                            {formatDate(record)}
+                                        </div>
+                                    },
+                                    {
+                                        title: 'Prescripteur',
+                                        dataIndex: 'prescripteur',
+                                        key: 'prescripteur',
+                                        // ...getColumnSearchProps("medecin"),
+                                        sorter: (a, b) => a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0) ,
+                                        //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
+                                    },
+                                    {
+                                        width : 'auto' ,
+                                        render :  (record)=>(
+                                            <Flex justify="center" align="center" >
+                                                <Space>
+                                                    {
+                                                        record?.medecin !== null && 
+                                                        <Tooltip title="Imprimer" >
+                                                            <Button type='link' icon={<PrinterOutlined/> } onClick={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/analyse`)}} />
+                                                        </Tooltip> 
+                                                    }
+                                
+                                                    {
+                                                        // record.medecin === userConnected.username &&
+                                                        <Tooltip title="Editer">
+                                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditPrescription(record,"analyse")}} />
+                                                        </Tooltip>
+                                                    }
+                                
+                                                    {
+                                                        // record.medecin === userConnected.username &&
+                                                        <Tooltip title="Supprimer">
+                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeletePrescription(record) }} />
+                                                        </Tooltip>
+                                                    }
+                                                </Space>
+                                            </Flex>
+                                        )
+                                    }
+                                ]}
+                            />
+                        </React.Fragment>
+                    },
+                    {
+                        key : "4",
+                        label : "Imageries",
+                        children : <React.Fragment>
+                            <Title level={4} > Liste des imageries de {currentPatient.prenom_patient} {currentPatient.nom_patient}  </Title>
+                            <br/>
+                            <DataTable 
+                                dataSourceCopy={
+                                    listPrescription.filter(element => element.codepresc === codesPrescriptions.IMG ) || []
+                                }
+                                tableLoading={isLoading}
+                                rowKey={(record)=>record.numpresc}
+                                columns={[
+                                    {
+                                        title: 'N° img.',
+                                        dataIndex: 'numpresc',
+                                        key: 'numpresc',
+                                    },
+                                    {
+                                        title: 'Date presc',
+                                        dataIndex: 'datepresc',
+                                        key: 'datepresc',
+                                        // ...getColumnSearchProps("datepresc"),
+                                        render: (record) => <div className='table-data'>
+                                            {formatDate(record)}
+                                        </div>
+                                    },
+                                    {
+                                        title: 'Prescripteur',
+                                        dataIndex: 'prescripteur',
+                                        key: 'prescripteur',
+                                        // ...getColumnSearchProps("medecin"),
+                                        sorter: (a, b) => a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0) ,
+                                        //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
+                                    },
+                                    {
+                                        width : 'auto' ,
+                                        render :  (record)=>(
+                                            <Flex justify="center" align="center" >
+                                                <Space>
+                                                    {
+                                                        record?.medecin !== null && 
+                                                        <Tooltip title="Imprimer" >
+                                                            <Button type='link' icon={<PrinterOutlined/> } onClick={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/imagerie`)}} />
+                                                        </Tooltip> 
+                                                    }
+                                
+                                                    {
+                                                        // record.medecin === userConnected.username &&
+                                                        <Tooltip title="Editer">
+                                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditPrescription(record,"imagerie")}} />
+                                                        </Tooltip>
+                                                    }
+                                
+                                                    {
+                                                        // record.medecin === userConnected.username &&
+                                                        <Tooltip title="Supprimer">
+                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeletePrescription(record) }} />
+                                                        </Tooltip>
+                                                    }
+                                                </Space>
+                                            </Flex>
+                                        )
+                                    }
+                                ]}
+                            />
+                        </React.Fragment>
                     }
-                ]}
+                ]} 
             />
+            
         
         </Card>
     )
