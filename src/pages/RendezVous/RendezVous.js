@@ -165,6 +165,7 @@ function RendezVous() {
 
             <Modal 
                 title="Examen clinique"
+                width={1000}
                 open={open} 
                 onCancel={()=>{
                     setOpen(false);
