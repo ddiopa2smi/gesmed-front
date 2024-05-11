@@ -1,5 +1,5 @@
-import { HomeOutlined } from '@ant-design/icons'
-import { Breadcrumb, Card, Col, Divider, Flex, Form, Input, InputNumber, Radio, Row, Select, Typography } from 'antd';
+import { HomeOutlined, OrderedListOutlined } from '@ant-design/icons'
+import { Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Modal, Radio, Row, Select, Space, Tooltip, Typography } from 'antd';
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import useFetch from '../../utils/hooks/useFetch';
@@ -7,6 +7,7 @@ import { endpoints } from '../../constants/endpoints.constants';
 import { codesPrescriptions } from '../../constants/app.constants';
 import AddAndEditDropdown from '../../components/common/AddAndEditDropdown/AddAndEditDropdown';
 import FormFooter from '../../components/common/FormFooter/FormFooter';
+import ListProduits from '../../components/specific/ListProduits/ListProduits';
 
 const {Title} = Typography;
 const {Option} = Select;
@@ -15,7 +16,8 @@ function FicheProduit() {
     const [form] = Form.useForm();
     const {data , isLoading , error} = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
     const listMedicaments = data;
-    console.log(data)
+    //console.log(data)
+    const [open,setOpen] = useState(false);
 
     const getMedocObjectByCodeActe = (id , list) => {
         let obj = null;
@@ -29,7 +31,14 @@ function FicheProduit() {
     }
     return (
         <Card className='FicheProduitWrapper' >
-          
+            <Flex justify="flex-end" align="center" >
+                <Space>
+                    
+                    <Tooltip title="Actualiser" >
+                        <Button type='primary' icon={<OrderedListOutlined/>} onClick={()=>{setOpen(true)}} >Liste des produits</Button>
+                    </Tooltip> 
+                </Space>
+            </Flex>
             <Title level={3} > Fiche Produit </Title>
             <br/>
             <Form
@@ -73,7 +82,7 @@ function FicheProduit() {
                 <Row gutter={[24,24]} >
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Form.Item 
-                            label="Référence"
+                            label="Référence interne"
                             name="reference" 
                             rules={[
                                 {
@@ -101,7 +110,7 @@ function FicheProduit() {
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Form.Item 
-                            label="Code Interne"
+                            label="Code CIP"
                             name="code_interne" 
                             rules={[
                                 {
@@ -376,6 +385,26 @@ function FicheProduit() {
                 <br/>
                 <FormFooter />
             </Form>
+
+
+            <Modal 
+                // styles={{
+                //     header : {
+                //         background : "red"
+                //     }
+                // }}
+                width={1000}
+                title="Liste des produits" 
+                open={open} 
+                onCancel={()=>{
+                    setOpen(false);
+                    //setCurrentRecord(null);
+                }}
+                footer={null}
+                destroyOnClose
+            >
+                <ListProduits />
+            </Modal>
         </Card>
     )
 }

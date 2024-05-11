@@ -98,9 +98,9 @@ const Ordonnance = () => {
         
         //getListMedicaments();
 
-        if (prescription.medecin !== userConnected.username) {
-            navigate(-1);
-        }
+        // if (prescription.medecin !== userConnected.username) {
+        //     navigate(-1);
+        // }
         
     },[])
     

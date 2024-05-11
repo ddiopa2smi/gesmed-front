@@ -76,11 +76,11 @@ function Imagerie() {
 
   const {data , dataCopy , isLoading , onRefresh} = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.IMG}`);
 
-	useEffect(() => {
-        if (prescription.medecin !== userConnected.username) {
-          navigate(-1);
-        }
-	}, []);
+	// useEffect(() => {
+  //       if (prescription.medecin !== userConnected.username) {
+  //         navigate(-1);
+  //       }
+	// }, []);
 
   
   return (

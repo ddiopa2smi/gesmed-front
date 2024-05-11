@@ -1,6 +1,7 @@
 import React from 'react'
 import { Card, Col, Row , Avatar , List , Typography, Breadcrumb} from 'antd';
 import { MedicineBoxOutlined, PushpinOutlined, SnippetsOutlined, TeamOutlined } from '@ant-design/icons';
+import OrdonnancesList from '../OrdonnancesList/OrdonnancesList';
 
 // import RvJour from '../../components/RvJour/RvJour';
 
@@ -32,28 +33,17 @@ function PharmacyDashboard() {
             </Card>
           </Col>
         </Row>
-        <br/><br/>
+        {/* <br/><br/>
         <Row  gutter={[24,24]}>
           <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
-            {/* <RvJour />   */}
             <Card title="Liste des médicaments facturés à l'IPM" extra={<a>Voir plus</a>} >
-              {/* <List
-                  itemLayout="horizontal"
-                  dataSource={data}
-                  renderItem={(item, index) => (
-                  <List.Item>
-                      <List.Item.Meta
-                      avatar={<Avatar src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`} />}
-                      title={<a href="https://ant.design">{item.title}</a>}
-                      //description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                      />
-                  </List.Item>
-                  )}
-              /> */}
+             
             </Card>
           </Col>
-          
-        </Row>
+        </Row> */}
+        
+        <br/><br/>
+        <OrdonnancesList />
     </div>
   )
 }

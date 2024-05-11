@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, ExportOutlined, HomeOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { Breadcrumb, Button, Card, Flex, Space, Tooltip, Typography } from 'antd'
 import React from 'react'
@@ -24,6 +24,10 @@ function SituationStocks() {
 
             <Flex justify="flex-end" align="center" >
                 <Space>
+                    <Tooltip title="Actualiser" >
+                        <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={()=>{console.log("refresh here")}} /> &nbsp;&nbsp;
+                    </Tooltip> 
+                    <Button type='primary' icon={<ExportOutlined/>} >Exporter</Button>
                     <Button type='primary' icon={<PlusOutlined/>} >Ajouter</Button>
                 </Space>
             </Flex>

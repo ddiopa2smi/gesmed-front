@@ -494,7 +494,7 @@ function Consultation() {
                             label="Date cons"
                             name="datecons" 
                         >
-                            <DatePicker disabled format="DD-MM-YYYY" />
+                            <DatePicker disabled format="dddd, DD MMMM YYYY" />
                         </Form.Item>
                     </Col>
                     
@@ -503,7 +503,7 @@ function Consultation() {
                             name="date_rv" 
                             label="Date RV"
                         >
-                            <DatePicker disabled format="DD-MM-YYYY" />
+                            <DatePicker disabled format="dddd, DD MMMM YYYY" />
                         </Form.Item>
                     </Col>                              
                 </Row>
@@ -525,7 +525,7 @@ function Consultation() {
                             name="debut_rm" 
                             label="Date début repos"
                         >
-                            <DatePicker disabled placeholder='Début' format="DD-MM-YYYY" />
+                            <DatePicker disabled placeholder='Début' format="dddd, DD MMMM YYYY" />
                         </Form.Item>
                         
                     </Col>
@@ -534,7 +534,7 @@ function Consultation() {
                             name="fin_rm" 
                             label="Date fin repos"
                         >
-                            <DatePicker disabled placeholder='Fin' format="DD-MM-YYYY" />
+                            <DatePicker disabled placeholder='Fin' format="dddd, DD MMMM YYYY" />
                         </Form.Item>
                         
                     </Col>

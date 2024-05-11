@@ -1,10 +1,15 @@
-import { DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Button, Card, Flex, Space, Tooltip, Typography } from 'antd'
-import React from 'react'
+import { Breadcrumb, Button, Card, Flex, Modal, Space, Tooltip, Typography } from 'antd'
+import React, { useState } from 'react'
 //import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
 import useFetch from '../../utils/hooks/useFetch';
+import { deletePopup } from '../../utils/helpers';
+import { deleteActions } from '../../actions/actions';
+import AddFournisseur from '../../components/specific/AddFournisseur/AddFournisseur';
+import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
+
 
 
 
@@ -15,9 +20,40 @@ function Fournisseurs() {
     
     const {data , dataCopy : listFournisseurs , onRefresh : refreshListFournisseurs , isLoading : listLoading} = useFetch();
 
-    // const onAdd = () => {
-        
-    // }
+    const [open , setOpen] = useState(false);
+    const [operationType , setOperationType] = useState("");
+    const [currentRecord , setCurrentRecord] = useState(null);
+
+
+    //console.log(data)
+
+
+    const onAdd = () => {
+        setOperationType("add");
+        setOpen(true);
+    }
+    
+    const onEdit = (record) => {
+        setOperationType("update");
+        setOpen(true);
+        setCurrentRecord({...record});
+    }
+
+    const onDelete = (record) => {
+        deletePopup()
+        .then((result)=>{
+            if (result.isConfirmed) {
+                console.log("Must delete")
+                // deleteActions(`${endpoints.patients.DELETE}/${record?.num_patient}`)
+                // .then((response)=>{
+                //     if (response.data.Deleted === true) {
+                //         message.success("Ligne retirée avec succès");
+                //         onRefresh()
+                //     }
+                // })
+            }
+        })
+    }
 
     return (
         <Card>
@@ -27,7 +63,11 @@ function Fournisseurs() {
 
             <Flex justify="flex-end" align="center" >
                 <Space>
-                    <Button type='primary' icon={<PlusOutlined/>} >Ajouter</Button>
+                    {/* <Tooltip title="Actualiser" >
+                        <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={refreshListFournisseurs} /> &nbsp;&nbsp;
+                    </Tooltip>  */}
+                    <ReloadButton onRefresh={refreshListFournisseurs} />
+                    <Button type='primary' icon={<PlusOutlined/>} onClick={onAdd} >Ajouter</Button>
                 </Space>
             </Flex>
 
@@ -45,8 +85,8 @@ function Fournisseurs() {
                     },
                     {
                         title: 'Raison sociale',
-                        dataIndex: 'denomination',
-                        key: 'denomination'
+                        dataIndex: 'raisoc',
+                        key: 'raisoc'
                     },
                     {
                         title: 'Adresse',
@@ -79,6 +119,34 @@ function Fournisseurs() {
                     }
                 ]}
             />
+
+
+            <Modal 
+                // styles={{
+                //     header : {
+                //         background : "red"
+                //     }
+                // }}
+                title={
+                    (operationType === "add" && "Nouveau fournisseur")||
+                    (operationType === "update" && "Mettre à jour les données")
+                } 
+                open={open} 
+                onCancel={()=>{
+                    setOpen(false);
+                    setCurrentRecord(null);
+                }}
+                footer={null}
+                destroyOnClose={true}
+            >
+                <AddFournisseur 
+                    setOpen={setOpen}
+                    operationType={operationType}
+                    onRefresh={refreshListFournisseurs}
+                    currentRecord={currentRecord}
+                />
+                
+            </Modal>
 
         </Card>
     )
