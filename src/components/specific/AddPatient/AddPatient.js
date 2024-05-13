@@ -96,7 +96,7 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                         getActions(`/api/Benef/list/${response.data.numcont}`)
                         .then((res)=>{
                             const data = res.data ;
-                            console.log(data);
+                            //console.log(data);
                             setListBeneficiaires(data);
                         })
                     }
@@ -162,7 +162,7 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                                 loading={listTypePatientsLoading}
                             >     
                                 {
-                                    listTypePatients.map((item , key)=>( item.code_pat !== 1 &&
+                                    listTypePatients.map((item , key)=>( //item.code_pat !== 1 &&
                                         <Option key={key}  value={item.code_pat} > {item.type_pat} </Option>
                                     ))
                                 }

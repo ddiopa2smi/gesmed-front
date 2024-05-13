@@ -332,14 +332,14 @@ const MySpace = () => {
             case "sorties_produits":
                 setCurrentSelectedKeys("sorties_produits");
                 break;
-            case "mouvements-sorties":
-                setCurrentSelectedKeys("mouvements-sorties");
-                break;
+            // case "mouvements-sorties":
+            //     setCurrentSelectedKeys("mouvements-sorties");
+            //     break;
             case "situation-stocks":
                 setCurrentSelectedKeys("situation-stocks");
                 break;
             case "new-mouvement-sortie":
-                setCurrentSelectedKeys("situation-stocks");
+                setCurrentSelectedKeys("sorties_produits");
                 break;
             case "saisie-inventaire":
                 setCurrentSelectedKeys("saisie-inventaire");

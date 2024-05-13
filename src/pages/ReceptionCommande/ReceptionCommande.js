@@ -20,6 +20,9 @@ function ReceptionCommande() {
                 layout='vertical'
                 form={form}
             >
+                <Flex align='center' justify='flex-end' >
+                    <Button type='primary' htmlType='submit' >Enregistrer</Button>
+                </Flex>
                 <Divider  orientation="left">Référence de bon de commande</Divider>
                 <Row gutter={[24,24]} align={"middle"} >
                     <Col xs={24} sm={24} md={8} lg={12} xl={12}>
@@ -65,87 +68,101 @@ function ReceptionCommande() {
                         </Form.Item>
                     </Col>
                 </Row>
-                <Divider />
-                <Row gutter={[24,24]} align={"middle"} >
-                    <Col xs={24} sm={24} md={8} lg={6} xl={6}>
-                        <Form.Item 
-                            label="Code produit"
-                            name="code_produit" 
-                        >
-                                <InputNumber min={0} style={{width:"100%"}} />
-                        </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={24} md={12} lg={6} xl={6}>
-                        <Form.Item 
-                            name="designation" 
-                            label="Désignation"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Sélection obligatoire',
-                                },
-                            ]}
-                        >
-                            <Input placeholder='Désignation' />
-                        </Form.Item>
-                        
-                    </Col>
-                    <Col xs={24} sm={24} md={8} lg={6} xl={6}>
-                        <Form.Item 
-                            label="Quantité livrée"
-                            name="qte_livree" 
-                        >
-                                <InputNumber min={0} style={{width:"100%"}} />
-                        </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={24} md={4} lg={6} xl={6}>
-                        <Button type='primary'> Ajouter  </Button>
-                    </Col>
-                </Row>
-                <DataTable 
-                    dataSource={[]}
-                    dataSourceCopy={[]}
-                    setDataSourceCopy={null}
-                    columns={[
-                        {
-                            title: 'Référence',
-                            dataIndex: 'reference',
-                            key: 'reference'
-                        },
-                        {
-                            title: 'Désignation',
-                            dataIndex: 'designation',
-                            key: 'designation'
-                        },
-                        {
-                            title: 'Qté commandée',
-                            dataIndex: 'qte_commande',
-                            key: 'qte_commande'
-                        },
-                        {
-                            title: 'Qté livrée',
-                            dataIndex: 'qte_livree',
-                            key: 'qte_livree'
-                        },
-                        {
-                            render :  (record)=>(
-                                <Flex align='center' >
-                                    <Space size="middle" >
-                                        <Tooltip title="Editer">
-                                            <Button type='link' icon={<EditOutlined/>} />
-                                        </Tooltip>
-                                        <Tooltip title="Supprimer">
-                                            <Button type='link' danger icon={<DeleteOutlined/>} />
-                                        </Tooltip>
-                                    </Space>
-                                </Flex>
-                            )
-                        }
-                    ]}
-                />
-                 <br/>
-                <FormFooter onCancel={()=>{navigate(-1)}} />
+                
+                {/* <br/>
+                <FormFooter onCancel={()=>{navigate(-1)}} /> */}
             </Form>
+
+            <Divider />
+            <Row gutter={[24,24]} align={"middle"} >
+                <Col xs={24} sm={24} md={8} lg={6} xl={6}>
+                    <Form.Item 
+                        label="Code produit"
+                        name="code_produit" 
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Sélection obligatoire',
+                            },
+                        ]}
+                    >
+                            <InputNumber min={0} style={{width:"100%"}} />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={6} xl={6}>
+                    <Form.Item 
+                        name="designation" 
+                        label="Désignation"
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Sélection obligatoire',
+                            },
+                        ]}
+                    >
+                        <Input placeholder='Désignation' />
+                    </Form.Item>
+                    
+                </Col>
+                <Col xs={24} sm={24} md={8} lg={6} xl={6}>
+                    <Form.Item 
+                        label="Quantité livrée"
+                        name="qte_livree" 
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Sélection obligatoire',
+                            },
+                        ]}
+                    >
+                            <InputNumber defaultValue={0} min={0} style={{width:"100%"}} />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} sm={24} md={4} lg={6} xl={6}>
+                    <Button type='primary'> Ajouter  </Button>
+                </Col>
+            </Row>
+            <DataTable 
+                dataSource={[]}
+                dataSourceCopy={[]}
+                setDataSourceCopy={null}
+                columns={[
+                    {
+                        title: 'Référence',
+                        dataIndex: 'reference',
+                        key: 'reference'
+                    },
+                    {
+                        title: 'Désignation',
+                        dataIndex: 'designation',
+                        key: 'designation'
+                    },
+                    {
+                        title: 'Qté commandée',
+                        dataIndex: 'qte_commande',
+                        key: 'qte_commande'
+                    },
+                    {
+                        title: 'Qté livrée',
+                        dataIndex: 'qte_livree',
+                        key: 'qte_livree'
+                    },
+                    {
+                        render :  (record)=>(
+                            <Flex align='center' >
+                                <Space size="middle" >
+                                    <Tooltip title="Editer">
+                                        <Button type='link' icon={<EditOutlined/>} />
+                                    </Tooltip>
+                                    <Tooltip title="Supprimer">
+                                        <Button type='link' danger icon={<DeleteOutlined/>} />
+                                    </Tooltip>
+                                </Space>
+                            </Flex>
+                        )
+                    }
+                ]}
+            />
            
 
         </Card>

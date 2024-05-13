@@ -94,37 +94,40 @@ export const getBreadCrumbLabel = (item) => {
             label = "Fiche produit";
             break;
         case "commandes-produits":
-            label = "Commandes produits";;
+            label = "Commandes produits";
             break;
         case "new-commande-produit":
-            label = "Nouveau commande produit";;
+            label = "Nouvelle commande produit";
             break;
         case "entrees-produits":
-            label = "Entrées produits";;
+            label = "Entrées produits";
             break;
         case "reception-commande":
-            label = "Réception commande";;
+            label = "Réception commande";
             break;
         case "sorties_produits":
-            label = "Sorties produits";;
+            label = "Sorties produits";
             break;
         case "mouvements-sorties":
-            label = "Mouvements sorties";;
+            label = "Mouvements sorties";
             break;
         case "situation-stocks":
-            label = "Situation stocks";;
+            label = "Situation stocks";
             break;
         case "new-mouvement-sortie":
-            label = "Nouveau mouvement sortie";;
+            label = "Nouveau mouvement sortie";
             break;
         case "saisie-inventaire":
-            label = "Saisie inventaire";;
+            label = "Saisie inventaire";
             break;
         case "fournisseurs":
-            label = "Fournisseurs";;
+            label = "Fournisseurs";
+            break;
+        case "facturation":
+            label = "Facturation";
             break;
         case "settings":
-            label = "Paramètres";;
+            label = "Paramètres";
             break;
         case "users":
             label = "Utilisateurs";
@@ -148,4 +151,13 @@ export const getBreadCrumbLabel = (item) => {
             break;
     }
     return label === "" ? item : label;
+}
+
+
+export const sortColumn = (record1, record2) => {
+    if (typeof record1 === "string" && typeof record2 === "string") {
+        return record1.charCodeAt(0) - record2.charCodeAt(0) ;
+    }else {
+        return record1- record2;
+    }
 }

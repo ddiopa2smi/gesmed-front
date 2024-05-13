@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import { DeleteOutlined, EditOutlined, HomeOutlined } from '@ant-design/icons';
 import DataTable from '../../components/common/DataTable/DataTable';
 import DetailsCommande from '../../components/specific/DetailsCommande/DetailsCommande';
+import { deletePopup, sortColumn } from '../../utils/helpers';
 
 //import DataTable from '../../shared/DataTable/DataTable';
 
@@ -17,7 +18,6 @@ function NewCommandeProduit() {
     const [form] = Form.useForm();
 
     const [listProduitsCommandes , setListProduitsCommandes] = useState([])
-
     return (
         <Card>
             <Form
@@ -37,8 +37,11 @@ function NewCommandeProduit() {
                 // }}
             >
 
+                <Flex align='center' justify='flex-end' >
+                    <Button type='primary' htmlType='submit' >Enregistrer</Button>
+                </Flex>
                 <Divider  orientation="left">En-tête Bon de commande</Divider>
-
+            
                 <Row gutter={[24,24]}>
                     <Col  xs={24} sm={12} md={8} lg={6} xl={6}>
                         <Form.Item 
@@ -100,7 +103,7 @@ function NewCommandeProduit() {
                     </Col>
                 </Row>
                  
-                <br/>
+                
 
                 {/* <DetailsCommande 
                     listProduitsCommandes={listProduitsCommandes}
@@ -109,88 +112,105 @@ function NewCommandeProduit() {
 
                 <br /> */}
 
-                <DataTable 
-                    dataSource={[]}
-                    dataSourceCopy={listProduitsCommandes || []}
-                    setDataSourceCopy={setListProduitsCommandes}
-                    columns={[
-                        {
-                            title: 'Référence',
-                            dataIndex: 'reference',
-                            key: 'reference',
-                            // render: (record) => <div className='table-data'>
-                            //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
-                            // </div> ,
-                        },
-                        {
-                            title: 'Désignation',
-                            dataIndex: 'produit',
-                            key: 'produit',
-                            // render: (record) => <div className='table-data'>
-                            //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
-                            // </div> ,
-                            sorter: (a, b) => a.produit.charCodeAt(0) - b.produit.charCodeAt(0),
-                            //sortOrder: sortedInfo.columnKey === 'produit' ? sortedInfo.order : null,
-                        },
-                        {
-                            title: 'Quantité',
-                            dataIndex: 'quantite',
-                            key: 'quantite',
-                            // render: (record) => <div className='table-data'>
-                            //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
-                            // </div> ,
-                            sorter: (a, b) => a.quantite.charCodeAt(0) - b.quantite.charCodeAt(0),
-                            //sortOrder: sortedInfo.columnKey === 'quantite' ? sortedInfo.order : null,
-                        },
-                        {
-                            title: 'P.U (HT)',
-                            dataIndex: 'pu',
-                            key: 'pu',
-                            // render: (record) => <div className='table-data'>
-                            //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
-                            // </div> ,
-                            sorter: (a, b) => a.pu.charCodeAt(0) - b.pu.charCodeAt(0),
-                            //sortOrder: sortedInfo.columnKey === 'pu' ? sortedInfo.order : null,
-                        },
-                        {
-                            title: 'Total (HT)',
-                            dataIndex: 'total',
-                            key: 'total',
-                            // render: (record) => <div className='table-data'>
-                            //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
-                            // </div> ,
-                            sorter: (a, b) => a.total.charCodeAt(0) - b.total.charCodeAt(0),
-                            //sortOrder: sortedInfo.columnKey === 'total' ? sortedInfo.order : null,
-                        },
-                        {
-                            render :  (record)=>(
-                                <Flex align='center' >
-                                    <Space size="middle" >
-                                        <Tooltip title="Editer">
-                                            <Button type='link' icon={<EditOutlined/>} />
-                                        </Tooltip>
-                                        <Tooltip title="Supprimer">
-                                            <Button type='link' danger icon={<DeleteOutlined/>} />
-                                        </Tooltip>
-                                    </Space>
-                                </Flex>
-                            )
-                        }
-                    ]}
-                />
-                <br />
-        
-
-                <FormFooter  
-                    onCancel={()=>{navigate(-1)}}
-                    onValid={()=>{return;}}
-                />
+                
 
             </Form>
 
             <DetailsCommande 
                 listProduitsCommandes={listProduitsCommandes}
                 setListProduitsCommandes={setListProduitsCommandes}
+            />
+
+            <br/>
+
+            <DataTable 
+                dataSource={[]}
+                dataSourceCopy={listProduitsCommandes || []}
+                setDataSourceCopy={setListProduitsCommandes}
+                rowKey={(record)=>record.reference}
+                columns={[
+                    {
+                        title: 'Référence',
+                        dataIndex: 'reference',
+                        key: 'reference',
+                        // render: (record) => <div className='table-data'>
+                        //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
+                        // </div> ,
+                    },
+                    {
+                        title: 'Désignation',
+                        dataIndex: 'produit',
+                        key: 'produit',
+                        // render: (record) => <div className='table-data'>
+                        //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
+                        // </div> ,
+                        sorter: (a, b) => sortColumn(a.produit , b.produit) ,
+                        //sortOrder: sortedInfo.columnKey === 'produit' ? sortedInfo.order : null,
+                    },
+                    {
+                        title: 'Quantité',
+                        dataIndex: 'quantite',
+                        key: 'quantite',
+                        // render: (record) => <div className='table-data'>
+                        //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
+                        // </div> ,
+                        sorter: (a, b) => sortColumn(a.quantite , b.quantite),
+                        //sortOrder: sortedInfo.columnKey === 'quantite' ? sortedInfo.order : null,
+                    },
+                    {
+                        title: 'P.U (HT)',
+                        dataIndex: 'pu',
+                        key: 'pu',
+                        // render: (record) => <div className='table-data'>
+                        //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
+                        // </div> ,
+                        sorter: (a, b) => sortColumn(a.pu , b.pu),
+                        //sortOrder: sortedInfo.columnKey === 'pu' ? sortedInfo.order : null,
+                    },
+                    {
+                        title: 'Total (HT)',
+                        dataIndex: 'total',
+                        key: 'total',
+                        // render: (record) => <div className='table-data'>
+                        //     <span style={{textOverflow:"ellipsis"}} > {record.toUpperCase()} </span>
+                        // </div> ,
+                        sorter: (a, b) => sortColumn(a.total , b.total),
+                        //sortOrder: sortedInfo.columnKey === 'total' ? sortedInfo.order : null,
+                    },
+                    {
+                        render :  (record)=>(
+                            <Flex align='center' >
+                                <Space size="middle" >
+                                    {/* <Tooltip title="Editer">
+                                        <Button 
+                                            type='link' 
+                                            icon={<EditOutlined/>} 
+                                            onClick={()=>{ 
+                                                setCurrentRecord({...record})
+                                            }} 
+                                        />
+                                    </Tooltip> */}
+                                    <Tooltip title="Supprimer">
+                                        <Button 
+                                            type='link' 
+                                            danger 
+                                            icon={<DeleteOutlined/>} 
+                                            onClick={()=>{ 
+                                                deletePopup()
+                                                .then((response)=>{
+                                                    if (response.isConfirmed) {
+                                                        const temp = listProduitsCommandes.filter((element)=>element.reference !== record.reference);
+                                                        setListProduitsCommandes(temp);
+                                                    }
+                                                })
+                                            }} 
+                                        />
+                                    </Tooltip>
+                                </Space>
+                            </Flex>
+                        )
+                    }
+                ]}
             />
            
             

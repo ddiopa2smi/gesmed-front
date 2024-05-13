@@ -14,6 +14,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import BackButton from '../../components/common/BackButton/BackButton';
 import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 import { printPDF } from '../../utils/helpers';
+import { codesPrescriptions } from '../../constants/app.constants';
 const {Title , Text} = Typography;
 const { TextArea } = Input;
 const {Option} = Select;
@@ -200,6 +201,11 @@ function Consultation() {
                                 onClick : ()=>{
                                     // nettoyer la prescription en mémoire
                                     sessionStorage.removeItem("editPrescription");
+                                    sessionStorage.setItem("prescription",JSON.stringify({  
+                                        codepresc : codesPrescriptions.ORD,
+                                        numcons : initConsultation.numcons ,
+                                        medecin : initConsultation.medecin
+                                    }));
                                     navigate(`/myspace/patients/dossier/prescriptions/ordonnance`);
                                 }
                             },
@@ -208,6 +214,11 @@ function Consultation() {
                                 key: '1',
                                 onClick : ()=>{
                                     sessionStorage.removeItem("editPrescription");
+                                    sessionStorage.setItem("prescription",JSON.stringify({  
+                                        codepresc : codesPrescriptions.ANA,
+                                        numcons : initConsultation.numcons ,
+                                        medecin : initConsultation.medecin
+                                    }));
                                     navigate(`/myspace/patients/dossier/prescriptions/analyse`);
                                 }
                             },
@@ -216,6 +227,11 @@ function Consultation() {
                                 key: '2',
                                 onClick : ()=>{
                                     sessionStorage.removeItem("editPrescription");
+                                    sessionStorage.setItem("prescription",JSON.stringify({  
+                                        codepresc : codesPrescriptions.IMG,
+                                        numcons : initConsultation.numcons ,
+                                        medecin : initConsultation.medecin
+                                    }));
                                     navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
                                 }
                             }, 

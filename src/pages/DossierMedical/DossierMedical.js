@@ -169,6 +169,7 @@ function DossierMedical() {
     const handlePrescriptions = (codepres , item) => {
         navigate("/myspace/patients/dossier/prescriptions",{replace : false});
         sessionStorage.setItem("currentPatient", JSON.stringify(currentPatient));
+        console.log(item)
         sessionStorage.setItem("prescription",JSON.stringify({  
             codepresc : codepres,
             numcons : item.numcons ,

@@ -27,6 +27,7 @@ const Ordonnance = () => {
     const userConnected  = JSON.parse(sessionStorage.getItem("userConnected"));
     //const initConsultation  = JSON.parse(sessionStorage.getItem("initConsultation"));
     const prescription  = JSON.parse(sessionStorage.getItem("prescription"));
+    
     const editPrescription  = JSON.parse(sessionStorage.getItem("editPrescription"));
     const [formLoading , setFormLoading] = useState(false);
     const [operationType , setOperationType] = useState("add");

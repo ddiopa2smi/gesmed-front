@@ -109,7 +109,7 @@ function Prescriptions() {
             key: 'qte_presc',
             sorter: (a, b) => a.qte_presc - b.qte_presc
         } ,
-        Table.EXPAND_COLUMN ,
+        //Table.EXPAND_COLUMN ,
         {
             width : 'auto',
             render :  (record)=>(
@@ -159,7 +159,7 @@ function Prescriptions() {
             key: 'qte_presc',
             sorter: (a, b) => a.qte_presc - b.qte_presc
         } ,
-        Table.EXPAND_COLUMN ,
+        //Table.EXPAND_COLUMN ,
         {
             width : 'auto' ,
             render :  (record)=>(
@@ -224,7 +224,6 @@ function Prescriptions() {
     }
 
 
-
     return (
         dataCopy &&
         <Card loading={isLoading} >
@@ -251,6 +250,7 @@ function Prescriptions() {
             <DataTable 
                 dataSourceCopy={dataCopy?.listPrescription?.filter(element => {
                     return element.codepresc === prescription.codepresc && element.numcons === prescription.numcons
+                    //return element.codepresc === prescription.codepresc && element.numpresc === prescription.numpresc
                 }) || []}
                 tableLoading={isLoading}
                 columns={getColumnsByCodePresc(prescription.codepresc)}

@@ -141,6 +141,7 @@ function DossierAT() {
               (operationType === "add" && "Nouvel Accident de travail")||
               (operationType === "update" && "Mettre à jour les données")
           } 
+          width={1000}
           open={open}
           onCancel={()=>{
               setOpen(false);

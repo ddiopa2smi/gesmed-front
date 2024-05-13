@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Form, Input, InputNumber, Modal, Radio, Row, Select, Tabs, Typography, message } from 'antd';
+import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, Modal, Radio, Row, Select, Tabs, Typography, message } from 'antd';
 import { useNavigate } from 'react-router';
 import { EditOutlined, HomeOutlined, DeleteOutlined, PlusCircleFilled, PlusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import TextArea from 'antd/es/input/TextArea';
@@ -9,6 +9,9 @@ import AddTypeMaladie from '../../components/specific/AddTypeMaladie/AddTypeMala
 import AddStructure from '../../components/specific/AddStructure/AddStructure';
 import { endpoints } from '../../constants/endpoints.constants';
 import DataTable from '../../components/common/DataTable/DataTable';
+import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
+import FormFooter from '../../components/common/FormFooter/FormFooter';
+import BackButton from '../../components/common/BackButton/BackButton';
 
 const {Title , Text} = Typography;
 const {Option} = Select;
@@ -1299,9 +1302,11 @@ function InfosCliniques() {
         
     })
     .catch((info)=>{
-        setLoading(false);
         message.error("Une erreur s'est produite, veuillez réessayer svp");
         console.log('Validate Failed:', info);
+    })
+    .finally(()=>{
+        setLoading(false)
     })
   }
 
@@ -1346,11 +1351,16 @@ function InfosCliniques() {
           ]}
         /> <br/> */}
         
+        <Flex align='center' >
+            <BackButton />
+        </Flex>
+        <br/>
         <div style={{display:'flex',justifyContent:"space-between",alignItems:"center",flexDirection:"row"}} >
             <Title level={5}> Infos cliniques du Patient N° {currentObject.num_patient } / {currentObject.prenom_patient} {currentObject.nom_patient}  </Title> <br/>
             <div>
-                <Button type="link" ghost  onClick={()=>{setSuscribe(Date.now())}}>Actualiser</Button>
-                <Button type="primary"   onClick={()=>{navigate(-1)}}>Fermer</Button>
+                {/* <Button type="link" ghost  onClick={()=>{setSuscribe(Date.now())}}>Actualiser</Button> */}
+                <ReloadButton onRefresh={()=>{setSuscribe(Date.now())}} />
+                {/* <Button type="primary"   onClick={()=>{navigate(-1)}}>Fermer</Button> */}
             </div>
         </div>
         <br/>
@@ -1361,15 +1371,21 @@ function InfosCliniques() {
             onFinish={onFinish}
             initialValues={initInfosConsultation}
         >
-          <Tabs defaultActiveKey="1" items={items} /> <br/>
-          <Row>
-              <Col span={12} offset={6}>
-                  <div style={{display:"flex",justifyContent:"center",alignItems:"center"}} >
-                      <Button className='button-cancel' type='ghost'  onClick={()=>{navigate(-1)}} >Annuler</Button> &nbsp;&nbsp;&nbsp;&nbsp;
-                      <Button type='primary' loading={loading} htmlType='submit' > Enregistrer </Button>
-                  </div> 
-              </Col>
-          </Row>
+            <Tabs defaultActiveKey="1" items={items} /> <br/>
+            {/* <Row>
+                <Col span={12} offset={6}>
+                    <div style={{display:"flex",justifyContent:"center",alignItems:"center"}} >
+                        <Button className='button-cancel' type='ghost'  onClick={()=>{navigate(-1)}} >Annuler</Button> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <Button type='primary' loading={loading} htmlType='submit' > Enregistrer </Button>
+                    </div>
+                    
+                </Col>
+            </Row> */}
+            <FormFooter 
+                loading={loading}
+                onCancel={()=>{navigate(-1)}}
+                htmlType='submit'
+            /> 
         </Form>
 
         <Modal
