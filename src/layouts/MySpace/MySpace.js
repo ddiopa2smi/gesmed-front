@@ -48,7 +48,6 @@ const MySpace = () => {
     const [breadCrumbItems , setBreadCrumbItems] = useState([]);
 
     
-    
 
     const  logout = () => {
         logoutPopup()
@@ -417,6 +416,14 @@ const MySpace = () => {
     //     console.log('onSelect', data);
     // };
 
+    let screenWidth = window.innerWidth;
+    ///console.log(screenWidth)
+    // const [screenWidth , setScreenWidth] = useState(window.innerWidth)
+    // useEffect(() => {
+    //     setScreenWidth(window.innerWidth)
+    //     console.log(screenWidth)
+    // }, [screenWidth])
+    
 
     return (
         <div className="MySpaceWrapper">
@@ -465,7 +472,7 @@ const MySpace = () => {
                             //rgb(255 255 255 /0.3)
                         }}
                     >
-                        <div style={{display:"flex",justifyContent:"center",alignItems:"center",width : "25%"}} >
+                        <div style={{display:"flex",justifyContent:"center",alignItems:"center",width : collapsed ? "6%" : "25%",transition : "all ease-in 0.2s"}} >
                             <h3>GESMED</h3>
                         </div>
                         <div style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between"}} >
@@ -533,7 +540,7 @@ const MySpace = () => {
                        
                     </Header>
                     
-                    <Content className='content'>
+                    <Content className='content' style={{marginLeft: screenWidth > 992 ? (collapsed ? "6%" : "20%") : 0}} >
                         <Breadcrumb items={breadCrumbItems}/> 
                         <br/>
                         <Outlet />

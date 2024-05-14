@@ -2,6 +2,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Input , Button , Space } from 'antd';
 import React, { useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words';
+import Swal from 'sweetalert2';
 
 function useSearch() {
     const [searchText, setSearchText] = useState('');
@@ -83,9 +84,13 @@ function useSearch() {
             />
         ),
         onFilter: (value, record) => {
-            //console.log(record)
+            
             if (record !== null && record !== undefined) {
-                record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+                if (record[dataIndex]=== undefined || record[dataIndex] === null) {
+                    return false
+                }else{
+                    return record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+                }
             }
         } ,
         onFilterDropdownOpenChange: (visible) => {

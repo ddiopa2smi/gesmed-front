@@ -143,6 +143,8 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
             <FormFooter 
                 onCancel={()=>{form.resetFields()}}
                 htmlType='submit'
+                cancelLabel={"Réinitialiser"}
+                validLabel={"Valider"}
             />
         </Form>
     )

@@ -14,6 +14,8 @@ import AddRv from '../../components/specific/AddRv/AddRv';
 import { deleteActions } from '../../actions/actions';
 import ExportFile from '../../components/common/ExportFile/ExportFile';
 import useSearch from '../../utils/hooks/useSearch';
+import { IoFilter } from "react-icons/io5";
+
 
 const {Title} = Typography;
 
@@ -85,7 +87,7 @@ function Patients() {
             <Flex justify="flex-end" align="center" >
                 <Space>
                     <Tooltip title="Recherche avancée" >
-                        <Button type='text' shape="circle" icon={<SearchOutlined/>} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
+                        <Button type='text' shape="circle" icon={<IoFilter size={20}/> /**<SearchOutlined/> */} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
                     </Tooltip> 
                     <Tooltip title="Exporter" >
                         <Button type='text' shape="circle" icon={<ExportOutlined/>} onClick={onExport} /> &nbsp;&nbsp;
