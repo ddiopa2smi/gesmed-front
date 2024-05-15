@@ -15,6 +15,8 @@ import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 import BackButton from '../../components/common/BackButton/BackButton';
 import EditButton from '../../components/common/EditButton/EditButton';
 import PrintButton from '../../components/common/PrintButton/PrintButton';
+import DeleteButton from '../../components/common/DeleteButton/DeleteButton';
+import MoreButton from '../../components/common/MoreButton/MoreButton';
 
 const {Title} = Typography;
 
@@ -36,14 +38,17 @@ function DossierMedical() {
     const listPrescription = data?.listPrescription;
 
     const doConsultation = (numRV) => {
-        getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`)
-        .then((response)=>{
-            if (response && response.data) {
-                //sessionStorage.setItem("initConsultation", JSON.stringify(response.data));
 
-                navigate("/myspace/patients/dossier/consultation" , {state : {consultationObject : response.data , currentPatient : currentPatient}});
-            }
-        })
+        navigate("/myspace/patients/dossier/consultation" , {state : {numRV : numRV , currentPatient : currentPatient}});
+        
+        // getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`)
+        // .then((response)=>{
+        //     if (response && response.data) {
+        //         //sessionStorage.setItem("initConsultation", JSON.stringify(response.data));
+
+        //         navigate("/myspace/patients/dossier/consultation" , {state : {consultationObject : response.data , currentPatient : currentPatient}});
+        //     }
+        // })
     }
 
     const onEditConsultation = (record) => {
@@ -107,6 +112,12 @@ function DossierMedical() {
                     </Descriptions.Item>
                     <Descriptions.Item label="Groupe sanguin">
                         { patient?.group_sanguin || <NotSpecified/>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Téléphone">
+                        { patient?.tel_patient || <NotSpecified/>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Email">
+                        { patient?.email_patient || <NotSpecified/>}
                     </Descriptions.Item>
                 </Descriptions>
             </div>
@@ -291,8 +302,9 @@ function DossierMedical() {
                                                                 trigger={['click']}
                                                             >
                                                                 <Tooltip title="Prescriptions" >
-                                                                    <UnorderedListOutlined  />
+                                                                    <Button type='text' icon={<UnorderedListOutlined  />} />
                                                                 </Tooltip>
+                                                            
                                                             </Dropdown>
 
                                                             <Dropdown
@@ -328,10 +340,13 @@ function DossierMedical() {
                                                                 }}
                                                                 trigger={['click']}
                                                             >
-                                                                <Tooltip title="Imprimer" >
+                                                                {/* <Tooltip title="Imprimer" >
                                                                     <Button type='text' icon={<PrinterOutlined/> }/>
-                                                                </Tooltip>
-                                                                {/* <PrintButton /> */}
+                                                                </Tooltip> */}
+                                                                <div>
+                                                                <PrintButton />
+                                                                </div>
+                                                                
                                                             </Dropdown> 
                                                         </>
                                                     }
@@ -346,9 +361,7 @@ function DossierMedical() {
                                 
                                                     {
                                                         record.medecin === userConnected.username &&
-                                                        <Tooltip title="Supprimer">
-                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeleteConsultation(record) }} />
-                                                        </Tooltip>
+                                                        <DeleteButton onDelete={()=>{onDeleteConsultation(record)}} />
                                                     }
                                                 </Space>
                                             </Flex>
@@ -400,24 +413,10 @@ function DossierMedical() {
                                                 <Space>
                                                     {
                                                         record?.medecin !== null && 
-                                                        <Tooltip title="Imprimer" >
-                                                            <Button type='link' icon={<PrinterOutlined/> } onClick={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/ordonnance`)}} />
-                                                        </Tooltip> 
+                                                        <PrintButton onPrint={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/ordonnance`)}} />
                                                     }
-                                
-                                                    {
-                                                        // record.medecin === userConnected.username &&
-                                                        <Tooltip title="Editer">
-                                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditPrescription(record,"ordonnance")}} />
-                                                        </Tooltip>
-                                                    }
-                                
-                                                    {
-                                                        // record.medecin === userConnected.username &&
-                                                        <Tooltip title="Supprimer">
-                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeletePrescription(record) }} />
-                                                        </Tooltip>
-                                                    }
+                                                    <EditButton onEdit={()=>{onEditPrescription(record,"ordonnance")}} />
+                                                    <DeleteButton onDelete={()=>{ onDeletePrescription(record) }} />
                                                 </Space>
                                             </Flex>
                                         )
@@ -468,24 +467,10 @@ function DossierMedical() {
                                                 <Space>
                                                     {
                                                         record?.medecin !== null && 
-                                                        <Tooltip title="Imprimer" >
-                                                            <Button type='link' icon={<PrinterOutlined/> } onClick={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/analyse`)}} />
-                                                        </Tooltip> 
+                                                        <PrintButton onPrint={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/analyse`)}} />
                                                     }
-                                
-                                                    {
-                                                        // record.medecin === userConnected.username &&
-                                                        <Tooltip title="Editer">
-                                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditPrescription(record,"analyse")}} />
-                                                        </Tooltip>
-                                                    }
-                                
-                                                    {
-                                                        // record.medecin === userConnected.username &&
-                                                        <Tooltip title="Supprimer">
-                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeletePrescription(record) }} />
-                                                        </Tooltip>
-                                                    }
+                                                    <EditButton onEdit={()=>{onEditPrescription(record,"analyse")}} />
+                                                    <DeleteButton onDelete={()=>{ onDeletePrescription(record) }} />
                                                 </Space>
                                             </Flex>
                                         )
@@ -536,24 +521,10 @@ function DossierMedical() {
                                                 <Space>
                                                     {
                                                         record?.medecin !== null && 
-                                                        <Tooltip title="Imprimer" >
-                                                            <Button type='link' icon={<PrinterOutlined/> } onClick={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/imagerie`)}} />
-                                                        </Tooltip> 
+                                                        <PrintButton onPrint={()=>{printPDF(`/api/Print/smed/Prescription/${record.numpresc}/imagerie`)}} />
                                                     }
-                                
-                                                    {
-                                                        // record.medecin === userConnected.username &&
-                                                        <Tooltip title="Editer">
-                                                            <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditPrescription(record,"imagerie")}} />
-                                                        </Tooltip>
-                                                    }
-                                
-                                                    {
-                                                        // record.medecin === userConnected.username &&
-                                                        <Tooltip title="Supprimer">
-                                                            <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDeletePrescription(record) }} />
-                                                        </Tooltip>
-                                                    }
+                                                    <EditButton onEdit={()=>{onEditPrescription(record,"imagerie")}} />
+                                                    <DeleteButton onDelete={()=>{ onDeletePrescription(record) }} />
                                                 </Space>
                                             </Flex>
                                         )

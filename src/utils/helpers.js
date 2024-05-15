@@ -1,6 +1,7 @@
 import Swal from "sweetalert2";
 import printJS from "print-js";
 import { API_URL } from "../constants/environment.constants";
+import { message } from "antd";
 
 export const formatDate = (record) => {
     return (record === null || record === "") ? "" : new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(record));
@@ -41,6 +42,12 @@ export const printPDF = (url) => {
         printable : `${API_URL}${url}` ,
         type : 'pdf' ,
         showModal : true ,
+        onLoadingEnd : ()=>{
+            console.log("end")
+        },
+        onError : (error) => {
+                console.log(error)
+        },
         modalMessage : "Impression en cours",
     }) 
 }
@@ -83,6 +90,9 @@ export const getBreadCrumbLabel = (item) => {
             break;
         case "consultations":
             label = "Consultations"
+            break;
+        case "details-consultation":
+            label = "Détails consultation"
             break;
         case "visites":
             label = "Visites";

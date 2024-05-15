@@ -5,7 +5,7 @@ import React from 'react'
 function EditButton({onEdit}) {
     return (
         <Tooltip title="Editer">
-            <Button type="text" icon={<EditOutlined/>} onClick={onEdit} />
+            <Button type="text" icon={<EditOutlined style={{color:"#27ae60"}} />} onClick={onEdit} />
         </Tooltip>
     )
 }

@@ -10,6 +10,7 @@ import {AiOutlineFolder} from "react-icons/ai"
 import Examen from '../../components/specific/Examen/Examen';
 import { getActions } from '../../actions/actions';
 import useSearch from '../../utils/hooks/useSearch';
+import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 
 
 const {Title} = Typography;
@@ -66,6 +67,7 @@ function RendezVous() {
 
             <Flex justify="flex-end" align="center" >
                 <Space>
+                    <ReloadButton onRefresh={onRefresh} />
                     <Segmented 
                         defaultValue={segmentedValue}
                         options={[
@@ -75,7 +77,7 @@ function RendezVous() {
                             },
                             {
                                 value : "traite",
-                                label : "Traités"
+                                label : "Pre-examinés"
                             }
                         ]}
                         
@@ -84,9 +86,6 @@ function RendezVous() {
                         }}
                     
                     />
-                    <Tooltip title="Actualiser" >
-                        <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={onRefresh} />
-                    </Tooltip> 
                 </Space>
             </Flex>
 

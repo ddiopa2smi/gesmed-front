@@ -5,7 +5,7 @@ import React from 'react'
 function PrintButton({onPrint}) {
     return (
         <Tooltip title="Imprimer">
-            <Button type="text" icon={<PrinterOutlined/>} onClick={onPrint} />
+            <Button type="text" icon={<PrinterOutlined style={{color:"#3498db"}}/>} onClick={onPrint} />
         </Tooltip>
     )
 }

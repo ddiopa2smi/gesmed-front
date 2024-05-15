@@ -172,7 +172,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     },
                                 ]}
                             >
-                                <InputNumber min={0} type='number' style={{width : "100%"}} />
+                                <InputNumber min={1} type='number' style={{width : "100%"}} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
@@ -186,7 +186,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     },
                                 ]}
                             >
-                                <InputNumber min={0} type='number'  style={{width : "100%"}} />
+                                <InputNumber min={1} type='number'  style={{width : "100%"}} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8} lg={8} xl={8}  >

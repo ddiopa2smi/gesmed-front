@@ -14,6 +14,7 @@ import useFetch from '../../utils/hooks/useFetch';
 import Posologie from '../../components/specific/Posologie/Posologie';
 import { deletePopup } from '../../utils/helpers';
 import BackButton from '../../components/common/BackButton/BackButton';
+import PrintButton from '../../components/common/PrintButton/PrintButton';
 const { Search } = Input;
 const {TextArea} = Input;
 const { Option } = Select;
@@ -27,8 +28,9 @@ const Ordonnance = () => {
     const userConnected  = JSON.parse(sessionStorage.getItem("userConnected"));
     //const initConsultation  = JSON.parse(sessionStorage.getItem("initConsultation"));
     const prescription  = JSON.parse(sessionStorage.getItem("prescription"));
-    
     const editPrescription  = JSON.parse(sessionStorage.getItem("editPrescription"));
+    // console.log(prescription)
+    // console.log(editPrescription)
     const [formLoading , setFormLoading] = useState(false);
     const [operationType , setOperationType] = useState("add");
     //const [listMedicaments , setListMedicaments] = useState([]);
@@ -41,7 +43,6 @@ const Ordonnance = () => {
     
     const save = () => {
         form
-        .validateFields()
         .then((values) => {
             switch (operationType) {
                 case "add" :
@@ -113,14 +114,12 @@ const Ordonnance = () => {
             </Flex>
             <br/>
             
-            {/* <Flex align='center' justify='space-between' >
+            <Flex align='center' justify='space-between' >
+                <Title level={4} >Prescription ordonnance du patient N° {currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>  
 
-                <Space>
-                    <Button className="button-close" type="ghost" ghost onClick={()=>{navigate(-1);}}  >Retour </Button>  
-                </Space>
+                {/* <PrintButton onPrint={null} /> */}
                 
-            </Flex> */}
-            <Title level={4} >Prescription ordonnance du patient N° {currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>  
+            </Flex>
 
             
             <br/>

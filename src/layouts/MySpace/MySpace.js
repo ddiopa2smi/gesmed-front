@@ -307,6 +307,9 @@ const MySpace = () => {
             case "consultations":
                 setCurrentSelectedKeys("consultations");
                 break;
+            case "details-consultation":
+                    setCurrentSelectedKeys("consultations");
+                    break;
             case "visites":
                 setCurrentSelectedKeys("visites");
                 break;

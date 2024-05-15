@@ -1,17 +1,23 @@
 import React from 'react'
-import { Button, Card, Flex, Space, Tooltip, Typography} from "antd"
+import { Button, Card, Dropdown, Flex, Space, Tooltip, Typography} from "antd"
 import useFetch from '../../utils/hooks/useFetch';
 import { endpoints } from '../../constants/endpoints.constants';
 import DataTable from '../../components/common/DataTable/DataTable';
 import { deletePopup, formatDate } from '../../utils/helpers';
-import { DeleteOutlined, EditOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, MoreOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
+import AdvancedSearchButton from '../../components/common/AdvancedSearchButton/AdvancedSearchButton';
+import MoreButton from '../../components/common/MoreButton/MoreButton';
+import { useNavigate } from 'react-router';
 
 const {Title} = Typography;
 
 function Consultations() {
-    const {data , dataCopy , setDataCopy, isLoading , onRefresh} = useFetch(endpoints.consultations.LIST);
+    const navigate = useNavigate()
+    const {data : listConsultations , dataCopy : listConsultationsCopy , setDataCopy : setListConsultationsCopy, isLoading : listConsultationsLoading , onRefresh : refreshListConsultations} = useFetch(endpoints.consultations.LIST);
 
-    const onEdit = (record) => {     
+    const openConsultation = (record) => {    
+        navigate("/myspace/consultations/details-consultation" , {state : {currentConsultation : record}});
     }
 
     const onDelete = (record) => {
@@ -34,24 +40,18 @@ function Consultations() {
 
           <Flex justify="flex-end" align="center" >
               <Space>
-                  <Tooltip title="Recherche" >
-                      <Button type='text' shape="circle" icon={<SearchOutlined/>} onClick={()=>{return null;}} /> &nbsp;&nbsp;
-                  </Tooltip> 
-                 
-                  <Tooltip title="Actualiser" >
-                      <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={onRefresh} /> &nbsp;&nbsp;
-                  </Tooltip> 
-                  {/* <Button type='primary' icon={<PlusOutlined/>} onClick={onAdd} >Ajouter</Button> */}
+                  <AdvancedSearchButton onClick={null} />
+                  <ReloadButton onRefresh={refreshListConsultations} />
               </Space>
           </Flex>
 
           <br/>
             
           <DataTable
-              dataSource={data}
-              dataSourceCopy={dataCopy}
-              setDataSourceCopy={setDataCopy}
-              tableLoading={isLoading}
+              dataSource={listConsultations}
+              dataSourceCopy={listConsultationsCopy}
+              setDataSourceCopy={setListConsultationsCopy}
+              tableLoading={listConsultationsLoading}
               columns={[
                 {
                   title: 'N° Cons',
@@ -100,12 +100,35 @@ function Consultations() {
                   render :  (record)=>(
                       <Flex justify="center" align="center" >
                           <Space>
-                              <Tooltip title="Editer">
-                                  <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEdit(record)}} />
-                              </Tooltip>
-                              <Tooltip title="Supprimer">
-                                  <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDelete(record) }} />
-                              </Tooltip>
+                              <Dropdown
+                                    menu={{items :  
+                                        [
+                                            {
+                                                label: "Voir la consultation" ,
+                                                key: '0',
+                                                onClick : ()=>{openConsultation(record)},
+                                            },
+                                            // {
+                                            //     label: "Créer RV" ,
+                                            //     key: '1',
+                                            //     onClick : ()=>{onCreateRV(record)} ,
+                                            // },
+                                            // {
+                                            //     label: "Modifier",
+                                            //     key: '2',
+                                            //     onClick : ()=>{onEdit(record)} , 
+                                            // }, 
+                                            // {
+                                            //     label: "Supprimer" ,
+                                            //     key: '3',
+                                            //     onClick : ()=>{onDelete(record)}
+                                            // },
+                                        ]
+                                    }}
+                                    trigger={['click']}
+                                >
+                                    <Button type='text' icon={<MoreOutlined/>} />
+                                </Dropdown>
                           </Space>
                       </Flex>
                   )

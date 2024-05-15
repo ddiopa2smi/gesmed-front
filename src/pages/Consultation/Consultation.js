@@ -1,5 +1,5 @@
 import {Modal ,Card , Row , Col , Form,  Input , InputNumber , Typography , Select , Button, DatePicker, message, Flex, Divider, Space, Dropdown } from 'antd'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
 import { getActions, putActions } from '../../actions/actions';
@@ -15,16 +15,17 @@ import BackButton from '../../components/common/BackButton/BackButton';
 import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 import { printPDF } from '../../utils/helpers';
 import { codesPrescriptions } from '../../constants/app.constants';
+import useObjectFetch from '../../utils/hooks/useObjectFetch';
 const {Title , Text} = Typography;
 const { TextArea } = Input;
 const {Option} = Select;
 
 
 const getInitCons = (initCons) => {
-    initCons.datecons = dayjs(initCons.datecons);
-    initCons.date_rv = initCons.date_rv === null ? dayjs(new Date())  : dayjs(initCons.date_rv);
-    initCons.debut_rm = initCons.debut_rm === null ? dayjs(new Date())  : dayjs(initCons.debut_rm);
-    initCons.fin_rm = initCons.fin_rm === null ? dayjs(new Date())  : dayjs(initCons.fin_rm);
+    initCons.datecons = dayjs(initCons?.datecons);
+    initCons.date_rv = initCons?.date_rv === null ? dayjs(new Date())  : dayjs(initCons.date_rv);
+    initCons.debut_rm = initCons?.debut_rm === null ? dayjs(new Date())  : dayjs(initCons.debut_rm);
+    initCons.fin_rm = initCons?.fin_rm === null ? dayjs(new Date())  : dayjs(initCons.fin_rm);
     return initCons;
 }
 
@@ -32,11 +33,39 @@ function Consultation() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const {state} = useLocation();
-    const currentPatient = state?.currentPatient;
-    const consultationObject = state?.consultationObject;
+    // const currentPatient = state?.currentPatient;
+    // const consultationObject = state?.consultationObject;
     
-    const initCons = getInitCons(consultationObject);
-    const [initConsultation , setInitConsultation] = useState(initCons);
+    // const initCons = getInitCons(consultationObject);
+    // const [initConsultation , setInitConsultation] = useState(initCons);
+
+
+    const currentPatient = state?.currentPatient;
+    const numRV = state?.numRV;
+
+    //const {data : consultationData , onRefresh : refreshConsultation , isLoading : consultationDataLoading} = useObjectFetch(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`);
+    //const initCons = consultationData !== null ? getInitCons(consultationData) : null;
+    const [initConsultation , setInitConsultation] = useState(null);
+    const [consultationDataLoading , setConsultationDataLoading] = useState(false)
+    const [refetch , setRefetch] = useState(null)
+
+    const refreshConsultation = () => {
+        setRefetch(Date.now())
+    }
+    useEffect(() => {
+        setConsultationDataLoading(true)
+        getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`)
+        .then((response)=>{
+            if (response?.data) {
+                setInitConsultation(getInitCons(response?.data))
+                form.setFieldsValue(getInitCons(response?.data))
+            }
+        })
+        .finally(()=>{
+            setConsultationDataLoading(false)
+        })
+    }, [refetch])
+    
 
     const [pathologieSelected  , setPathologieSelected] = useState(null);
     const [motifSelected  , setMotifSelected] = useState(null);
@@ -95,7 +124,7 @@ function Consultation() {
     }
 
 
-    const handleForm = () => {
+    const save = () => {
         setLoading(true);
         form
         .validateFields()
@@ -107,29 +136,32 @@ function Consultation() {
             const payload = {...initConsultation , ...values};
             putActions(endpoints.consultations.UPDATE , payload)
             .then((response)=>{
-                console.log(response.data);
-                if (response.data.Updated === true) {
-                    getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${payload.numrv}`)
-                    .then((response)=>{
-                        const data = getInitCons(response.data);
-                        setInitConsultation(data);
-                        form.setFieldsValue(data);
-                        sessionStorage.setItem("initConsultation", JSON.stringify(response.data));
-                        setLoading(false);
-                        message.success("Consultation enrégistreé avec succès");
-                        form.resetFields();
-                        //navigate(-1);
-                    })
+                //console.log(response.data);
+                if (response?.data?.Updated) {
+                    message.success("Consultation enrégistreé avec succès");
+                    refreshConsultation()
+                    // getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${payload.numrv}`)
+                    // .then((response)=>{
+                    //     const data = getInitCons(response.data);
+                    //     setInitConsultation(data);
+                    //     form.setFieldsValue(data);
+                    //     //sessionStorage.setItem("initConsultation", JSON.stringify(response.data));
+                    //     setLoading(false);
+                    //     message.success("Consultation enrégistreé avec succès");
+                    //     form.resetFields();
+                    //     //navigate(-1);
+                    // })
                 }
                 else {
                     setLoading(false);
                     message.error("Oopss...,quelque chose s'est mal passé, veuillez réessayer");
                 }
             }) 
+            .finally(()=>{
+                setLoading(false)
+            })
         })
         .catch((info)=>{
-            setLoading(false);
-            message.error("Oopss...,quelque chose s'est mal passé, veuillez réessayer");
             console.log('Validate Failed:', info);
         })
     }
@@ -138,17 +170,15 @@ function Consultation() {
    //console.log(initConsultation)
 
     return (
-        <Card>
+        <Card loading={consultationDataLoading} >
             <Flex justify='flex-start' align='center' >
                 <BackButton />
             </Flex>
             <Flex justify='space-between' align='center' >
-                <Title level={4} >Consultation médical {initConsultation.numcons}  </Title>
+                <Title level={4} >Consultation médical {initConsultation?.numcons}  </Title>
                 <Space align="center" >
                     <ReloadButton 
-                        onRefresh={()=>{ 
-                            return;
-                        }}
+                        onRefresh={refreshConsultation}
                     />
                     
                     <Dropdown
@@ -299,7 +329,7 @@ function Consultation() {
 
                 }}
 
-                onFinish={handleForm}
+                onFinish={save}
             >
                 <Divider/>
                 <Row gutter={[24,24]}>

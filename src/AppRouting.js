@@ -32,6 +32,7 @@ import DossierAT from "./pages/DossierAT/DossierAT";
 import Privileges from "./pages/Privileges/Privileges";
 import Privilege from "./pages/Privilege/Privilege";
 import Facturation from "./pages/Facturation/Facturation";
+import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation";
 
 export const router = createBrowserRouter(
     [
@@ -116,7 +117,16 @@ export const router = createBrowserRouter(
                 },
                 {
                     path : "consultations",
-                    element : <Consultations />
+                    children : [
+                        {
+                            path : "",
+                            element : <Consultations />
+                        },
+                        {
+                            path : "details-consultation",
+                            element : <DetailsConsultation />
+                        },
+                    ]
                 },
                 {
                     path : "visites",
