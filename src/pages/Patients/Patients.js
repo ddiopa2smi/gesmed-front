@@ -15,6 +15,9 @@ import { deleteActions } from '../../actions/actions';
 import ExportFile from '../../components/common/ExportFile/ExportFile';
 import useSearch from '../../utils/hooks/useSearch';
 import { IoFilter } from "react-icons/io5";
+import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
+import ExcellExportButton from '../../components/common/ExcellExportButton/ExcellExportButton';
+import AdvancedSearchButton from '../../components/common/AdvancedSearchButton/AdvancedSearchButton';
 
 
 const {Title} = Typography;
@@ -86,12 +89,15 @@ function Patients() {
 
             <Flex justify="flex-end" align="center" >
                 <Space>
-                    <Tooltip title="Recherche avancée" >
-                        <Button type='text' shape="circle" icon={<IoFilter size={20}/> /**<SearchOutlined/> */} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
-                    </Tooltip> 
-                    <Tooltip title="Exporter" >
+                    <ReloadButton onRefresh={onRefresh} /> &nbsp;&nbsp;
+                    {/* <Tooltip title="Recherche avancée" >
+                        <Button type='text' shape="circle" icon={<IoFilter size={20}/>} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
+                    </Tooltip>  */}
+                    <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
+                    {/* <Tooltip title="Exporter" >
                         <Button type='text' shape="circle" icon={<ExportOutlined/>} onClick={onExport} /> &nbsp;&nbsp;
-                    </Tooltip> 	
+                    </Tooltip>  */}
+                    <ExcellExportButton onClick={onExport} /> &nbsp;&nbsp;
                     {/* {
                         //tableLoading === false &&
                         dataSourceCopy.length !== 0 &&
@@ -99,9 +105,10 @@ function Patients() {
                             <ExportFile title={title} data={dataSourceCopy} /> &nbsp;&nbsp;
                         </>
                     } */}
-                    <Tooltip title="Actualiser" >
+                    {/* <Tooltip title="Actualiser" >
                         <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={onRefresh} /> &nbsp;&nbsp;
-                    </Tooltip> 
+                    </Tooltip>  */}
+                    
                     <Button type='primary' icon={<PlusOutlined/>} onClick={onAdd} >Ajouter</Button>
                 </Space>
             </Flex>
@@ -113,6 +120,8 @@ function Patients() {
                 dataSourceCopy={dataCopy}
                 setDataSourceCopy={setDataCopy}
                 tableLoading={isLoading}
+                rowKey={(record)=>record.num_patient}
+                //rowSelected
                 columns={[
                     {
                         title: '',
@@ -187,22 +196,22 @@ function Patients() {
                                     menu={{items :  
                                         [
                                             {
-                                                label: <span style={{textOverflow:"ellipsis"}} > <FolderOutlined/> Ouvrir Dossier Médical </span> ,
+                                                label: "Ouvrir Dossier Médical" ,
                                                 key: '0',
                                                 onClick : ()=>{onOpenMedicalFolder(record)},
                                             },
                                             {
-                                                label: <span> <ClockCircleOutlined/> Créer RV</span> ,
+                                                label: "Créer RV" ,
                                                 key: '1',
                                                 onClick : ()=>{onCreateRV(record)} ,
                                             },
                                             {
-                                                label: <span> <EditOutlined/> Modifier </span>,
+                                                label: "Modifier",
                                                 key: '2',
                                                 onClick : ()=>{onEdit(record)} , 
                                             }, 
                                             {
-                                                label: <span> <DeleteOutlined/> Supprimer</span> ,
+                                                label: "Supprimer" ,
                                                 key: '3',
                                                 onClick : ()=>{onDelete(record)}
                                             },
@@ -210,7 +219,7 @@ function Patients() {
                                     }}
                                     trigger={['click']}
                                 >
-                                    <Button type='text' shape='circle' icon={<MoreOutlined/>} />
+                                    <Button type='text' icon={<MoreOutlined/>} />
                                 </Dropdown>
                             </Flex>
                         )

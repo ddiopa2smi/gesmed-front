@@ -512,16 +512,16 @@ const MySpace = () => {
                                 {
                                     isDark ?
                                     <Tooltip placement="bottomRight" title={<>Mode Sombre</>} >
-                                        <Button shape='circle' type='text' icon={<TbMoonStars size={24} /> } onClick={()=> handleLightMode()} />
+                                        <Button  type='text' icon={<TbMoonStars size={24} /> } onClick={()=> handleLightMode()} />
                                     </Tooltip>
                                     :
                                     <Tooltip placement="bottomRight" title={<>Mode clair</>}  >
-                                        <Button shape='circle' type='text' icon={<HiOutlineSun size={24} /> } onClick={()=> handleDarkMode()} />
+                                        <Button  type='text' icon={<HiOutlineSun size={24} /> } onClick={()=> handleDarkMode()} />
                                     </Tooltip>
                                 }   &nbsp;&nbsp;&nbsp;
 
                                 <Tooltip placement="bottomRight" title={<>Notifications</>}  >
-                                    <Button shape='circle' type='text' icon={<BellOutlined style={{fontSize : 24}} /> } onClick={()=>{setOpenDrawer(true)}} /> 
+                                    <Button  type='text' icon={<BellOutlined style={{fontSize : 24}} /> } onClick={()=>{setOpenDrawer(true)}} /> 
                                 </Tooltip>
                                 &nbsp;&nbsp;&nbsp;
 
@@ -530,10 +530,12 @@ const MySpace = () => {
                                         items : profilMenu ,
                                     }}
                                 >
-                                    <Avatar size={"default"} icon={<UserOutlined/>} style={{ cursor:'pointer'}} /> 
+                                    <Button type='text' icon={<Avatar size="small" icon={<UserOutlined/>} style={{ cursor:'pointer'}} />} >
+                                        <Text>  { userConnected ? userConnected?.username : ""} </Text>
+                                    </Button> 
                                 </Dropdown>
                                 &nbsp;
-                                <Text>  { userConnected ? userConnected?.username : ""} </Text>
+                                
                                 
                             </div>
                         </div>

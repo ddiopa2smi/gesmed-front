@@ -5,3 +5,8 @@ export const codesPrescriptions = {
     ANA : "01",
     IMG : "02"
 }
+
+
+export const images = {
+    excell : require("./../assets/excell.png")
+}

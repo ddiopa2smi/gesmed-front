@@ -4,7 +4,7 @@ import { Button ,Popover,Tooltip,Tree, Typography } from 'antd';
 import { ExportOutlined } from '@ant-design/icons'
 import FormFooter from '../FormFooter/FormFooter';
 
-// const {Text} = Typography;
+const {Text} = Typography;
 
 function ExportFile({ setOpen , title , data}) {
     //const [open, setOpen] = useState(false);
@@ -117,6 +117,9 @@ function ExportFile({ setOpen , title , data}) {
     return (
         data.length !== 0 &&
         <>
+            <Text>Vous avez la possibilité de sélectionner uniquement les champs à afficher dans le document</Text>
+            <br/>
+            <br/>
             <Tree
                 checkable
                 onCheck={onCheck}
@@ -125,9 +128,11 @@ function ExportFile({ setOpen , title , data}) {
                 selectable={false}
                 //height={300}
             />  
+            <br/>
             <FormFooter 
                 onCancel={()=>{setOpen(false)}}
                 onValid={handleExportFile}
+                validLabel={"Exporter"}
             /> 
         </>
         // data.length !== 0 ?

@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { getActions } from "../../actions/actions";
+import { LoadingContext } from "../providers/LoadingProvider";
 
 export function useObjectFetch(url) {
     const [data , setData] = useState(null);
-    const [dataCopy , setDataCopy] = useState([]);
+    const [dataCopy , setDataCopy] = useState(null);
     const [error,  setError] = useState(false);
     const [isLoading,  setIsLoading] = useState(false);
     const [refetch , setRefetch] = useState(null);
-
+    const {setLoadingProgress , setLoadingComplete } = useContext(LoadingContext);
     const onRefresh = () => {
         setRefetch(Date.now())
     }
@@ -15,6 +16,7 @@ export function useObjectFetch(url) {
     useEffect(() => {
         if(!url) return;
         setIsLoading(true)
+        setLoadingProgress()
         const fetchData = async (route) => {
             await getActions(route)
             .then((response)=>{
@@ -26,6 +28,7 @@ export function useObjectFetch(url) {
             })
             .finally(()=>{
                 setIsLoading(false)
+                setLoadingComplete()
             })
         }
 

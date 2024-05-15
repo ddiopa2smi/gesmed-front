@@ -26,6 +26,7 @@ function RendezVous() {
     const [segmentedValue , setSegmentedValue] = useState("attente");
 
     const handleExamenClinique = (record) => {
+        setOpen(true);
         setExamActionLoading(true);
         getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${record.num_ordre}`)
         .then((response)=>{
@@ -35,13 +36,16 @@ function RendezVous() {
             // sessionStorage.setItem("initExamPayload", JSON.stringify(resp)); 
             setCurrentRecord(record);
             setDefaultExamPayload(response.data);
-            setExamActionLoading(false);
-            setOpen(true);
+            //setExamActionLoading(false);
+            // setOpen(true);
         })
         .catch((error)=>{
-            setExamActionLoading(false);
+            //setExamActionLoading(false);
             console.log(error);
             message.error("Une erreur est survenue, veuillez réessayer!")
+        })
+        .finally(()=>{
+            setExamActionLoading(false)
         })
     }  
 
@@ -92,6 +96,7 @@ function RendezVous() {
                 dataSource={data}
                 dataSourceCopy = {segmentedValue === "attente" ? dataCopy.filter((element)=> element.effectue === false) : dataCopy.filter((element)=> element.effectue === true)}
                 setDataSourceCopy={setDataCopy}
+                rowKey={(record)=>record.num_ordre}
                 columns={[
                     {
                         title: 'N°',
@@ -147,10 +152,9 @@ function RendezVous() {
                             <Flex align='center' >
                                 <Space size="middle" >
                                     {
-                                    examActionLoading === true ? <Spin /> :
-                                    <Tooltip title="Examiner">
-                                        <RiStethoscopeLine cursor="pointer" size={18} onClick={()=>{handleExamenClinique(record)}} />
-                                    </Tooltip>
+                                        <Tooltip title="Examiner">
+                                            <RiStethoscopeLine cursor="pointer" size={18} onClick={()=>{handleExamenClinique(record)}} />
+                                        </Tooltip>
                                     }
                                     
                                     <Tooltip title="Ouvrir dossier">
@@ -174,12 +178,17 @@ function RendezVous() {
                 footer={null}
                 destroyOnClose
             >
-                <Examen 
-                setOpen={setOpen}
-                currentRecord={currentRecord}
-                onRefresh={onRefresh}
-                defaultExamPayload={defaultExamPayload}
-                />
+                {
+                    examActionLoading ?
+                    <Spin /> : 
+                    <Examen 
+                        setOpen={setOpen}
+                        currentRecord={currentRecord}
+                        onRefresh={onRefresh}
+                        defaultExamPayload={defaultExamPayload}
+                    />
+                }
+                
                 
             </Modal>
 

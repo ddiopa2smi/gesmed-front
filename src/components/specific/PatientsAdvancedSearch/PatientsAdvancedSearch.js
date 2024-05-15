@@ -1,10 +1,14 @@
 import { Form , Row , Col , Input , Select , DatePicker } from "antd";
 import FormFooter from "../../common/FormFooter/FormFooter";
+import useFetch from "../../../utils/hooks/useFetch";
+import { endpoints } from "../../../constants/endpoints.constants";
 const {Option } = Select;
 const { RangePicker } = DatePicker;
 
 function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, setOpen}) {
     const [form] = Form.useForm();
+    const {data : listTypePatients , isLoading : listTypePatientsLoading } = useFetch(endpoints.patients.LIST_TYPE)
+
     return (
         <Form
             form={form}
@@ -116,9 +120,23 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                 <Col xs={24} sm={12} md={8} lg={8} xl={8}>
                     <Form.Item
                         name="type_patient"
-                        label="Type"
+                        label="Type de patient"
                     >
-                        <Input />
+                        <Select
+                            style={{width:'100%',background:"transparent"}}
+                            showSearch
+                            placeholder="Type de patient"
+                            optionFilterProp="children" 
+                            filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                            loading={listTypePatientsLoading}
+                        >     
+                            {
+                                listTypePatients.map((item , key)=>( 
+                                    <Option key={key}  value={item.code_pat} > {item.type_pat} </Option>
+                                ))
+                            }
+                            
+                        </Select>
                     </Form.Item>
                 </Col>
             </Row>

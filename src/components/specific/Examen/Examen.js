@@ -39,6 +39,18 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
         } 
     }
 
+    const transformArrToString = (arr) => {
+        let result = "";
+        for (let i = 0; i < arr.length; i++) {
+            const element = arr[i];
+            if (i === 0) {
+                result += element
+            }else {
+                result += "-"+element
+            }
+        }
+        return result;
+    }
     const saveExamen = () => {
         form
         .validateFields()
@@ -47,10 +59,12 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
             const payload = { ...defaultExamPayload , ...values} ;
             payload.numpat = currentRecord.num_patient ;
             payload.numrv = currentRecord.num_ordre;
+            payload.muqueuse = payload.muqueuse !== null ? transformArrToString(payload.muqueuse) : payload.muqueuse
+            payload.zone_oedemes = payload.zone_oedemes !== null ? transformArrToString(payload.zone_oedemes) : payload.zone_oedemes
+            //console.log(payload)
             postActions(endpoints.consultations.SAVE,payload)   
             .then((response)=>{
-                setLoading(false);
-                if (response.data.Saved === true) {
+                if (response?.data?.Saved === true) {
                     message.success("Examen clinique enregistré avec succès");
                     setOpen(false);
                     form.resetFields();
@@ -62,14 +76,16 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                 
             })
             .catch((error)=>{
-                setLoading(false);
                 message.error(error?.message);
                 console.log(error);
+            })
+            .finally(()=>{
+                setLoading(false);
             })
         })
         .catch((info) => {
             console.log('Validate Failed:', info);
-        });
+        })
     } 
 
     return (
@@ -107,9 +123,9 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="tension" 
                                 rules={[
                                     {
-                                    required: true,
-                                    message: 'Champ obligatoire',
-                                    },
+                                        required: true,
+                                        message: 'Champ obligatoire',
+                                    }
                                 ]}
                             >
                                 <InputNumber min={0} type='number' style={{width : "100%"}} />
@@ -126,7 +142,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     },
                                 ]}
                             >
-                                <InputNumber min={0}  style={{width : "100%"}} />
+                                <InputNumber min={0} type='number'  style={{width : "100%"}} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8} lg={8} xl={8} >
@@ -140,7 +156,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     },
                                 ]}
                             >
-                                <InputNumber min={0} style={{width : "100%"}} />
+                                <InputNumber min={0} type='number' style={{width : "100%"}} />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -170,7 +186,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     },
                                 ]}
                             >
-                                <InputNumber min={0}  style={{width : "100%"}} />
+                                <InputNumber min={0} type='number'  style={{width : "100%"}} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
@@ -184,7 +200,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     },
                                 ]}
                             >
-                                <InputNumber min={0} disabled style={{width : "100%",fontWeight : "bold" , color :"var(--app-color)"}} />
+                                <InputNumber min={0}  disabled style={{width : "100%",fontWeight : "bold" , color :"var(--app-color)"}} />
                             </Form.Item>
                         </Col>
                     </Row>

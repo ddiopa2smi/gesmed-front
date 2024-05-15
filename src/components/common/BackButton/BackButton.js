@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router';
 function BackButton() {
     const navigate = useNavigate();
     return (
-        <Button type='ghost' size='small' style={{color:"#fff",backgroundColor:"var(--back-button)",marginBottom : 8}} onClick={()=>{navigate(-1);}}  > <ArrowLeftOutlined/> Retour</Button>
+        <Button type='ghost' size='small' style={{color:"#fff",backgroundColor:"var(--back-button)",marginBottom : 24}} onClick={()=>{navigate(-1);}}  > <ArrowLeftOutlined/> Retour</Button>
     )
 }
 

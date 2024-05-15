@@ -11,12 +11,12 @@ function AddAndEditDropdown({items}) {
             trigger={['click']}     
             arrow
         >
-            <Button type='primary' shape='circle' size='small'  icon={<PlusOutlined />} style={{marginLeft : 4}}  />
-                {/* <div style={{cursor:"pointer"}} >
-                    <PlusOutlined style={{fontSize:14}} />
-                    <EditOutlined style={{fontSize:14}} />
+            <Button type="text" size='small' style={{marginLeft : 4}} >
+                <div>
+                    <PlusOutlined  />
+                    <EditOutlined  />
                 </div>
-            </Button> */}
+            </Button>
             
         </Dropdown>
     </Flex>
