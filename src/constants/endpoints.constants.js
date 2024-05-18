@@ -95,6 +95,12 @@ export const endpoints = {
         ADD : "",
         UPDATE : "",
         DELETE : ""
+    } ,
+    familleMedoc : {
+        LIST : "/api/ParamMedoc/famille/list",
+        ADD : "/api/ParamMedoc/famille/add",
+        UPDATE : "/api/ParamMedoc/famille/update",
+        DELETE : "/api/ParamMedoc/famille/delete",
     }
     
 }

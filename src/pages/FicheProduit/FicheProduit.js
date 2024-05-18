@@ -8,16 +8,32 @@ import { codesPrescriptions } from '../../constants/app.constants';
 import AddAndEditDropdown from '../../components/common/AddAndEditDropdown/AddAndEditDropdown';
 import FormFooter from '../../components/common/FormFooter/FormFooter';
 import ListProduits from '../../components/specific/ListProduits/ListProduits';
+import AddFamilleMedoc from '../../components/specific/AddFamilleMedoc/AddFamillleMedoc';
 
 const {Title} = Typography;
 const {Option} = Select;
 
 function FicheProduit() {
     const [form] = Form.useForm();
-    const {data , isLoading , error} = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
-    const listMedicaments = data;
-    //console.log(data)
+    const {data : listMedicaments , isLoading , error} = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
+    const {data : familleMedocsList , isLoading : familleMedocsListLoading , onRefresh : listFamilleMedocRefresh} = useFetch(endpoints.familleMedoc.LIST);
+
+    const [currentSelectableTask , setCurrentSelectableTask] = useState("");
+    const [operationType , setOperationType] = useState(null);
     const [open,setOpen] = useState(false);
+    const [open2,setOpen2] = useState(false);
+
+
+    const [familleMedocSelected , setFamilleMedocSelected] = useState(null);
+
+    const openModal = (operation , selectableTask) => {
+        if(operation === "add"){
+            setFamilleMedocSelected(null)
+        }
+        setOpen2(true);
+        setOperationType(operation);
+        setCurrentSelectableTask(selectableTask);
+    }
 
     const getMedocObjectByCodeActe = (id , list) => {
         let obj = null;
@@ -49,6 +65,16 @@ function FicheProduit() {
                         const obj = getMedocObjectByCodeActe(changedValues.code_produit , listMedicaments);
                         form.setFieldValue("code_interne", obj.codeacte);
                         form.setFieldValue("designation", obj.libacte);
+                    }
+
+
+                    if (changedValues.code_famille) {
+                        const code = changedValues.code_famille;
+                        familleMedocsList.forEach(element => {
+                            if (element.code_famille === code) {
+                                setFamilleMedocSelected(element);
+                            }
+                        });
                     }
                    
                 }}
@@ -165,36 +191,38 @@ function FicheProduit() {
                         </Flex>
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
-                        <Flex align='center' >
+                        <Flex align='center' justify='flex-start' >
                             <Form.Item 
                                 label="Famille"
-                                name="famille" 
+                                name="code_famille" 
                             >
                                 <Select
                                     style={{width:'100%',background:"transparent"}}
                                     showSearch
                                     placeholder="Choisir..."
                                     optionFilterProp="children" 
-                                    //filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    isLoading={familleMedocsListLoading}
                                 >     
-                                    {/* {
-                                        pathologiesList.map((item , key)=>(
-                                            <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
+                                    {
+                                        familleMedocsList.map((item , key)=>(
+                                            <Option key={key}  value={item?.code_famille} > {item?.libelle_famille} </Option>
                                         ))
-                                    } */}
-                                    <Option key={"1"}  value={"1"} > Koffi </Option>
+                                    }
                                         
                                 </Select>
                             </Form.Item>
                             <AddAndEditDropdown items={[
                                 {
                                     key: '0',
-                                    label: (<span>Ajouter</span>) ,
+                                    label: "Ajouter" ,
+                                    onClick : ()=> openModal("add","FAMILLE_MEDOC")
                                 },
                                 {
                                     label: <span>Modifier</span>,
                                     key: '1',
-                                    //disabled : motifSelected === null ? true : false
+                                    onClick : ()=> openModal("update","FAMILLE_MEDOC"),
+                                    disabled : familleMedocSelected === null ? true : false
                                 },
                             ]} />
                         </Flex>
@@ -404,6 +432,19 @@ function FicheProduit() {
                 destroyOnClose
             >
                 <ListProduits />
+            </Modal>
+
+            <Modal 
+                title="Ajouter une famille de médicament" 
+                open={open2} 
+                onCancel={()=>{
+                    setOpen2(false);
+                    //setCurrentRecord(null);
+                }}
+                footer={null}
+                destroyOnClose
+            >
+                {currentSelectableTask === "FAMILLE_MEDOC" && <AddFamilleMedoc  setOpen={setOpen2} operationType={operationType} onRefresh={listFamilleMedocRefresh} currentRecord={familleMedocSelected} /> }
             </Modal>
         </Card>
     )

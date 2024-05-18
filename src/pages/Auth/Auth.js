@@ -21,10 +21,10 @@ function Auth() {
   const [loading, setLoading] = useState(false);
 
   const login = () => {
-    setLoading(true);
     form
       .validateFields()
       .then((values) => {
+        setLoading(true)
         axios.post(`${API_URL}/api/User/Connect`, values).then((response) => {
           if (response.data.username !== null) {
             sessionStorage.setItem(
@@ -47,8 +47,7 @@ function Auth() {
       })
       .finally(()=>{
         setLoading(false)
-      })
-      ;
+      });
   };
 
   return (

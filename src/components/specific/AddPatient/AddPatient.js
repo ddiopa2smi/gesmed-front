@@ -7,6 +7,7 @@ import useFetch from '../../../utils/hooks/useFetch';
 import dayjs from "dayjs"
 import axios from 'axios';
 import { API_URL } from '../../../constants/environment.constants';
+import Swal from 'sweetalert2';
 
 const {TextArea} = Input;
 const { Option } = Select;
@@ -17,6 +18,7 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
     const [typePatient , setTypePatient] = useState(null);
     const [matriculeToSearch , setMatriculeToSearch] = useState(null);
     const [listBeneficiaires, setListBeneficiaires] = useState([]);
+    const [listBeneficiairesLoading , setListBeneficiairesLoading] = useState(false)
     const [benefLuiMeme, setBenefLuiMeme] = useState(null);
     const {data : listTypePatients , isLoading : listTypePatientsLoading } = useFetch(endpoints.patients.LIST_TYPE)
    
@@ -38,7 +40,7 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
 
                             if (response.data.Added) {
                                 message.success("Nouveau patient ajouté avec succès");
-                                setFormLoading(false)
+                                
                                 setOpen(false);
                                 form.resetFields();
                                 onRefresh();
@@ -54,6 +56,7 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                             // setOpen(false);
                             // form.resetFields();
                             // onRefresh();
+                            setFormLoading(false)
                         })
                         
                     break;
@@ -89,17 +92,26 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
     useEffect(()=>{
         const searchPatientByMatricule = (value) => {
             if (value && value !== null) { 
+                setListBeneficiairesLoading(true);
                 getActions(`/api/Participant/Patient/${value}`)
                 .then((response)=>{
-                    if (response?.data) {
+                    //console.log(response.data);
+                    
+                    if (response?.data?.numcont === "None") {
+                        Swal.fire("Avertissement", "Participant introuvable")
+                    }else{
                         setBenefLuiMeme(response.data)
                         getActions(`/api/Benef/list/${response.data.numcont}`)
                         .then((res)=>{
                             const data = res.data ;
                             //console.log(data);
                             setListBeneficiaires(data);
+                            
                         })
                     }
+                })
+                .finally(()=>{
+                    setListBeneficiairesLoading(false)
                 })
             }
         }
@@ -202,7 +214,7 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                                     placeholder="Patient"
                                     optionFilterProp="children" 
                                     filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                    onFocus={()=>{console.log("focus select")}}
+                                    loading={listBeneficiairesLoading}
                                 >    
                                     {
                                         listBeneficiaires?.map((item,key)=>(

@@ -12,9 +12,10 @@ import FormFooter from '../../components/common/FormFooter/FormFooter';
 import DataTable from '../../components/common/DataTable/DataTable';
 import useFetch from '../../utils/hooks/useFetch';
 import Posologie from '../../components/specific/Posologie/Posologie';
-import { deletePopup } from '../../utils/helpers';
+import { deletePopup, printPDF } from '../../utils/helpers';
 import BackButton from '../../components/common/BackButton/BackButton';
 import PrintButton from '../../components/common/PrintButton/PrintButton';
+import DeleteButton from '../../components/common/DeleteButton/DeleteButton';
 const { Search } = Input;
 const {TextArea} = Input;
 const { Option } = Select;
@@ -39,11 +40,15 @@ const Ordonnance = () => {
     const [isModalVisible , setIsModalVisible] = useState(false);
     const [posologieButtonStatus , setPosologieButtonStatus] = useState(true);
     const [quantity , setQuantity] = useState(1);
+    const [canPrint , setCanPrint] = useState(false);
+    const [numCons , setNumCons] = useState(null);
     //const [selectMedicamentsListLoading , setSelectMedicamentsListLoading ] = useState(false);
     
     const save = () => {
         form
+        .validateFields()
         .then((values) => {
+            
             switch (operationType) {
                 case "add" :
                         const payload = {
@@ -57,9 +62,18 @@ const Ordonnance = () => {
                         }
 
                         if(medicamentsPrescrites.length !== 0) {
+                            setFormLoading(true)
                             postActions(endpoints.prescriptions.ADD , payload)
-                            .then(()=>{
-                                message.success("Nouvelle ordonnance ajoutée avec succès");
+                            .then((response)=>{
+                                if (response?.data?.Saved) {
+                                    message.success("Nouvelle ordonnance ajoutée avec succès");
+                                    setCanPrint(true)
+                                    setNumCons(response?.data?.Saved)
+                                }
+                               
+                            })
+                            .finally(()=>{
+                                setFormLoading(false)
                             })
                             //setMedicamentsPrescrites([]);
                         }
@@ -74,8 +88,8 @@ const Ordonnance = () => {
                 default:
                     break;
             }
-            form.resetFields();  
-            navigate(-1);  
+            //form.resetFields();  
+            //navigate(-1);  
         })
         .catch((info) => {
             console.log('Validate Failed:', info);
@@ -117,8 +131,8 @@ const Ordonnance = () => {
             <Flex align='center' justify='space-between' >
                 <Title level={4} >Prescription ordonnance du patient N° {currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>  
 
-                {/* <PrintButton onPrint={null} /> */}
-                
+                {/* <PrintButton onPrint={null}  /> */}
+                <Button type="primary" onClick={()=>{printPDF(`/api/Print/smed/Prescription/${numCons}/ordonnance`)}} disabled={!canPrint} > Imprimer </Button>
             </Flex>
 
             
@@ -216,6 +230,7 @@ const Ordonnance = () => {
                 <Title level={5} >Liste des médicaments</Title>
                 <DataTable 
                     dataSourceCopy={medicamentsPrescrites}
+                    rowKey={(record)=>record.codeacte}
                     columns={[
                         {
                             title: 'Code',
@@ -247,16 +262,18 @@ const Ordonnance = () => {
                             render :  (record)=>(
                                 <Space>
                                     <Tooltip title="Supprimer" >
-                                        <Button type='link' danger icon={<DeleteOutlined/>} 
-                                            onClick={()=>{ 
-                                                deletePopup()
-                                                .then((response)=>{
-                                                    if (response.isConfirmed) {
-                                                        const temp = medicamentsPrescrites.filter((element)=>element.codeacte !== record.codeacte);
-                                                        setMedicamentsPrescrites(temp);
-                                                    }
-                                                })
-                                            }} 
+                                        <DeleteButton 
+                                            onDelete={
+                                                ()=>{ 
+                                                    deletePopup()
+                                                    .then((response)=>{
+                                                        if (response.isConfirmed) {
+                                                            const temp = medicamentsPrescrites.filter((element)=>element.codeacte !== record.codeacte);
+                                                            setMedicamentsPrescrites(temp);
+                                                        }
+                                                    })
+                                                }
+                                            }
                                         />
                                     </Tooltip>
                                 </Space>
@@ -271,7 +288,7 @@ const Ordonnance = () => {
                 <FormFooter 
                     onCancel={()=>{navigate(-1)}}
                     htmlType={"submit"}
-                    
+                    loading={formLoading}
                 />
             </Form>
 

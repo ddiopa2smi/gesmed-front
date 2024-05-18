@@ -61,7 +61,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
             payload.numrv = currentRecord.num_ordre;
             payload.muqueuse = payload.muqueuse !== null ? transformArrToString(payload.muqueuse) : payload.muqueuse
             payload.zone_oedemes = payload.zone_oedemes !== null ? transformArrToString(payload.zone_oedemes) : payload.zone_oedemes
-            //console.log(payload)
+            console.log(payload)
             postActions(endpoints.consultations.SAVE,payload)   
             .then((response)=>{
                 if (response?.data?.Saved === true) {
@@ -171,8 +171,9 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
+                                
                             >
-                                <InputNumber min={1} type='number' style={{width : "100%"}} />
+                                <InputNumber min={1} defaultValue={1} type='number' style={{width : "100%"}} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
@@ -186,7 +187,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     },
                                 ]}
                             >
-                                <InputNumber min={1} type='number'  style={{width : "100%"}} />
+                                <InputNumber min={1} defaultValue={1} type='number'  style={{width : "100%"}} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12} md={8} lg={8} xl={8}  >

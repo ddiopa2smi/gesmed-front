@@ -13,7 +13,7 @@ import AddRegion from '../../components/specific/AddRegion/AddRegion';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import BackButton from '../../components/common/BackButton/BackButton';
 import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
-import { printPDF } from '../../utils/helpers';
+import { deletePopup, printPDF } from '../../utils/helpers';
 import { codesPrescriptions } from '../../constants/app.constants';
 import useObjectFetch from '../../utils/hooks/useObjectFetch';
 const {Title , Text} = Typography;
@@ -166,14 +166,26 @@ function Consultation() {
         })
     }
 
+    const validFinalConsultation = () => {
+        deletePopup()
+        .then((result)=>{
+            if (result.isConfirmed) {
+                console.log("final consult")
+            }
+        })
+    }
+
     
    //console.log(initConsultation)
 
     return (
         <Card loading={consultationDataLoading} >
             <Flex justify='flex-start' align='center' >
-                <BackButton />
+                <BackButton /> &nbsp;&nbsp;
+                <Button type='primary' size='small' onClick={()=>{validFinalConsultation()}} >Cloturer la consultation</Button>
             </Flex>
+            <br/>
+            <br/>
             <Flex justify='space-between' align='center' >
                 <Title level={4} >Consultation médical {initConsultation?.numcons}  </Title>
                 <Space align="center" >
@@ -571,7 +583,7 @@ function Consultation() {
                             name="debut_rm" 
                             label="Date début repos"
                         >
-                            <DatePicker disabled placeholder='Début' format="dddd, DD MMMM YYYY" />
+                            <DatePicker style={{color:"green"}} disabled placeholder='Début' format="dddd, DD MMMM YYYY" />
                         </Form.Item>
                         
                     </Col>
