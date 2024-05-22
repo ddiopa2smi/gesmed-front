@@ -16,6 +16,7 @@ import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 import { deletePopup, printPDF } from '../../utils/helpers';
 import { codesPrescriptions } from '../../constants/app.constants';
 import useObjectFetch from '../../utils/hooks/useObjectFetch';
+import CrudComponent from '../../components/common/CrudComponent/CrudComponent';
 const {Title , Text} = Typography;
 const { TextArea } = Input;
 const {Option} = Select;
@@ -297,7 +298,7 @@ function Consultation() {
                 form={form}
                 name="consultation_form"
                 initialValues={initConsultation}
-
+                
                 onValuesChange={(changedValues , allValues)=>{
 
                     if (changedValues.code_patho) {
@@ -610,6 +611,7 @@ function Consultation() {
             <Modal
                 title={currentSelectableTask === "PATHOLOGIE" && "Pathologie" || currentSelectableTask === "MOTIF" && "Motif" || currentSelectableTask === "REGION" && "Région" }
                 open={open}
+                width={700}
                 onCancel={()=>{
                     setOpen(false);
                     setPathologieSelected(null);
@@ -619,6 +621,7 @@ function Consultation() {
                 footer={null}
                 destroyOnClose
             >
+                <CrudComponent dataSource={pathologies.data} />
                 {currentSelectableTask === "PATHOLOGIE" && <AddPathologie  setOpen={setOpen} operationType={operationType} onRefresh={null} currentRecord={pathologieSelected} /> }
 
                 {currentSelectableTask === "MOTIF" && <AddMotif  setOpen={setOpen} operationType={operationType} onRefresh={null} currentRecord={motifSelected} /> }

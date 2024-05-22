@@ -3,7 +3,7 @@ import useFetch from '../../utils/hooks/useFetch'
 import { endpoints } from '../../constants/endpoints.constants'
 import { ClockCircleOutlined, DeleteOutlined, EditOutlined , ExportOutlined, FilterOutlined, FolderOutlined, HomeOutlined, MoreOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Button, Card, Flex, Space, Typography , Image, Dropdown, Modal ,message, Tooltip } from 'antd'
+import { Breadcrumb, Button, Card, Flex, Space, Typography , Image, Dropdown, Modal ,message, Tooltip, Input } from 'antd'
 import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
 import test_img from "./../../assets/test_img.jpg"
@@ -18,6 +18,7 @@ import { IoFilter } from "react-icons/io5";
 import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 import ExcellExportButton from '../../components/common/ExcellExportButton/ExcellExportButton';
 import AdvancedSearchButton from '../../components/common/AdvancedSearchButton/AdvancedSearchButton';
+import SearchBar from '../../components/common/SearchBar/SearchBar';
 
 
 const {Title} = Typography;
@@ -87,13 +88,22 @@ function Patients() {
         <Card>
             <Title level={3} >Liste des patients</Title>
 
-            <Flex justify="flex-end" align="center" >
+            <Flex justify="space-between" align="center" >
+
+                <Space>
+                    <SearchBar 
+                        data={data}
+                        setDataCopy={setDataCopy}
+                        listKeys={['num_patient','nom_patient','prenom_patient']}
+                    />
+                    <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
+                </Space>
                 <Space>
                     <ReloadButton onRefresh={onRefresh} /> &nbsp;&nbsp;
                     {/* <Tooltip title="Recherche avancée" >
                         <Button type='text' shape="circle" icon={<IoFilter size={20}/>} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
                     </Tooltip>  */}
-                    <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
+                    {/* <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp; */}
                     {/* <Tooltip title="Exporter" >
                         <Button type='text' shape="circle" icon={<ExportOutlined/>} onClick={onExport} /> &nbsp;&nbsp;
                     </Tooltip>  */}

@@ -18,6 +18,13 @@ function DetailsConsultation() {
             <Title level={3} >Détails de la consultation</Title>
             <Descriptions column={2} layout="horizontal"  /*layout={window.screen.height < 992 && 'vertical'}*/ >
                 
+                <Descriptions.Item label="Numéro patient">
+                    { currentConsultation?.numpat  || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="Numéro rendez-vous">
+                    { currentConsultation?.numrv  || <NotSpecified/>}
+                </Descriptions.Item>
+
                 <Descriptions.Item label="Date de consultation">
                     { currentConsultation?.datecons && formatDate(currentConsultation?.datecons) || <NotSpecified/>}
                 </Descriptions.Item>
@@ -43,6 +50,7 @@ function DetailsConsultation() {
                 <Descriptions.Item label="Résultat">
                     { currentConsultation?.resultat  || <NotSpecified/>}
                 </Descriptions.Item>
+               
                 
             </Descriptions>
         </Card>

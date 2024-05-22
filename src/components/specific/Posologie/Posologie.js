@@ -127,7 +127,7 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                             message: 'Champ obligatoire',
                             },
                         ]}
-                        initialValue={"Matin"}
+                        initialValue={["Matin"]}
                     >
                         <Checkbox.Group style={{ display:"flex",flexDirection:"column"}} options={["Matin","Midi","Soir","Au coucher"]}/>
                     </Form.Item>
@@ -137,7 +137,7 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                         <Form.Item 
                             name="comment" 
                             label="Comment"
-                            initialValue={"Aucun"}
+                            initialValue={"Avant repas"}
                             rules={[
                                 {
                                     required: true,

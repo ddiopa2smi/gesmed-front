@@ -10,6 +10,8 @@ function DataTable({
     rowKey,
     columns,
     rowSelected,
+    pagination,
+    components
 }) {
 
     const [tableCount , setTableCount] = useState(null);
@@ -75,6 +77,8 @@ function DataTable({
             scroll={window.screen.width < 1200 && {
                 x : 1000,
             }}
+            components={components}
+            pagination={pagination}
             footer={()=> selectedRowKeys.length !== 0 ? `${selectedRowKeys.length}/${dataSourceCopy.length} ligne(s) sélectionné(es)` :  `${dataSourceCopy?.length} lignes au total`}
         />
     )
