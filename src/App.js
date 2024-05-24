@@ -33,6 +33,10 @@ function App() {
               Segmented : {
                 itemSelectedBg : PRIMARY_COLOR ,
                 itemSelectedColor : '#ffff'
+              },
+              Menu : {
+                itemSelectedBg : PRIMARY_COLOR,
+                itemSelectedColor : "#ffffff",
               }
             }
         }}

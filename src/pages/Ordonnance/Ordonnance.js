@@ -110,12 +110,18 @@ const Ordonnance = () => {
     const selectMedicamentsListLoading = medicamentsFetched.isLoading;
     
     useEffect(()=>{
-
+        if (editPrescription?.listActes?.length !== 0) {
+            setCanPrint(true)
+        }
         
         //getListMedicaments();
 
         // if (prescription.medecin !== userConnected.username) {
         //     navigate(-1);
+        // }
+        
+        // return () => {
+        //     sessionStorage.removeItem('editPrescription')
         // }
         
     },[])

@@ -15,6 +15,7 @@ function DetailsConsultation() {
             <Flex>
                 <BackButton />
             </Flex>
+            <br/>
             <Title level={3} >Détails de la consultation</Title>
             <Descriptions column={2} layout="horizontal"  /*layout={window.screen.height < 992 && 'vertical'}*/ >
                 
@@ -50,7 +51,35 @@ function DetailsConsultation() {
                 <Descriptions.Item label="Résultat">
                     { currentConsultation?.resultat  || <NotSpecified/>}
                 </Descriptions.Item>
-               
+
+                <Descriptions.Item label="Tension Artérielle">
+                    { currentConsultation?.tension && currentConsultation?.tension || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="Température(°C)">
+                    { currentConsultation?.temp && currentConsultation?.temp || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="Pouls">
+                    { currentConsultation?.pouls && currentConsultation?.pouls || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="Poids">
+                    { currentConsultation?.poids && currentConsultation?.poids || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="Taille(cm)">
+                    { currentConsultation?.taille && currentConsultation?.taille || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="IMC(kg/m3)">
+                    { currentConsultation?.imc && currentConsultation?.imc || <NotSpecified/>}
+                </Descriptions.Item>
+                
+                {/* <Descriptions.Item label="Date de rendez-vous">
+                    { currentConsultation?.tension && currentConsultation?.tension || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="Date de début repos médical">
+                    { currentConsultation?.tension && currentConsultation?.tension || <NotSpecified/>}
+                </Descriptions.Item>
+                <Descriptions.Item label="Date de fin repos médical">
+                    { currentConsultation?.tension && currentConsultation?.tension || <NotSpecified/>}
+                </Descriptions.Item> */}
                 
             </Descriptions>
         </Card>

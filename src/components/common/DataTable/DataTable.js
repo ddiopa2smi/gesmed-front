@@ -35,10 +35,7 @@ function DataTable({
             onSelect: (changableRowKeys) => {
               let newSelectedRowKeys = [];
               newSelectedRowKeys = changableRowKeys.filter((_, index) => {
-                if (index % 2 !== 0) {
-                  return false;
-                }
-                return true;
+                return index % 2 === 0;
               });
               setSelectedRowKeys(newSelectedRowKeys);
             },
@@ -49,10 +46,7 @@ function DataTable({
             onSelect: (changableRowKeys) => {
               let newSelectedRowKeys = [];
               newSelectedRowKeys = changableRowKeys.filter((_, index) => {
-                if (index % 2 !== 0) {
-                  return true;
-                }
-                return false;
+                return index % 2 !== 0;
               });
              
               setSelectedRowKeys(newSelectedRowKeys);

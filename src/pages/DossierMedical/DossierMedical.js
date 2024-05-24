@@ -187,7 +187,7 @@ function DossierMedical() {
             <br/>
             <Row gutter={[24,24]}>
                 <Col sxs={24} sm={24} md={12} lg={12} xl={12} >
-                    <Title level={4} >Dossier Médical Patient N°{currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>
+                    <Title level={4}>Dossier Médical Patient N°{currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>
                 </Col>
                 <Col xs={24} sm={24} md={12} lg={12} xl={12} offset={0}>
                     <Flex justify="flex-end" align="center" wrap="nowrap" >
