@@ -1,5 +1,5 @@
 import { HomeOutlined, OrderedListOutlined } from '@ant-design/icons'
-import { Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Modal, Radio, Row, Select, Space, Tooltip, Typography } from 'antd';
+import { Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Modal, Radio, Row, Select, Space, Tooltip, Typography, message } from 'antd';
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import useFetch from '../../utils/hooks/useFetch';
@@ -9,6 +9,10 @@ import AddAndEditDropdown from '../../components/common/AddAndEditDropdown/AddAn
 import FormFooter from '../../components/common/FormFooter/FormFooter';
 import ListProduits from '../../components/specific/ListProduits/ListProduits';
 import AddFamilleMedoc from '../../components/specific/AddFamilleMedoc/AddFamillleMedoc';
+import AddConditionnement from '../../components/AddConditionnement/AddConditionnement';
+import AddFormeGalenique from '../../components/AddFormeGalenique/AddFormeGalenique';
+import { deletePopup } from '../../utils/helpers';
+import { deleteActions } from '../../actions/actions';
 
 const {Title} = Typography;
 const {Option} = Select;
@@ -17,6 +21,8 @@ function FicheProduit() {
     const [form] = Form.useForm();
     const {data : listMedicaments , isLoading , error} = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
     const {data : familleMedocsList , isLoading : familleMedocsListLoading , onRefresh : listFamilleMedocRefresh} = useFetch(endpoints.familleMedoc.LIST);
+    const {data : conditionnementsList , isLoading : conditionnementsListLoading , onRefresh : conditionnementsListRefresh} = useFetch(endpoints.conditionnements.LIST);
+    const {data : formesGaleniqueList , isLoading : formesGaleniqueListLoading , onRefresh : formesGaleniqueListRefresh} = useFetch(endpoints.forme_galenique.LIST);
 
     const [currentSelectableTask , setCurrentSelectableTask] = useState("");
     const [operationType , setOperationType] = useState(null);
@@ -25,6 +31,8 @@ function FicheProduit() {
 
 
     const [familleMedocSelected , setFamilleMedocSelected] = useState(null);
+    const [formeGaleniqueSelected , setFormeGaleniqueSelected] = useState(null);
+    const [conditionnementSelected , setConditionnementSelected] = useState(null);
 
     const openModal = (operation , selectableTask) => {
         if(operation === "add"){
@@ -44,6 +52,47 @@ function FicheProduit() {
         }
 
         return obj;
+    }
+
+
+    const onDelete = (currentSelectableTask , record) => {
+        deletePopup()
+        .then((result)=>{
+            if (result.isConfirmed) {
+                switch (currentSelectableTask) {
+                    case "FAMILLE_MEDOC":
+                        deleteActions(`${endpoints.familleMedoc.DELETE}/${record?.code_famille}`)
+                        .then((response)=>{
+                            if (response?.data) {
+                                message.success("Ligne retirée avec succès");
+                                listFamilleMedocRefresh()
+                            }
+                        })
+                        break;
+                    case "CONDITIONNEMENT":
+                        deleteActions(`${endpoints.conditionnements.DELETE}/${record?.cond_code}`)
+                        .then((response)=>{
+                            if (response?.data) {
+                                message.success("Ligne retirée avec succès");
+                                conditionnementsListRefresh()
+                            }
+                        })
+                        break;
+                    case "FORME_GALENIQUE":
+                        deleteActions(`${endpoints.forme_galenique.DELETE}/${record?.code_forme}`)
+                        .then((response)=>{
+                            if (response?.data) {
+                                message.success("Ligne retirée avec succès");
+                                formesGaleniqueListRefresh()
+                            }
+                        })
+                        break;
+                
+                    default:
+                        break;
+                }
+            }
+        })
     }
     return (
         <Card className='FicheProduitWrapper' >
@@ -73,6 +122,24 @@ function FicheProduit() {
                         familleMedocsList.forEach(element => {
                             if (element.code_famille === code) {
                                 setFamilleMedocSelected(element);
+                            }
+                        });
+                    }
+
+                    if (changedValues.cond_code) {
+                        const code = changedValues.cond_code;
+                        conditionnementsList.forEach(element => {
+                            if (element.cond_code === code) {
+                                setConditionnementSelected(element);
+                            }
+                        });
+                    }
+
+                    if (changedValues.code_forme) {
+                        const code = changedValues.code_forme;
+                        formesGaleniqueList.forEach(element => {
+                            if (element.code_forme === code) {
+                                setFormeGaleniqueSelected(element);
                             }
                         });
                     }
@@ -155,38 +222,43 @@ function FicheProduit() {
                         <Flex align='center' >
                             <Form.Item 
                                 label="Forme galénique"
-                                name="forme_galenique"  
+                                name="code_forme"  
+                                style={{width:"90%"}}
                             >
                                 <Select
                                     style={{width:'100%',background:"transparent"}}
                                     showSearch
-                                    placeholder="Forme"
+                                    placeholder="Choisir..."
                                     optionFilterProp="children" 
-                                    filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    loading={formesGaleniqueListLoading}
+                                    allowClear
                                 >     
-                                    <Option key={"comprimes"}  value={"comprimes"} > Comprimés </Option>
-                                    <Option key={"cuilliere"}  value={"cuilliere"} > Cuillièrées </Option>
-                                    <Option key={"ovules"}  value={"ovules"} > Ovules </Option>
-                                    <Option key={"application"}  value={"application"} > Applications </Option>
-                                    <Option key={"ampoules"}  value={"ampoules"} > Ampoules </Option>
-                                    <Option key={"sachets"}  value={"sachets"} > Sachets </Option>
-                                    <Option key={"injections"}  value={"injections"} > Injections </Option>
-                                    <Option key={"gouttes"}  value={"gouttes"} > Gouttes </Option>
-                                    <Option key={"gellules"}  value={"gellules"} > Gellules </Option>
-                                    <Option key={"suppositoires"}  value={"suppositoires"} > Suppositoires </Option>
-
+                                    {
+                                        formesGaleniqueList.map((item , key)=>(
+                                            <Option key={key}  value={item?.code_forme} > {item?.libelle_forme} </Option>
+                                        ))
+                                    }
                                 </Select>
                             </Form.Item>
                             <AddAndEditDropdown items={[
                                 {
                                     key: '0',
-                                    label: (<span>Ajouter</span>) ,
+                                    label: "Ajouter" ,
+                                    onClick : ()=> openModal("add","FORME_GALENIQUE")
                                 },
                                 {
-                                    label: <span>Modifier</span>,
+                                    label: "Modifier",
                                     key: '1',
-                                    //disabled : motifSelected === null ? true : false
+                                    onClick : ()=> openModal("update","FORME_GALENIQUE"),
+                                    disabled : formeGaleniqueSelected === null
                                 },
+                                {
+                                    label: "Supprimer",
+                                    key: '2',
+                                    onClick : ()=> onDelete("FORME_GALENIQUE",formeGaleniqueSelected),
+                                    disabled : formeGaleniqueSelected === null
+                                }
                             ]} />
                         </Flex>
                     </Col>
@@ -195,6 +267,7 @@ function FicheProduit() {
                             <Form.Item 
                                 label="Famille"
                                 name="code_famille" 
+                                style={{width:"90%"}}
                             >
                                 <Select
                                     style={{width:'100%',background:"transparent"}}
@@ -219,11 +292,17 @@ function FicheProduit() {
                                     onClick : ()=> openModal("add","FAMILLE_MEDOC")
                                 },
                                 {
-                                    label: <span>Modifier</span>,
+                                    label: "Modifier",
                                     key: '1',
                                     onClick : ()=> openModal("update","FAMILLE_MEDOC"),
-                                    disabled : familleMedocSelected === null ? true : false
+                                    disabled : familleMedocSelected === null
                                 },
+                                {
+                                    label: "Supprimer",
+                                    key: '2',
+                                    onClick : ()=> onDelete("FAMILLE_MEDOC",familleMedocSelected),
+                                    disabled : familleMedocSelected === null
+                                }
                             ]} />
                         </Flex>
                     </Col>
@@ -231,33 +310,42 @@ function FicheProduit() {
                         <Flex align='center' >
                             <Form.Item 
                                 label="Conditionnement"
-                                name="conditionnement" 
+                                name="cond_code" 
+                                style={{width:"90%"}}
                             >
                                 <Select
                                     style={{width:'100%',background:"transparent"}}
                                     showSearch
                                     placeholder="Choisir..."
                                     optionFilterProp="children" 
-                                    //filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    isLoading={conditionnementsListLoading}
                                 >     
-                                    {/* {
-                                        pathologiesList.map((item , key)=>(
-                                            <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
+                                    {
+                                        conditionnementsList.map((item , index)=>(
+                                            <Option key={index}  value={item?.cond_code} > {item?.cond_lib} </Option>
                                         ))
-                                    } */}
-                                    <Option key={"1"}  value={"1"} > Conditionnement </Option>
+                                    }
                                         
                                 </Select>
                             </Form.Item>
                             <AddAndEditDropdown items={[
                                 {
                                     key: '0',
-                                    label: (<span>Ajouter</span>) ,
+                                    label: "Ajouter" ,
+                                    onClick : ()=> openModal("add","CONDITIONNEMENT")
                                 },
                                 {
-                                    label: <span>Modifier</span>,
+                                    label: "Modifier",
                                     key: '1',
-                                    //disabled : motifSelected === null ? true : false
+                                    onClick : ()=> openModal("update","CONDITIONNEMENT"),
+                                    disabled : conditionnementSelected === null
+                                },
+                                {
+                                    label: "Supprimer",
+                                    key: '2',
+                                    onClick : ()=> onDelete("CONDITIONNEMENT",conditionnementSelected),
+                                    disabled : conditionnementSelected === null
                                 },
                             ]} />
                         </Flex>
@@ -435,7 +523,7 @@ function FicheProduit() {
             </Modal>
 
             <Modal 
-                title="Ajouter une famille de médicament" 
+                title="Ajout rapide"
                 open={open2} 
                 onCancel={()=>{
                     setOpen2(false);
@@ -445,6 +533,8 @@ function FicheProduit() {
                 destroyOnClose
             >
                 {currentSelectableTask === "FAMILLE_MEDOC" && <AddFamilleMedoc  setOpen={setOpen2} operationType={operationType} onRefresh={listFamilleMedocRefresh} currentRecord={familleMedocSelected} /> }
+                {currentSelectableTask === "CONDITIONNEMENT" && <AddConditionnement  setOpen={setOpen2} operationType={operationType} onRefresh={conditionnementsListRefresh} currentRecord={conditionnementSelected} /> }
+                {currentSelectableTask === "FORME_GALENIQUE" && <AddFormeGalenique  setOpen={setOpen2} operationType={operationType} onRefresh={formesGaleniqueListRefresh} currentRecord={formeGaleniqueSelected} /> }
             </Modal>
         </Card>
     )

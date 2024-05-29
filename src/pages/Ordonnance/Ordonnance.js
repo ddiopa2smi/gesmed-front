@@ -167,7 +167,7 @@ const Ordonnance = () => {
             >
             
                 <Row gutter={[24,24]} align={"middle"} >
-                    <Col xs={24} sm={24} md={6} lg={6} xl={6} >
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4} >
                         <Form.Item 
                             label="Date Ordonnance"
                             name="datepresc" 
@@ -183,7 +183,7 @@ const Ordonnance = () => {
                         </Form.Item>
                     </Col>
                     
-                    <Col xs={24} sm={24} md={12} lg={12} xl={12} >
+                    <Col xs={24} sm={24} md={8} lg={8} xl={8} >
                         <Form.Item 
                             label="Médicament"
                             name="medicament" 
@@ -211,14 +211,28 @@ const Ordonnance = () => {
                             </Select>
                         </Form.Item>
                     </Col>
-                    <Col xs={24} sm={24} md={3} lg={3} xl={3} >
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4} >
                         <Form.Item 
-                            label="Quantité"
+                            label="Quantité en stock"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Sélection obligatoire',
+                                },
+                            ]}
+                            initialValue={1}
+                        >
+                            <InputNumber disabled /> 
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4} >
+                        <Form.Item 
+                            label="Qte à prescrire"
                             name="qte_presc" 
                             rules={[
                                 {
-                                required: true,
-                                message: 'Champ obligatoire',
+                                    required: true,
+                                    message: 'Champ obligatoire',
                                 },
                             ]}
                             initialValue={editPrescription?.qte_presc || 1}
@@ -226,8 +240,8 @@ const Ordonnance = () => {
                             <InputNumber min={1} />
                         </Form.Item>
                     </Col>
-                    <Col xs={24} sm={24} md={3} lg={3} xl={3}  >
-                        <Button type='primary' disabled={posologieButtonStatus}  onClick={()=>{setIsModalVisible(true)}} >Posologie</Button>
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4}  >
+                        <Button type='primary' ghost disabled={posologieButtonStatus}  onClick={()=>{setIsModalVisible(true)}} >Posologie</Button>
                     </Col>
                 </Row>
                 
@@ -273,7 +287,7 @@ const Ordonnance = () => {
                                                 ()=>{ 
                                                     deletePopup()
                                                     .then((response)=>{
-                                                        if (response.isConfirmed) {
+                                                        if (response?.isConfirmed) {
                                                             const temp = medicamentsPrescrites.filter((element)=>element.codeacte !== record.codeacte);
                                                             setMedicamentsPrescrites(temp);
                                                         }

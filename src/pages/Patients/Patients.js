@@ -37,6 +37,7 @@ function Patients() {
 
 
     const onAdd = () => {
+        setCurrentRecord(null);
         setOperationType("add");
         setOpen(true);
     }

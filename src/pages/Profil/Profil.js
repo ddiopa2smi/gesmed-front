@@ -55,12 +55,12 @@ function Profil() {
             {/* <Card style={{backgroundImage : `url('${require("./../../assets/bg-monprofil.jpg")}')`,backgroundSize: "100% 100%" , backgroundRepeat : "no-repeat", height :250}} >
                 <Button>Changer photo</Button>
             </Card> */}
-            <Card style={{backgroundColor: "var(--app-color)",height :250}} >
+            {/* <Card style={{backgroundColor: "var(--app-color)",height :250}} >
                 <Button>Changer photo</Button>
             </Card>
             <div style={{marginTop : -25 , padding : 8, backgroundColor : "white"}} >
                 <Avatar size={{ xs: 32, sm: 32, md: 48, lg: 64, xl: 64}} icon={<UserOutlined/>} />
-            </div>
+            </div> */}
             <Space direction="horizontal" align='center' wrap>
                 <Avatar size={{ xs: 32, sm: 32, md: 48, lg: 64, xl: 64}} icon={<UserOutlined/>} />
                 <Space direction="horizontal" align='center' wrap>
@@ -158,9 +158,9 @@ function Profil() {
 
             </Form>
 
-            <Divider orientation="left">Mot de passe</Divider>
-            <ChangePassword />
-            <Divider orientation="left">Mes privilèges</Divider>
+            {/* <Divider orientation="left">Mot de passe</Divider>
+            <ChangePassword /> */}
+            {/* <Divider orientation="left">Mes privilèges</Divider> */}
 
 
         </Card>

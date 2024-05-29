@@ -100,11 +100,12 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                     if (response?.data?.numcont === "None") {
                         Swal.fire("Avertissement", "Participant introuvable")
                     }else{
+                        // Swal.fire("Succès", "Ouvrir la liste Patient pour sélectionner un participant")
                         setBenefLuiMeme(response.data)
                         getActions(`/api/Benef/list/${response.data.numcont}`)
                         .then((res)=>{
                             const data = res.data ;
-                            //console.log(data);
+                            
                             setListBeneficiaires(data);
                             
                         })
@@ -206,7 +207,8 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                                     message: 'Sélection obligatoire',   
                                     },
                                 ]}
-                                initialValue={currentRecord?.benef}
+                                //initialValue={currentRecord?.benef}
+                                //initialValue={listBeneficiaires[0]?.matribenef}
                             >
                                 <Select
                                     style={{width:'100%',background:"transparent"}}
@@ -227,9 +229,79 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                         </Col>
                     </>
                 }
-                
             </Row>
             
+            {
+                // Must fixed the search of patients when enter the matricule later 
+                //Fixed
+                typePatient === 4 && 
+                <>
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                            <Form.Item
+                                name="phone"
+                                label="Téléphone"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Champ obligatoire',
+                                    },
+                                ]}
+                                //initialValue={currentRecord?.prenom_patient}
+                            >
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                            <Form.Item
+                                name="num_piece"
+                                label="Numéro de la pièce "
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Champ obligatoire',
+                                    },
+                                ]}
+                                //initialValue={currentRecord?.prenom_patient}
+                            >
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                            <Form.Item
+                                name="nom_pere"
+                                label="Nom du père"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Champ obligatoire',
+                                    },
+                                ]}
+                                //initialValue={currentRecord?.prenom_patient}
+                            >
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                            <Form.Item
+                                name="nom_mere"
+                                label="Nom de la mère"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Champ obligatoire',
+                                    },
+                                ]}
+                                //initialValue={currentRecord?.prenom_patient}
+                            >
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </>
+            }
             <Row gutter={[24,24]} >
                 <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                     <Form.Item 

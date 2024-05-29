@@ -58,7 +58,7 @@ function ExportFile({ setOpen , title , data}) {
         if (data) {
             const headerDefinition = getObjectModel();
             const SETTINGS_FOR_EXPORT = {
-                fileName: title ? title : 'Modèle d\'import des données',
+                fileName: title || 'Modèle d\'import des données',
                 workSheets: [
                     {
                         sheetName: 'Modèle',
