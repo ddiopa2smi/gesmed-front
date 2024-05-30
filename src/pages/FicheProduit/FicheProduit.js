@@ -11,7 +11,7 @@ import ListProduits from '../../components/specific/ListProduits/ListProduits';
 import AddFamilleMedoc from '../../components/specific/AddFamilleMedoc/AddFamillleMedoc';
 import AddConditionnement from '../../components/AddConditionnement/AddConditionnement';
 import AddFormeGalenique from '../../components/AddFormeGalenique/AddFormeGalenique';
-import { deletePopup } from '../../utils/helpers';
+import { deletePopup, generateRandomCode } from '../../utils/helpers';
 import { deleteActions } from '../../actions/actions';
 
 const {Title} = Typography;
@@ -114,6 +114,7 @@ function FicheProduit() {
                         const obj = getMedocObjectByCodeActe(changedValues.code_produit , listMedicaments);
                         form.setFieldValue("code_interne", obj.codeacte);
                         form.setFieldValue("designation", obj.libacte);
+                        form.setFieldValue("reference",generateRandomCode())
                     }
 
 
@@ -149,7 +150,7 @@ function FicheProduit() {
                 <Row gutter={[24,24]} >
                     <Col xs={24} sm={12} md={8} lg={12} xl={12} >
                         <Form.Item 
-                            label="Créer produit"
+                            label="Produit"
                             name="code_produit" 
                         >
                             <Select
@@ -184,7 +185,7 @@ function FicheProduit() {
                                 },
                             ]}
                         >
-                            <Input/>
+                            <Input disabled />
                         </Form.Item>
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >

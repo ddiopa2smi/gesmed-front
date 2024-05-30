@@ -194,3 +194,8 @@ export const getTypePatient = (code) => {
     }
     return libelle_code;
 }
+
+export const generateRandomCode = () => {
+    return `PH${Math.floor(100000 + Math.random() * 900000)}`;
+}
+  

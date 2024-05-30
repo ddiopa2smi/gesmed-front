@@ -66,7 +66,7 @@ function NewCommandeProduit() {
                             name="date_p" 
                             initialValue={dayjs(new Date())}
                         >
-                            <DatePicker placeholder='Choisir la date' disabled format="DD/MM/YYYY" />
+                            <DatePicker placeholder='Choisir la date' format="DD/MM/YYYY" />
                         </Form.Item>
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={6} xl={6}>
@@ -75,7 +75,7 @@ function NewCommandeProduit() {
                             name="date_livraison" 
                             initialValue={dayjs(new Date())}
                         >
-                            <DatePicker placeholder='Date de livraison' disabled format="DD/MM/YYYY" />
+                            <DatePicker placeholder='Date de livraison' format="DD/MM/YYYY" />
                         </Form.Item>
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={6} xl={6}>
