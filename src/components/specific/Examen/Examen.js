@@ -1,5 +1,5 @@
 import { Col, Form, Radio, Row, Typography, Card, InputNumber, Checkbox, message,Divider } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { postActions } from '../../../actions/actions';
 import { endpoints } from '../../../constants/endpoints.constants';
 import FormFooter from '../../common/FormFooter/FormFooter';
@@ -11,6 +11,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
     const [loading , setLoading] = useState(false);
     const [isImcAlertVisible , setIsImcAlertVisible] = useState(false);
     const [imcAlert , setImcAlert] = useState("");
+    
     
     const imcAlertMessage = (imc) => {
         if (imc<18.5) {
@@ -87,6 +88,24 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
             console.log('Validate Failed:', info);
         })
     } 
+
+    useEffect(()=>{
+        const transformationFromStringToArray = (chaine,splitSign) => {
+            let splitChaine = chaine.split(splitSign)
+            if (splitChaine.length > 1) {
+                return splitChaine
+            }else{
+                return chaine
+            }
+        }
+
+        if (defaultExamPayload.muqueuse !== null || defaultExamPayload.zone_oedemes !== null) {
+            form.setFieldValue("muqueuse" , transformationFromStringToArray(defaultExamPayload.muqueuse,'-'))
+            form.setFieldValue("zone_oedemes" , transformationFromStringToArray(defaultExamPayload.zone_oedemes,'-'))
+        }
+
+        
+    },[])
 
     return (
         <Form

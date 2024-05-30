@@ -171,3 +171,26 @@ export const sortColumn = (record1, record2) => {
         return record1- record2;
     }
 }
+
+
+export const getTypePatient = (code) => {
+    let libelle_code = null;
+    switch (code) {
+        case 1:
+            libelle_code = "PERMANENT";
+            break;
+        case 2:
+            libelle_code = "JOURNALIER";
+            break;
+        case 3:
+            libelle_code = "SAISONNIER";
+            break;
+        case 4:
+            libelle_code = "EXTERNE";
+            break;
+    
+        default:
+            break;
+    }
+    return libelle_code;
+}

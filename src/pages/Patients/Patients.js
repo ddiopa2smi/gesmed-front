@@ -7,7 +7,7 @@ import { Breadcrumb, Button, Card, Flex, Space, Typography , Image, Dropdown, Mo
 import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
 import test_img from "./../../assets/test_img.jpg"
-import { deletePopup, formatDate } from '../../utils/helpers';
+import { deletePopup, formatDate, getTypePatient } from '../../utils/helpers';
 import AddPatient from '../../components/specific/AddPatient/AddPatient';
 import PatientsAdvancedSearch from '../../components/specific/PatientsAdvancedSearch/PatientsAdvancedSearch';
 import AddRv from '../../components/specific/AddRv/AddRv';
@@ -21,7 +21,7 @@ import AdvancedSearchButton from '../../components/common/AdvancedSearchButton/A
 import SearchBar from '../../components/common/SearchBar/SearchBar';
 
 
-const {Title} = Typography;
+const {Title , Text} = Typography;
 
 function Patients() {
     const navigate = useNavigate();
@@ -181,7 +181,10 @@ function Patients() {
                     {
                         title: 'Type',
                         dataIndex: 'type_patient',
-                        key: 'type_patient'
+                        key: 'type_patient',
+                        render: (record) => <div className='table-data'>
+                            <Text ellipsis > {getTypePatient(record)} </Text>
+                        </div>
                     },
                     {
                         title: 'Date RV',
