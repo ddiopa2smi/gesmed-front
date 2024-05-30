@@ -137,7 +137,7 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                         <Form.Item 
                             name="comment" 
                             label="Comment"
-                            initialValue={"Avant repas"}
+                            initialValue={"Aucun"}
                             rules={[
                                 {
                                     required: true,
@@ -188,6 +188,7 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
             <FormFooter 
                 onCancel={()=>{setIsModalVisible(false)}}
                 htmlType='submit'
+                validLabel={"Ajouter"}
             />
             
         </Form>

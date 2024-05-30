@@ -16,7 +16,6 @@ import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 import { deletePopup, printPDF } from '../../utils/helpers';
 import { codesPrescriptions } from '../../constants/app.constants';
 import useObjectFetch from '../../utils/hooks/useObjectFetch';
-import CrudComponent from '../../components/common/CrudComponent/CrudComponent';
 const {Title , Text} = Typography;
 const { TextArea } = Input;
 const {Option} = Select;
@@ -77,9 +76,9 @@ function Consultation() {
     const [operationType , setOperationType] = useState(null);
     const [loading , setLoading] = useState(false);
 
-    const pathologies = useFetch(endpoints.pathologie.LIST);
-    const motifs = useFetch(endpoints.motifs.LIST);
-    const regions = useFetch(endpoints.regions.LIST);
+    const { data : pathologies , isLoading : pathologiesLoading , onRefresh : pathologiesRefreshList} = useFetch(endpoints.pathologie.LIST);
+    const {data : motifs , isLoading : motifsLoading , onRefresh : motifsRefreshList} = useFetch(endpoints.motifs.LIST);
+    const { data : regions , isLoading : regionsLoading , onRefresh : regionsRefreshList} = useFetch(endpoints.regions.LIST);
      
 
     const itemsMotif = [
@@ -183,7 +182,7 @@ function Consultation() {
         <Card loading={consultationDataLoading} >
             <Flex justify='flex-start' align='center' >
                 <BackButton /> &nbsp;&nbsp;
-                <Button type='primary' size='small' onClick={()=>{validFinalConsultation()}} >Cloturer la consultation</Button>
+                <Button type='primary' size='small' onClick={()=>{validFinalConsultation()}} disabled={initConsultation?.medecin === null} >Cloturer la consultation</Button>
             </Flex>
             <br/>
             <br/>
@@ -303,7 +302,7 @@ function Consultation() {
 
                     if (changedValues.code_patho) {
                         const code_p = changedValues.code_patho;
-                        pathologies.data.forEach(element => {
+                        pathologies.forEach(element => {
                             if (element.code_patho === code_p) {
                                 setPathologieSelected(element);
                             }
@@ -312,7 +311,7 @@ function Consultation() {
 
                     if (changedValues.code_motifcons) {
                         const code_m = changedValues.code_motifcons;
-                        motifs.data.forEach(element => {
+                        motifs.forEach(element => {
                             if (element.code_motifcons === code_m) {
                                 setMotifSelected(element);
                             }
@@ -321,7 +320,7 @@ function Consultation() {
 
                     if (changedValues.code_region) {
                         const code_r = changedValues.code_region;
-                        regions.data.forEach(element => {
+                        regions.forEach(element => {
                             if (element.code_region === code_r) {
                                 setRegionSelected(element);
                             }
@@ -358,11 +357,11 @@ function Consultation() {
                                     showSearch
                                     placeholder="Pathologie"
                                     optionFilterProp="children" 
-                                    loading={pathologies.isLoading}
+                                    loading={pathologiesLoading}
                                     filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                                 >     
                                     {
-                                        pathologies.data.map((item , key)=>(
+                                        pathologies.map((item , key)=>(
                                             <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
                                         ))
                                     }
@@ -383,11 +382,11 @@ function Consultation() {
                                     showSearch
                                     placeholder="Motif de consultation"
                                     optionFilterProp="children" 
-                                    loading={motifs.isLoading}
+                                    loading={motifsLoading}
                                     filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                                 >     
                                         {
-                                            motifs.data.map((item , key)=>(
+                                            motifs.map((item , key)=>(
                                                 <Option key={key}  value={item.code_motifcons} > {item.libelle_motifcons} </Option>
                                             ))
                                         }
@@ -408,11 +407,11 @@ function Consultation() {
                                     showSearch
                                     placeholder="Région concernée"
                                     optionFilterProp="children" 
-                                    loading={regions.isLoading}
+                                    loading={regionsLoading}
                                     filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                                 >     
                                     {
-                                        regions.data.map((item , key)=>(
+                                        regions.map((item , key)=>(
                                             <Option key={key}  value={item.code_region} > {item.libelle_region} </Option>
                                         ))
                                     }
@@ -611,7 +610,7 @@ function Consultation() {
             <Modal
                 title={currentSelectableTask === "PATHOLOGIE" && "Pathologie" || currentSelectableTask === "MOTIF" && "Motif" || currentSelectableTask === "REGION" && "Région" }
                 open={open}
-                width={700}
+                //width={700}
                 onCancel={()=>{
                     setOpen(false);
                     setPathologieSelected(null);
@@ -621,12 +620,11 @@ function Consultation() {
                 footer={null}
                 destroyOnClose
             >
-                <CrudComponent dataSource={pathologies.data} />
-                {currentSelectableTask === "PATHOLOGIE" && <AddPathologie  setOpen={setOpen} operationType={operationType} onRefresh={null} currentRecord={pathologieSelected} /> }
+                {currentSelectableTask === "PATHOLOGIE" && <AddPathologie  setOpen={setOpen} operationType={operationType} onRefresh={pathologiesRefreshList} currentRecord={pathologieSelected} /> }
 
-                {currentSelectableTask === "MOTIF" && <AddMotif  setOpen={setOpen} operationType={operationType} onRefresh={null} currentRecord={motifSelected} /> }
+                {currentSelectableTask === "MOTIF" && <AddMotif  setOpen={setOpen} operationType={operationType} onRefresh={motifsRefreshList} currentRecord={motifSelected} /> }
 
-                {currentSelectableTask === "REGION" && <AddRegion  setOpen={setOpen} operationType={operationType} onRefresh={null} currentRecord={regionSelected} />}
+                {currentSelectableTask === "REGION" && <AddRegion  setOpen={setOpen} operationType={operationType} onRefresh={regionsRefreshList} currentRecord={regionSelected} />}
                 
             </Modal>
             

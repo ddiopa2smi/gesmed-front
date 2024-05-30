@@ -33,6 +33,7 @@ import Privileges from "./pages/Privileges/Privileges";
 import Privilege from "./pages/Privilege/Privilege";
 import Facturation from "./pages/Facturation/Facturation";
 import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation";
+import GestionPassword from "./pages/GestionPassword/GestionPassword";
 
 export const router = createBrowserRouter(
     [
@@ -227,6 +228,10 @@ export const router = createBrowserRouter(
                                     element : <Privilege />
                                 },
                             ]
+                        },
+                        {
+                            path : "gestion-mot-de-passe",
+                            element : <GestionPassword />
                         },
                         {
                             path : "profil",

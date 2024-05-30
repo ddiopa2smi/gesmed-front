@@ -93,14 +93,14 @@ function MedicalDashboard() {
             </Card>
           </Col>
         </Row>
-        <br/>
+        {/* <br/>
         <Row  gutter={[24,24]}>
           <Col  xs={24} sm={12} md={8} lg={6} xl={6} >
             <Card title={<><TeamOutlined style={{ backgroundColor : "hsl(30,100%, 95%)", color : "hsl(30,100%, 50%)" ,padding:5,borderRadius:8 , fontSize:20}} /> Consultations du jour </>} extra={<Link to="/myspace/patients" >Voir plus</Link>} >
                 120
             </Card>
           </Col>
-        </Row>
+        </Row> */}
         <br/><br/>
         <Row  gutter={[24,24]}>
           <Col  xs={24} sm={24} md={16} lg={16} xl={16}>

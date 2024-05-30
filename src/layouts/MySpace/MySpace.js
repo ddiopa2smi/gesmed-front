@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import "./MySpace.scss";
 import { Outlet, useLocation, useNavigate, /*useParams*/ } from 'react-router';
 //import { useDispatch, useSelector } from 'react-redux';
-import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined} from '@ant-design/icons';
+import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined, LockOutlined} from '@ant-design/icons';
 import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb, theme, AutoComplete, Input, Flex} from 'antd';
 //import { setLightMode , setDarkMode } from './../../reducers/theme.reducers';
 import {TbMoonStars} from "react-icons/tb";
@@ -74,7 +74,7 @@ const MySpace = () => {
 			key : 1 ,
 			icon : <UserOutlined /> ,
 			label : "Mon profil" ,
-			onClick : ()=> navigate("/myspace/profil")
+			onClick : ()=> navigate("/myspace/settings/profil")
 		} ,
 		{
 			type: 'divider',
@@ -250,6 +250,13 @@ const MySpace = () => {
                             onClick : ()=>{navigate("/myspace/settings/privileges")}
                         },
                         {
+                            key: 'gestion-mot-de-passe',   
+                            label: "Gestion de mot de passe" , 
+                            title: "Gestion de mot de passe" , 
+                            icon: <LockOutlined  />,
+                            onClick : ()=>{navigate("/myspace/settings/gestion-mot-de-passe")}   
+                        },
+                        {
                             key: 'profil',   
                             label: "Mon profil" , 
                             title: "Mon profil" , 
@@ -369,6 +376,9 @@ const MySpace = () => {
                 break;
             case "profil":
                 setCurrentSelectedKeys("profil");
+                break;
+            case "gestion-mot-de-passe":
+                setCurrentSelectedKeys("gestion-mot-de-passe");
                 break;
             default:
                 setCurrentSelectedKeys(route);

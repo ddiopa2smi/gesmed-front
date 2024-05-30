@@ -62,22 +62,6 @@ const NewAccount = () => {
 
     return(
         <Card>
-            <Breadcrumb
-                items={[
-                    {
-                        title : <Link to="/myspace/dashboard" > <HomeOutlined/> </Link>
-                    } ,
-                    {
-                        title : <Link to="/myspace/settings/accounts" > Comptes</Link>
-                    },
-                    {
-                        title : currentAccount === null ? "Nouveau compte" : "Edition compte"
-                    }
-                ]}
-            /> 
-
-            <br/>
-
             <Title level={3} > {currentAccount === null ? "Créer un nouveau compte" : "Modifier un compte existant"} </Title>
             <Form
                 form={form}
@@ -247,7 +231,7 @@ const NewAccount = () => {
                                 <Form.Item
                                     name="new_password"
                                     label="Mot de passe"
-                                    help="Entrer un mot de passe d'au moins 8 caractères"
+                                    help="Le mot de passe doit contenir au moins 8 caractères qui doivent inclure une majuscule, une minuscule, un chiffre et un caractère spécial"
                                     rules={[
                                         {
                                             required: true,
@@ -287,7 +271,7 @@ const NewAccount = () => {
                     </>
                 }
 
-                <Divider  orientation="left">Informations</Divider>
+                <Divider  orientation="left">Autres informations</Divider>
 
                 <Row gutter={[24,24]}>
                     <Col xs={24} sm={24} md={8} lg={6} xl={6} >

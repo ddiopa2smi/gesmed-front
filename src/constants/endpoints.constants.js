@@ -96,11 +96,23 @@ export const endpoints = {
         UPDATE : "",
         DELETE : ""
     } ,
+    forme_galenique : {
+        LIST : "/api/ParamMedoc/forme/list",
+        ADD : "/api/ParamMedoc/forme/add",
+        UPDATE : "/api/ParamMedoc/forme/update",
+        DELETE : "/api/ParamMedoc/forme/delete", 
+    },
     familleMedoc : {
         LIST : "/api/ParamMedoc/famille/list",
         ADD : "/api/ParamMedoc/famille/add",
         UPDATE : "/api/ParamMedoc/famille/update",
         DELETE : "/api/ParamMedoc/famille/delete",
+    } ,
+    conditionnements : {
+        LIST : "/api/ParamMedoc/cond/list",
+        ADD : "/api/ParamMedoc/cond/add",
+        UPDATE : "/api/ParamMedoc/cond/update",
+        DELETE : "/api/ParamMedoc/cond/delete", 
     }
     
 }

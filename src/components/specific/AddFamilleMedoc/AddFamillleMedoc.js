@@ -39,7 +39,7 @@ const AddFamilleMedoc = ({
                     values.code_famille = currentRecord?.code_famille;
                     putActions(endpoints.familleMedoc.UPDATE,values)
                     .then((response)=>{
-                        if (response?.data?.Updated) {
+                        if (response?.data) {
                             message.success("Modification effectuée avec succès");
                             form.resetFields(); 
                             setOpen(false);

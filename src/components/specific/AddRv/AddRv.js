@@ -1,10 +1,11 @@
-import { Col, Form, Row, Calendar, message } from 'antd';
+import { Col, Form, Row, Calendar, message, Typography } from 'antd';
 import { useState } from 'react';
 import { postActions } from '../../../actions/actions';
 import { endpoints } from '../../../constants/endpoints.constants';
 import FormFooter from '../../common/FormFooter/FormFooter';
 import dayjs from "dayjs"
 
+const {Title} = Typography;
 function AddRv({setOpen , onRefresh , currentRecord}) {
     const [form] = Form.useForm();
     const [formLoading , setFormLoading] = useState(false);
@@ -38,6 +39,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
             layout="vertical"
             onFinish={createRV}
         >
+            <Title level={4} > Patient {currentRecord?.num_patient} / {currentRecord?.prenom_patient} {currentRecord?.nom_patient} </Title>
             <Row>
                 <Col>
                     <Form.Item 

@@ -26,7 +26,7 @@ const AddMotif = ({
                             if (response.data.Added === true) {
                                 setLoading(false)
                                 message.success("Enregistrement effectué avec succès");
-                                //onRefresh();
+                                onRefresh();
                                 form.resetFields(); 
                                 setOpen(false);
                             }
@@ -40,7 +40,7 @@ const AddMotif = ({
                             if (response.data.Updated === true) {
                                 setLoading(false);
                                 message.success("Modification effectuée avec succès");
-                                //onRefresh();
+                                onRefresh();
                                 form.resetFields(); 
                                 setOpen(false);
                             }
