@@ -9,6 +9,10 @@ import { deletePopup } from '../../utils/helpers';
 import { deleteActions } from '../../actions/actions';
 import AddFournisseur from '../../components/specific/AddFournisseur/AddFournisseur';
 import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
+import { endpoints } from '../../constants/endpoints.constants';
+import EditButton from '../../components/common/EditButton/EditButton';
+import DeleteButton from '../../components/common/DeleteButton/DeleteButton';
+import SearchBar from '../../components/common/SearchBar/SearchBar';
 
 
 
@@ -18,8 +22,8 @@ const {Title} = Typography;
 function Fournisseurs() {
     // const navigate = useNavigate();
     
-    const {data , dataCopy : listFournisseurs , onRefresh : refreshListFournisseurs , isLoading : listLoading} = useFetch();
-
+    const {data : listFournisseurs , dataCopy : listFournisseursCopy , setDataCopy : setListFournisseursCopy ,  onRefresh : refreshListFournisseurs , isLoading : listLoading} = useFetch(endpoints.fournisseurs.LIST);
+    //console.log(listFournisseurs)
     const [open , setOpen] = useState(false);
     const [operationType , setOperationType] = useState("");
     const [currentRecord , setCurrentRecord] = useState(null);
@@ -61,7 +65,14 @@ function Fournisseurs() {
 
             <Title level={3} >Liste des fournisseurs</Title>
 
-            <Flex justify="flex-end" align="center" >
+            <Flex justify="space-between" align="center" >
+                <Space>
+                    <SearchBar 
+                        data={listFournisseurs}
+                        setDataCopy={setListFournisseursCopy}
+                        listKeys={['fourn_code','fourn_raisoc','adresse','tel_portable','email']}
+                    />
+                </Space>
                 <Space>
                     {/* <Tooltip title="Actualiser" >
                         <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={refreshListFournisseurs} /> &nbsp;&nbsp;
@@ -74,19 +85,19 @@ function Fournisseurs() {
             <br/>
 
             <DataTable 
-                dataSource={[]}
-                dataSourceCopy={[]}
-                setDataSourceCopy={null}
+                dataSource={listFournisseurs}
+                dataSourceCopy={listFournisseursCopy}
+                setDataSourceCopy={setListFournisseursCopy}
                 columns={[
                     {
                         title: 'N°',
-                        dataIndex: 'num_fourn',
-                        key: 'num_fourn'
+                        dataIndex: 'fourn_code',
+                        key: 'fourn_code'
                     },
                     {
                         title: 'Raison sociale',
-                        dataIndex: 'raisoc',
-                        key: 'raisoc'
+                        dataIndex: 'fourn_raisoc',
+                        key: 'fourn_raisoc'
                     },
                     {
                         title: 'Adresse',
@@ -94,9 +105,9 @@ function Fournisseurs() {
                         key: 'adresse'
                     },
                     {
-                        title: 'Téléphone',
-                        dataIndex: 'telephone',
-                        key: 'telephone'
+                        title: 'Tél. portable',
+                        dataIndex: 'tel_portable',
+                        key: 'tel_portable'
                     },
                     {
                         title: 'Email',
@@ -107,12 +118,8 @@ function Fournisseurs() {
                         render :  (record)=>(
                             <Flex align='center' >
                                 <Space size="middle" >
-                                    <Tooltip title="Editer">
-                                        <Button type='link' icon={<EditOutlined/>} />
-                                    </Tooltip>
-                                    <Tooltip title="Supprimer">
-                                        <Button type='link' danger icon={<DeleteOutlined/>} />
-                                    </Tooltip>
+                                    <EditButton onEdit={()=>{onEdit(record)}} />
+                                    <DeleteButton onDelete={()=>{ onDelete(record) }} />
                                 </Space>
                             </Flex>
                         )
@@ -122,11 +129,6 @@ function Fournisseurs() {
 
 
             <Modal 
-                // styles={{
-                //     header : {
-                //         background : "red"
-                //     }
-                // }}
                 title={
                     (operationType === "add" && "Nouveau fournisseur")||
                     (operationType === "update" && "Mettre à jour les données")

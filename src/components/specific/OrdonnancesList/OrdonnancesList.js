@@ -1,10 +1,14 @@
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Modal, Row, Segmented, Space, Tooltip } from 'antd'
+import { Button, Card, Col, Flex, Modal, Row, Segmented, Select, Space, Tooltip } from 'antd'
 import React, { useState } from 'react'
 import DataTable from '../../common/DataTable/DataTable';
 import useFetch from '../../../utils/hooks/useFetch';
 import useSearch from '../../../utils/hooks/useSearch';
+import ReloadButton from '../../common/ReloadButton/ReloadButton';
+import AdvancedSearchButton from '../../common/AdvancedSearchButton/AdvancedSearchButton';
+import FormFooter from '../../common/FormFooter/FormFooter';
 
+const {Option} = Select;
 function OrdonnancesList() {
     const [segmentedValue , setSegmentedValue] = useState("instance");
     const {data , dataCopy, setDataCopy , isLoading , error , onRefresh} = useFetch();
@@ -22,9 +26,11 @@ function OrdonnancesList() {
         <Card title="Liste des ordonnances" extra={<a>Voir plus</a>}>
             <Flex justify="flex-end" align="center" >
                 <Space>
-                    <Tooltip title="Recherche avancée" >
+                    {/* <Tooltip title="Recherche avancée" >
                         <Button type='text' shape="circle" icon={<SearchOutlined/>} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
-                    </Tooltip> 
+                    </Tooltip>  */}
+                    <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
+                    <ReloadButton onRefresh={onRefresh} /> &nbsp;&nbsp;
                     <Segmented 
                         defaultValue={segmentedValue}
                         options={[
@@ -43,9 +49,6 @@ function OrdonnancesList() {
                         }}
                     
                     />
-                    <Tooltip title="Actualiser" >
-                        <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={onRefresh} />
-                    </Tooltip> 
                 </Space>
             </Flex>
 
@@ -144,7 +147,25 @@ function OrdonnancesList() {
                 footer={null}
                 destroyOnClose={operationType=== "ads"? false : true}
             >
-                Gérer la recherche avancée ici
+                {/* Gérer la recherche avancée ici */}
+                <Select
+                    style={{width:'100%',background:"transparent"}}
+                    showSearch
+                    placeholder="Période"
+                    optionFilterProp="children" 
+                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                    //onChange={(value)=>{setTypePatient(value);}}
+                    //loading={null}
+                >     
+                    <Option key={"1"}  value={"today"} > Aujourd'hui </Option>
+                    <Option key={"2"}  value={"week"} > Dans la semaine </Option>
+                    <Option key={"3"}  value={"trimestre"} > Dans 3 mois </Option>
+                    <Option key={"4"}  value={"semestre"} > Dans 6 mois </Option>
+                    <Option key={"5"}  value={"annual"} > Cette année </Option>
+                </Select>
+                <br/>
+                <br/>
+                <FormFooter />
                 {/* {
                     (operationType === "ads") && 
                     <PatientsAdvancedSearch 

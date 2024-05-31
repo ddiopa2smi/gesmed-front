@@ -2,6 +2,7 @@ import Swal from "sweetalert2";
 import printJS from "print-js";
 import { API_URL } from "../constants/environment.constants";
 import { message } from "antd";
+import { v4 as uuidv4 } from 'uuid';
 
 export const formatDate = (record) => {
     return (record === null || record === "") ? "" : new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(record));
@@ -196,6 +197,9 @@ export const getTypePatient = (code) => {
 }
 
 export const generateRandomCode = () => {
-    return `PH${Math.floor(100000 + Math.random() * 900000)}`;
+    // return `PH${Math.floor(100000 + Math.random() * 900000)}`;
+    let randomUniqueChaine = uuidv4();
+    let result = randomUniqueChaine.toUpperCase().replaceAll("-","");
+    return `PH${result}`;
 }
   

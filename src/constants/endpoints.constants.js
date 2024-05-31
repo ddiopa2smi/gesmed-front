@@ -91,10 +91,10 @@ export const endpoints = {
         }
     } ,
     fournisseurs : {
-        LIST : "/api/smed/",
-        ADD : "",
-        UPDATE : "",
-        DELETE : ""
+        LIST : "/api/ParamMedoc/fournisseurs/list",
+        ADD : "/api/ParamMedoc/fournisseurs/add",
+        UPDATE : "/api/ParamMedoc/fournisseurs/update",
+        DELETE : "/api/ParamMedoc/fournisseurs/delete"
     } ,
     forme_galenique : {
         LIST : "/api/ParamMedoc/forme/list",

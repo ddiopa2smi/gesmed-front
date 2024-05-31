@@ -14,6 +14,7 @@ import AddFormeGalenique from '../../components/AddFormeGalenique/AddFormeGaleni
 import { deletePopup, generateRandomCode } from '../../utils/helpers';
 import { deleteActions } from '../../actions/actions';
 
+
 const {Title} = Typography;
 const {Option} = Select;
 

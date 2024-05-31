@@ -11,7 +11,7 @@ import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
 
 const {TextArea} = Input;
 const { Option } = Select;
-const { Text } = Typography;
+const { Text , Title } = Typography;
 
 function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) {
     const [form] = Form.useForm();
@@ -27,46 +27,41 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
             setFormLoading(true);
             switch (operationType) {
                 case "add":
-                        // values.num_patient = values.benef;
-                        // values.datenaiss_patient = new Date(values.datenaiss_patient).toISOString();
-                        // console.log(values)
-                        // postActions(endpoints.patients.ADD,values)
-                        // .then((response)=>{
-                        //     //setFormLoading(false);
+                       
+                        console.log(values)
+                        postActions(endpoints.fournisseurs.ADD,values)
+                        .then((response)=>{
+                            //setFormLoading(false);
 
-                        //     if (response.data.Added) {
-                        //         message.success("Nouveau patient ajouté avec succès");
-                        //         setFormLoading(false)
-                        //         setOpen(false);
-                        //         form.resetFields();
-                        //         onRefresh();
-                        //     }
-                        //     else {
-                        //         message.warning("Patient déja ajouté")
-                        //     }
-
+                            if (response?.data) {
+                                message.success("Nouveau fournisseur ajouté avec succès");
+                                form.resetFields();
+                                onRefresh();
+                            }
                             
-                        // })
-                        // .finally(()=>{
-                        //     // setFormLoading(false)
-                        //     // setOpen(false);
-                        //     // form.resetFields();
-                        //     // onRefresh();
-                        // })
+                        })
+                        .finally(()=>{
+                            setFormLoading(false)
+                            setOpen(false);
+                        })
                         
                     break;
                 case "update":
-                        // values.datenaiss_patient = new Date(values.datenaiss_patient).toISOString();
-                        // values.num_patient = currentRecord ? currentRecord.num_patient : null;
-                        // putActions(endpoints.patients.UPDATE,values)
-                        // .then((response)=>{
-                        //     setFormLoading(false);
-                        //     message.success("Opération éffectuée avec succès");
-                        //     setOpen(false);
-                        //     form.resetFields();
-                        //     onRefresh();
-                        // })
-                        // setOpen(false);
+                        values.fourn_code = currentRecord ? currentRecord.fourn_code : null;
+                        putActions(endpoints.fournisseurs.UPDATE,values)
+                        .then((response)=>{
+                            setFormLoading(false);
+                            if (response?.data) {
+                                message.success("Opération éffectuée avec succès");
+                                form.resetFields();
+                                onRefresh();
+                            }
+                            
+                        })
+                        .finally(()=>{
+                            setFormLoading(false)
+                            setOpen(false);
+                        })
                     break;
                 default:
                     break;
@@ -110,6 +105,7 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
             layout="vertical"
             onFinish={save}
             preserve={false}
+            initialValues={currentRecord}
             onValuesChange={(changedValues , values)=>{
                 // if (changedValues.benef) {
                 //     //console.log(changedValues)
@@ -140,7 +136,7 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
             <Row gutter={[8,8]} >
                 <Col xs={24} sm={24} md={12} lg={12} xl={12}>
                     <Form.Item 
-                        name="raisoc" 
+                        name="fourn_raisoc" 
                         label="Raison sociale"
                         rules={[
                             {
@@ -148,7 +144,6 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                                 message: 'Champ obligatoire',
                             },
                         ]}
-                        //initialValue={currentRecord?.type_patient}
                     >
                             <Input/>
                     </Form.Item>
@@ -156,7 +151,7 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                 
                 <Col xs={24} sm={24} md={12} lg={12} xl={12}>
                     <Form.Item 
-                        name="adresse_fourn" 
+                        name="adresse" 
                         label="Adresse"
                         rules={[
                             {
@@ -164,7 +159,6 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                                 message: 'Champ obligatoire',
                             },
                         ]}
-                        //initialValue={currentRecord?.type_patient}
                     >
                             <Input/>
                     </Form.Item>
@@ -175,7 +169,7 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                 
                 <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item 
-                        name="email_fourn" 
+                        name="email" 
                         label="Email"
                         rules={[
                             {
@@ -197,15 +191,23 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
             <Row gutter={[8,8]} >
                 <Col xs={24} sm={24} md={12} lg={12} xl={12}>
                     <Form.Item 
-                        name="qualite_fourn" 
-                        label="Qualité"
+                        name="tel_fixe" 
+                        label="Téléphone fixe"
                         rules={[
                             {
-                                required: true,
+                                required: false,
                                 message: 'Champ obligatoire',
                             },
+                            ({getFieldValue})=>({
+                                validator(_,value) {
+                                    if (/^\d{9}$/.test(value)) {
+                                        return Promise.resolve()
+                                    }else{
+                                        return Promise.reject(new Error("Veuillez saisir un numéro de téléphone valide."))
+                                    }
+                                }
+                            })
                         ]}
-                        //initialValue={currentRecord?.type_patient}
                     >
                             <Input/>
                     </Form.Item>
@@ -213,8 +215,8 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                 
                 <Col xs={24} sm={24} md={12} lg={12} xl={12}>
                     <Form.Item 
-                        name="phone_fourn" 
-                        label="Téléphone"
+                        name="tel_portable" 
+                        label="Téléphone portable"
                         rules={[
                             {
                                 required: true,
@@ -230,33 +232,91 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                                 }
                             })
                         ]}
-                        //initialValue={currentRecord?.type_patient}
                     >
                             <Input/>
                     </Form.Item>
                 </Col>
             </Row>
 
-            {/* <Row gutter={[8,8]} >
-                <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+            
+            <Title level={4}>Contacts</Title>          
+            <Row gutter={[8,8]} >
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
                     <Form.Item 
-                        name="adresse_fourn" 
-                        label="Contact"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Champ obligatoire',
-                            },
-                        ]}
-                        //initialValue={currentRecord?.type_patient}
+                        name="contact_qualite" 
+                        label="Qualité"
+                        // rules={[
+                        //     {
+                        //         required: true,
+                        //         message: 'Champ obligatoire',
+                        //     },
+                        // ]}
                     >
                             <Input/>
                     </Form.Item>
                 </Col>
-            </Row> */}
-
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                    <Form.Item 
+                        name="contact_nom" 
+                        label="Nom"
+                        // rules={[
+                        //     {
+                        //         required: true,
+                        //         message: 'Champ obligatoire',
+                        //     },
+                        // ]}
+                    >
+                            <Input/>
+                    </Form.Item>
+                </Col>
+            </Row>
 
             <Row gutter={[8,8]} >
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                    <Form.Item 
+                        name="contact_tel" 
+                        label="Téléphone contact"
+                        rules={[
+                            // {
+                            //     required: true,
+                            //     message: 'Champ obligatoire',
+                            // },
+                            ({getFieldValue})=>({
+                                validator(_,value) {
+                                    if (/^\d{9}$/.test(value)) {
+                                        return Promise.resolve()
+                                    }else{
+                                        return Promise.reject(new Error("Veuillez saisir un numéro de téléphone valide."))
+                                    }
+                                }
+                            })
+                        ]}
+                    >
+                            <Input/>
+                    </Form.Item>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                    <Form.Item 
+                        name="contact_email" 
+                        label="Email"
+                        rules={[
+                            // {
+                            //     required: true,
+                            //     message: 'Champ obligatoire',
+                            // },
+                            {
+                                type : "email",
+                                message : "Veuillez entrer un email dans ce champ"
+                            }
+                        ]}
+                    >
+                            <Input/>
+                    </Form.Item>
+                </Col>
+            </Row>
+
+
+            {/* <Row gutter={[8,8]} >
                 <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Text>Autres contacts</Text> 
                     <br/>
@@ -361,7 +421,7 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                         }
                     </Form.List>
                 </Col>
-            </Row>
+            </Row> */}
 
             <FormFooter 
                 loading={formLoading}

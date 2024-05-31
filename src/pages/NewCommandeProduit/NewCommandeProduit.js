@@ -7,6 +7,8 @@ import { DeleteOutlined, EditOutlined, HomeOutlined } from '@ant-design/icons';
 import DataTable from '../../components/common/DataTable/DataTable';
 import DetailsCommande from '../../components/specific/DetailsCommande/DetailsCommande';
 import { deletePopup, sortColumn } from '../../utils/helpers';
+import useFetch from '../../utils/hooks/useFetch';
+import { endpoints } from '../../constants/endpoints.constants';
 
 //import DataTable from '../../shared/DataTable/DataTable';
 
@@ -18,6 +20,8 @@ function NewCommandeProduit() {
     const [form] = Form.useForm();
 
     const [listProduitsCommandes , setListProduitsCommandes] = useState([])
+    const {data : listFournisseurs , isLoading : listFournisseursLoading} = useFetch(endpoints.fournisseurs.LIST);
+
     return (
         <Card>
             <Form
@@ -43,14 +47,14 @@ function NewCommandeProduit() {
                 <Divider  orientation="left">En-tête Bon de commande</Divider>
             
                 <Row gutter={[24,24]}>
-                    <Col  xs={24} sm={12} md={8} lg={6} xl={6}>
+                    {/* <Col  xs={24} sm={12} md={8} lg={6} xl={6}>
                         <Form.Item 
                             label="Numéro"
                             name="numero_bc" 
                         >
                             <InputNumber min={0}/>
                         </Form.Item>
-                    </Col>
+                    </Col> */}
                     <Col  xs={24} sm={12} md={8} lg={6} xl={6}>
                         <Form.Item 
                             label="Date commande"
@@ -89,15 +93,13 @@ function NewCommandeProduit() {
                                 placeholder="Choisir..."
                                 optionFilterProp="children" 
                                 filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                //loading={selectMedicamentsListLoading}
+                                loading={listFournisseursLoading}
                             >     
-                                {/* {
-                                    listMedicaments.map((item)=>(
-                                        <Option key={item.codeacte}  value={item.codeacte} > {item.libacte} </Option>
+                                {
+                                    listFournisseurs.map((item , index)=>(
+                                        <Option key={index}  value={item?.fourn_code} > {item?.fourn_raisoc} </Option>
                                     ))
-                                }   */}
-                                <Option key="1"  value="fournisseur" > Fournisseur </Option>
-
+                                }
                             </Select>
                         </Form.Item>
                     </Col>
