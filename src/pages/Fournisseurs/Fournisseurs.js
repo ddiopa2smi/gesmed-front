@@ -1,6 +1,6 @@
 import { DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Button, Card, Flex, Modal, Space, Tooltip, Typography } from 'antd'
+import { Breadcrumb, Button, Card, Flex, Modal, Space, Tooltip, Typography, message } from 'antd'
 import React, { useState } from 'react'
 //import { useNavigate } from 'react-router';
 import DataTable from '../../components/common/DataTable/DataTable';
@@ -47,14 +47,14 @@ function Fournisseurs() {
         deletePopup()
         .then((result)=>{
             if (result.isConfirmed) {
-                console.log("Must delete")
-                // deleteActions(`${endpoints.patients.DELETE}/${record?.num_patient}`)
-                // .then((response)=>{
-                //     if (response.data.Deleted === true) {
-                //         message.success("Ligne retirée avec succès");
-                //         onRefresh()
-                //     }
-                // })
+                //console.log("Must delete")
+                deleteActions(`${endpoints.fournisseurs.DELETE}/${record?.fourn_code}`)
+                .then((response)=>{
+                    if (response?.data) {
+                        message.success("Ligne retirée avec succès");
+                        refreshListFournisseurs()
+                    }
+                })
             }
         })
     }

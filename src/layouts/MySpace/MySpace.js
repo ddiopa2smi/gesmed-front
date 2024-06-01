@@ -167,12 +167,19 @@ const MySpace = () => {
                     onClick : ()=>{navigate("/myspace/facturation")}
                     
                 },
+                // space === "spharma" && {
+                //     key: 'fiche-produit',
+                //     icon: <FileOutlined  />,
+                //     label: "Fiche Produit" , 
+                //     title: "Fiche Produit" , 
+                //     onClick : ()=>{navigate("/myspace/fiche-produit")}
+                // },
                 space === "spharma" && {
-                    key: 'fiche-produit',
+                    key: 'gestion-fiche-produits',
                     icon: <FileOutlined  />,
-                    label: "Fiche Produit" , 
-                    title: "Fiche Produit" , 
-                    onClick : ()=>{navigate("/myspace/fiche-produit")}
+                    label: "Gestion fiche produits" , 
+                    title: "Gestion fiche produits" , 
+                    onClick : ()=>{navigate("/myspace/gestion-fiche-produits")}
                 },
                 space === "spharma" && {
                     key: 'commandes-produits',
@@ -323,8 +330,11 @@ const MySpace = () => {
             case "dossier-accident-travail":
                 setCurrentSelectedKeys("dossier-accident-travail");
                 break;
+            case "gestion-fiche-produits":
+                setCurrentSelectedKeys("gestion-fiche-produits");
+                break;
             case "fiche-produit":
-                setCurrentSelectedKeys("fiche-produit");
+                setCurrentSelectedKeys("gestion-fiche-produits");
                 break;
             case "commandes-produits":
                 setCurrentSelectedKeys("commandes-produits");

@@ -1,7 +1,7 @@
 import { HomeOutlined, OrderedListOutlined } from '@ant-design/icons'
 import { Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Modal, Radio, Row, Select, Space, Tooltip, Typography, message } from 'antd';
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import useFetch from '../../utils/hooks/useFetch';
 import { endpoints } from '../../constants/endpoints.constants';
 import { codesPrescriptions } from '../../constants/app.constants';
@@ -12,13 +12,17 @@ import AddFamilleMedoc from '../../components/specific/AddFamilleMedoc/AddFamill
 import AddConditionnement from '../../components/AddConditionnement/AddConditionnement';
 import AddFormeGalenique from '../../components/AddFormeGalenique/AddFormeGalenique';
 import { deletePopup, generateRandomCode } from '../../utils/helpers';
-import { deleteActions } from '../../actions/actions';
+import { deleteActions, postActions, putActions } from '../../actions/actions';
+import BackButton from '../../components/common/BackButton/BackButton';
 
 
 const {Title} = Typography;
 const {Option} = Select;
 
 function FicheProduit() {
+    const navigate = useNavigate();
+    const {state} = useLocation();
+    const currentRecord = state?.currentRecord;
     const [form] = Form.useForm();
     const {data : listMedicaments , isLoading , error} = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
     const {data : familleMedocsList , isLoading : familleMedocsListLoading , onRefresh : listFamilleMedocRefresh} = useFetch(endpoints.familleMedoc.LIST);
@@ -34,6 +38,72 @@ function FicheProduit() {
     const [familleMedocSelected , setFamilleMedocSelected] = useState(null);
     const [formeGaleniqueSelected , setFormeGaleniqueSelected] = useState(null);
     const [conditionnementSelected , setConditionnementSelected] = useState(null);
+
+
+    const [formLoading , setFormLoading] = useState(false);
+
+
+    const save = () => {
+        form
+        .validateFields()
+        .then((values) => {
+            console.log(values)
+            postActions(endpoints.fiche_produit.ADD,values)
+            .then((response)=>{
+                if (response?.data) {
+                    message.success("Nouvelle fiche produit ajoutée avec succès");
+                    
+                    //setOpen(false);
+                    form.resetFields();
+                    //onRefresh();
+                }
+
+                
+            })
+            .finally(()=>{
+                setFormLoading(false)
+            })
+            //setFormLoading(true);
+            // switch (operationType) {
+            //     case "add":
+            //             // values.num_patient = values.benef;
+            //             // values.datenaiss_patient = new Date(values.datenaiss_patient).toISOString();
+            //             console.log(values)
+            //             // postActions(endpoints.fiche_produit.ADD,values)
+            //             // .then((response)=>{
+            //             //     if (response?.data) {
+            //             //         message.success("Nouvelle fiche produit ajoutée avec succès");
+                                
+            //             //         //setOpen(false);
+            //             //         form.resetFields();
+            //             //         onRefresh();
+            //             //     }
+
+                            
+            //             // })
+            //             // .finally(()=>{
+            //             //     setFormLoading(false)
+            //             // })
+                        
+            //         break;
+            //     case "update":
+            //             // values.datenaiss_patient = new Date(values.datenaiss_patient).toISOString();
+            //             // values.num_patient = currentRecord ? currentRecord.num_patient : null;
+            //             // putActions(endpoints.patients.UPDATE,values)
+            //             // .then((response)=>{
+            //             //     setFormLoading(false);
+            //             //     message.success("Opération éffectuée avec succès");
+            //             //     form.resetFields();
+            //             // })
+            //         break;
+            //     default:
+            //         break;
+            // }
+        })
+        .catch((info) => {
+            console.log('Validate Failed:', info);
+        });
+    }
 
     const openModal = (operation , selectableTask) => {
         if(operation === "add"){
@@ -97,11 +167,14 @@ function FicheProduit() {
     }
     return (
         <Card className='FicheProduitWrapper' >
+            <Flex justify='flex-start' align='center' >
+                <BackButton />
+            </Flex>
             <Flex justify="flex-end" align="center" >
                 <Space>
                     
                     <Tooltip title="Actualiser" >
-                        <Button type='primary' icon={<OrderedListOutlined/>} onClick={()=>{setOpen(true)}} >Liste des produits</Button>
+                        <Button type='primary' icon={<OrderedListOutlined/>} onClick={()=>{navigate("/myspace/gestion-fiche-produits")}} >Liste des produits</Button>
                     </Tooltip> 
                 </Space>
             </Flex>
@@ -110,17 +183,19 @@ function FicheProduit() {
             <Form
                 layout='vertical'
                 form={form}
+                onFinish={save}
+                initialValues={currentRecord}
                 onValuesChange={(changedValues , allValues)=> {
                     if (changedValues.code_produit) {
                         const obj = getMedocObjectByCodeActe(changedValues.code_produit , listMedicaments);
-                        form.setFieldValue("code_interne", obj.codeacte);
-                        form.setFieldValue("designation", obj.libacte);
-                        form.setFieldValue("reference",generateRandomCode())
+                        form.setFieldValue("code_cip", obj.codeacte);
+                        form.setFieldValue("libelle_produit", obj.libacte);
+                        // form.setFieldValue("reference",generateRandomCode())
                     }
 
 
-                    if (changedValues.code_famille) {
-                        const code = changedValues.code_famille;
+                    if (changedValues.famille) {
+                        const code = changedValues.famille;
                         familleMedocsList.forEach(element => {
                             if (element.code_famille === code) {
                                 setFamilleMedocSelected(element);
@@ -128,8 +203,8 @@ function FicheProduit() {
                         });
                     }
 
-                    if (changedValues.cond_code) {
-                        const code = changedValues.cond_code;
+                    if (changedValues.cond) {
+                        const code = changedValues.cond;
                         conditionnementsList.forEach(element => {
                             if (element.cond_code === code) {
                                 setConditionnementSelected(element);
@@ -137,8 +212,8 @@ function FicheProduit() {
                         });
                     }
 
-                    if (changedValues.code_forme) {
-                        const code = changedValues.code_forme;
+                    if (changedValues.forme) {
+                        const code = changedValues.forme;
                         formesGaleniqueList.forEach(element => {
                             if (element.code_forme === code) {
                                 setFormeGaleniqueSelected(element);
@@ -175,24 +250,11 @@ function FicheProduit() {
                 <Divider  orientation="left">Identification</Divider>
 
                 <Row gutter={[24,24]} >
-                    <Col xs={24} sm={12} md={8} lg={8} xl={8} >
-                        <Form.Item 
-                            label="Référence interne"
-                            name="reference" 
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Champ obligatoire',
-                                },
-                            ]}
-                        >
-                            <Input disabled />
-                        </Form.Item>
-                    </Col>
+                    
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Form.Item 
                             label="Désignation"
-                            name="designation" 
+                            name="libelle_produit" 
                             rules={[
                                 {
                                     required: true,
@@ -206,13 +268,30 @@ function FicheProduit() {
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Form.Item 
                             label="Code CIP"
-                            name="code_interne" 
+                            name="code_cip" 
                             rules={[
                                 {
                                     required: true,
                                     message: 'Champ obligatoire',
                                 },
                             ]}
+                        >
+                            <Input disabled />
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={8} xl={8} >
+                        <Form.Item 
+                            label="Référence interne"
+                            name="code_produit" 
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Champ obligatoire',
+                                },
+                            ]}
+                            style={{
+                                display:"none"
+                            }}
                         >
                             <Input disabled />
                         </Form.Item>
@@ -224,7 +303,7 @@ function FicheProduit() {
                         <Flex align='center' >
                             <Form.Item 
                                 label="Forme galénique"
-                                name="code_forme"  
+                                name="forme"  
                                 style={{width:"90%"}}
                             >
                                 <Select
@@ -268,7 +347,7 @@ function FicheProduit() {
                         <Flex align='center' justify='flex-start' >
                             <Form.Item 
                                 label="Famille"
-                                name="code_famille" 
+                                name="famille" 
                                 style={{width:"90%"}}
                             >
                                 <Select
@@ -312,7 +391,7 @@ function FicheProduit() {
                         <Flex align='center' >
                             <Form.Item 
                                 label="Conditionnement"
-                                name="cond_code" 
+                                name="cond" 
                                 style={{width:"90%"}}
                             >
                                 <Select
@@ -360,11 +439,11 @@ function FicheProduit() {
                         <Form.Item 
                             label="Descriptif"
                             name="descriptif" 
-                            initialValue={1}
+                            initialValue="spec"
                         >
                             <Radio.Group>
-                                <Radio value={1}>Spécialité</Radio>
-                                <Radio value={2}>Générique</Radio>
+                                <Radio value="spec">Spécialité</Radio>
+                                <Radio value="gen">Générique</Radio>
                             </Radio.Group>
                         </Form.Item>
                     </Col>
@@ -372,11 +451,11 @@ function FicheProduit() {
                         <Form.Item 
                             label="Statut"
                             name="statut" 
-                            initialValue={1}
+                            initialValue="payant"
                         >
                             <Radio.Group>
-                                <Radio value={1}>Payant</Radio>
-                                <Radio value={2}>Gratuit</Radio>
+                                <Radio value="payant">Payant</Radio>
+                                <Radio value="gratuit">Gratuit</Radio>
                             </Radio.Group>
                         </Form.Item>
                     </Col>
@@ -429,9 +508,9 @@ function FicheProduit() {
                                         <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
                                     ))
                                 } */}
-                                <Option key={"1"}  value={"boites"} > Boites </Option>
-                                <Option key={"2"}  value={"comprimes"} > Comprimés </Option>
-                                <Option key={"3"}  value={"plaquettes"} > Plaquettes </Option>
+                                <Option key={"1"}  value="Boite" > Boite </Option>
+                                <Option key={"2"}  value="Comprime" > Comprimés </Option>
+                                <Option key={"3"}  value="Plaquette" > Plaquettes </Option>
                                     
                             </Select>
                         </Form.Item>
@@ -457,7 +536,7 @@ function FicheProduit() {
                         <Form.Item 
                             label="Refrigéré?"
                             name="refrigere" 
-                            initialValue={true}
+                            initialValue={false}
                             rules={[
                                 {
                                     required: true,
@@ -475,6 +554,7 @@ function FicheProduit() {
                         <Form.Item 
                             label="Quantité stock mini"
                             name="qte_stock_mini" 
+                            initialValue={10}
                             rules={[
                                 {
                                     required: true,
@@ -488,7 +568,8 @@ function FicheProduit() {
                     <Col xs={24} sm={12} md={8} lg={6} xl={6}>
                         <Form.Item 
                             label="Délai péremption (jours)"
-                            name="delai_peremption" 
+                            name="delai_peremtion" 
+                            initialValue={10}
                             rules={[
                                 {
                                     required: true,
@@ -501,11 +582,14 @@ function FicheProduit() {
                     </Col>
                 </Row>
                 <br/>
-                <FormFooter />
+                <FormFooter 
+                    loading={formLoading}
+                    htmlType="submit"
+                />
             </Form>
 
 
-            <Modal 
+            {/* <Modal 
                 // styles={{
                 //     header : {
                 //         background : "red"
@@ -522,7 +606,7 @@ function FicheProduit() {
                 destroyOnClose
             >
                 <ListProduits />
-            </Modal>
+            </Modal> */}
 
             <Modal 
                 title="Ajout rapide"

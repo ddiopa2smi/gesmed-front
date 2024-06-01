@@ -104,6 +104,9 @@ export const getBreadCrumbLabel = (item) => {
         case "fiche-produit":
             label = "Fiche produit";
             break;
+        case "gestion-fiche-produits":
+            label = "Gestion Fiches Produits";
+            break;
         case "commandes-produits":
             label = "Commandes produits";
             break;
@@ -112,6 +115,9 @@ export const getBreadCrumbLabel = (item) => {
             break;
         case "entrees-produits":
             label = "Entrées produits";
+            break;
+        case "sorties-produits":
+            label = "Sorties produits";
             break;
         case "reception-commande":
             label = "Réception commande";

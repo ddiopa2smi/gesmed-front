@@ -34,6 +34,7 @@ import Privilege from "./pages/Privilege/Privilege";
 import Facturation from "./pages/Facturation/Facturation";
 import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation";
 import GestionPassword from "./pages/GestionPassword/GestionPassword";
+import GestionFicheProduits from "./pages/GestionFicheProduits/GestionFicheProduits";
 
 export const router = createBrowserRouter(
     [
@@ -141,9 +142,22 @@ export const router = createBrowserRouter(
                     path : "facturation",
                     element : <Facturation />
                 },
+                // {
+                //     path : "fiche-produit",
+                //     element : <FicheProduit />
+                // },
                 {
-                    path : "fiche-produit",
-                    element : <FicheProduit />
+                    path : "gestion-fiche-produits",
+                    children : [
+                        {
+                            path : "",
+                            element : <GestionFicheProduits/>
+                        },
+                        {
+                            path : "fiche-produit",
+                            element : <FicheProduit/>
+                        },
+                    ]
                 },
                 {
                     path : "commandes-produits",

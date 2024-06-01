@@ -113,6 +113,10 @@ export const endpoints = {
         ADD : "/api/ParamMedoc/cond/add",
         UPDATE : "/api/ParamMedoc/cond/update",
         DELETE : "/api/ParamMedoc/cond/delete", 
+    } ,
+    fiche_produit : {
+        ADD : "/api/Produit/add",
+        LIST : "/api/Produit/list",
     }
     
 }

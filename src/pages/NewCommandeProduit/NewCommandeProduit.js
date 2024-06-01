@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, Col, DatePicker, Divider, Flex, Form,InputNumber, Modal, Row, Select, Space, Tooltip } from 'antd'
+import { Breadcrumb, Button, Card, Col, DatePicker, Divider, Flex, Form,InputNumber, Modal, Row, Select, Space, Tooltip, Typography } from 'antd'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router';
 import FormFooter from '../../components/common/FormFooter/FormFooter';
@@ -13,6 +13,7 @@ import { endpoints } from '../../constants/endpoints.constants';
 //import DataTable from '../../shared/DataTable/DataTable';
 
 const {Option} = Select;
+const {Title , Text} = Typography;
 
 
 function NewCommandeProduit() {
@@ -41,6 +42,7 @@ function NewCommandeProduit() {
                 // }}
             >
 
+                <Title level={3} >Nouvelle commande produit</Title>
                 <Flex align='center' justify='flex-end' >
                     <Button type='primary' htmlType='submit' >Enregistrer</Button>
                 </Flex>

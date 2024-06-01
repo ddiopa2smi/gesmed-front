@@ -193,21 +193,21 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                     <Form.Item 
                         name="tel_fixe" 
                         label="Téléphone fixe"
-                        rules={[
-                            {
-                                required: false,
-                                message: 'Champ obligatoire',
-                            },
-                            ({getFieldValue})=>({
-                                validator(_,value) {
-                                    if (/^\d{9}$/.test(value)) {
-                                        return Promise.resolve()
-                                    }else{
-                                        return Promise.reject(new Error("Veuillez saisir un numéro de téléphone valide."))
-                                    }
-                                }
-                            })
-                        ]}
+                        // rules={[
+                        //     {
+                        //         required: false,
+                        //         message: 'Champ obligatoire',
+                        //     },
+                        //     ({getFieldValue})=>({
+                        //         validator(_,value) {
+                        //             if (/^\d{9}$/.test(value)) {
+                        //                 return Promise.resolve()
+                        //             }else{
+                        //                 return Promise.reject(new Error("Veuillez saisir un numéro de téléphone valide."))
+                        //             }
+                        //         }
+                        //     })
+                        // ]}
                     >
                             <Input/>
                     </Form.Item>
@@ -276,21 +276,21 @@ function AddFournisseur({ setOpen , operationType , onRefresh , currentRecord}) 
                     <Form.Item 
                         name="contact_tel" 
                         label="Téléphone contact"
-                        rules={[
-                            // {
-                            //     required: true,
-                            //     message: 'Champ obligatoire',
-                            // },
-                            ({getFieldValue})=>({
-                                validator(_,value) {
-                                    if (/^\d{9}$/.test(value)) {
-                                        return Promise.resolve()
-                                    }else{
-                                        return Promise.reject(new Error("Veuillez saisir un numéro de téléphone valide."))
-                                    }
-                                }
-                            })
-                        ]}
+                        // rules={[
+                        //     // {
+                        //     //     required: true,
+                        //     //     message: 'Champ obligatoire',
+                        //     // },
+                        //     // ({getFieldValue})=>({
+                        //     //     validator(_,value) {
+                        //     //         if (/^\d{9}$/.test(value)) {
+                        //     //             return Promise.resolve()
+                        //     //         }else{
+                        //     //             return Promise.reject(new Error("Veuillez saisir un numéro de téléphone valide."))
+                        //     //         }
+                        //     //     }
+                        //     // })
+                        // ]}
                     >
                             <Input/>
                     </Form.Item>
