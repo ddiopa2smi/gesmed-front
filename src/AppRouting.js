@@ -35,6 +35,7 @@ import Facturation from "./pages/Facturation/Facturation";
 import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation";
 import GestionPassword from "./pages/GestionPassword/GestionPassword";
 import GestionFicheProduits from "./pages/GestionFicheProduits/GestionFicheProduits";
+import ProtectedRoute from "./components/specific/ProtectedRoute/ProtectedRoute";
 
 export const router = createBrowserRouter(
     [
@@ -44,11 +45,11 @@ export const router = createBrowserRouter(
         },
         {
             path : "/login",
-            element : <Auth />
+            element : <Auth />,
         },
         {
             path : "/home",
-            element : <Home />
+            element : <ProtectedRoute component={<Home/>} />
         },
         {
             path : "*",
@@ -56,7 +57,8 @@ export const router = createBrowserRouter(
         },
         {
             path : "myspace",
-            element : <MySpace /> ,
+            //element : <MySpace />  ,
+            element : <ProtectedRoute component={<MySpace />} />  ,
             children : [
                 {
                     path : "",

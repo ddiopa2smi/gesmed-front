@@ -575,7 +575,7 @@ const MySpace = () => {
                     </Content>
 
                     <Drawer title="Mes notifications" placement="right" onClose={()=>{setOpenDrawer(false)}} open={openDrawer}>
-                        <Text>Aucunes notifications pour l'instant</Text>
+                        <Text>Aucune notification</Text>
                     </Drawer>
 
                 </Layout>

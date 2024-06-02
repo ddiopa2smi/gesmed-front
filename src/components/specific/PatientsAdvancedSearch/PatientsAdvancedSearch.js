@@ -67,9 +67,9 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                 <Col xs={24} sm={12} md={8} lg={8} xl={8}>
                     <Form.Item
                         name="num_patient"
-                        label="Numéro " 
+                        label="Numéro patient" 
                     >
-                        <Input />
+                        <Input placeholder="Entrer un numéro"/>
                     </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={8} xl={8}>
@@ -77,7 +77,7 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                         name="nom_patient"
                         label="Nom" 
                     >
-                        <Input />
+                        <Input placeholder="Entrer un nom" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={8} xl={8}>
@@ -85,7 +85,7 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                         name="prenom_patient"
                         label="Prénom"
                     >
-                        <Input />
+                        <Input placeholder="Entrer un prénom"/>
                     </Form.Item>
                 </Col>
             </Row>
@@ -98,7 +98,7 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                             <Select
                                 style={{width:'100%',background:"transparent"}}
                                 showSearch
-                                placeholder="Sexe du patient"
+                                placeholder="Choisir"
                                 optionFilterProp="children" 
                                 filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                                 
@@ -114,7 +114,7 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                         name="age_patient"
                         label="Age(min-max)"
                     >
-                        <Input />
+                        <Input placeholder="Ex: 30; 40-50" />
                     </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={8} xl={8}>
@@ -125,7 +125,7 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                         <Select
                             style={{width:'100%',background:"transparent"}}
                             showSearch
-                            placeholder="Type de patient"
+                            placeholder="Choisir"
                             optionFilterProp="children" 
                             filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                             loading={listTypePatientsLoading}
@@ -141,25 +141,32 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                 </Col>
             </Row>
             <Row gutter={[24,24]} >
-                <Col xs={24} sm={12} md={8} lg={12} xl={12}>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item
                         name="date_rv"
                         label="Date de rendez-vous"
                     >
-                        <RangePicker format="DD/MM/YYYY" />
+                        <RangePicker style={{width:'100%'}} format="DD/MM/YYYY" />
                     </Form.Item>
                 </Col>
-                <Col xs={24} sm={12} md={8} lg={12} xl={12}>
+                
+            </Row>
+            <Row gutter={[24,24]} >
+                <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item
                         name="date_creation"
                         label="Date de création"
                     >
-                        <RangePicker format="DD/MM/YYYY" />
+                        <RangePicker style={{width:'100%'}} format="DD/MM/YYYY" />
                     </Form.Item>
                 </Col>
             </Row>
             <FormFooter 
-                onCancel={()=>{form.resetFields()}}
+                onCancel={()=>{
+                    form.resetFields();
+                    setOpen(false);
+                    setDataSourceCopy(dataSource);
+                }}
                 htmlType='submit'
                 cancelLabel={"Réinitialiser"}
                 validLabel={"Valider"}

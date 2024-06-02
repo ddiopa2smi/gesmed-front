@@ -9,6 +9,7 @@ import image1 from "./../../assets/auth-img-1.jpg"
 import image2 from "./../../assets/auth-img-2.jpg"
 import Title from "antd/es/typography/Title";
 import { Link } from "react-router-dom";
+import { auth } from "../../actions/actions";
 
 const { Text } = Typography;
 
@@ -25,29 +26,30 @@ function Auth() {
       .validateFields()
       .then((values) => {
         setLoading(true)
-        axios.post(`${API_URL}/api/User/Connect`, values).then((response) => {
-          if (response.data.username !== null) {
+        auth(values)
+        .then((response) => {
+          if (response?.data?.username !== null) {
             sessionStorage.setItem(
               "userConnected",
               JSON.stringify(response.data)
             );
-            //navigate("/myspace/dashboard", { replace: true });
             navigate("/home", { replace: true });
             message.success("Bienvenue dans votre espace de gestion");
-            form.resetFields();
+            
           } else {
             message.error("Login et/ou mot de passe incorrect(s)");
           }
-        });
+        })
+        .finally(()=>{
+          setLoading(false);
+          form.resetFields();
+        })
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
         message.error(info.message);
         message.error("Veuillez svp renseigner toutes les informations");
       })
-      .finally(()=>{
-        setLoading(false)
-      });
   };
 
   return (
