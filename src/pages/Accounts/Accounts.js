@@ -21,6 +21,7 @@ function Accounts() {
     //const usersList = data;
     const usersListWithoutOwnAccount = data.filter(element => element?.login !== userConnected.login);
     const personnelMedicalList = usersListWithoutOwnAccount.filter(element=>element?.perim === 'MED');
+    //console.log(personnelMedicalList)
     const personnelPharmacieList = usersListWithoutOwnAccount.filter(element=>element?.perim === 'PH');
     
     //console.log(usersListWithoutOwnAccount)
@@ -138,6 +139,71 @@ function Accounts() {
                 },
                 {
                     key: '2',
+                    label: "Personnel non médical",
+                    children:  <>
+                        <Title level={3} >Liste du personnel non médical</Title>
+                        <DataTable 
+                            dataSource={[]}
+                            dataSourceCopy={[]}
+                            setDataSourceCopy={setDataSourceCopy}
+                            columns={[
+                                {
+                                    title: 'Login',
+                                    dataIndex: 'login',
+                                    key: 'login'
+                                },
+                                {
+                                    title: 'Nom complet',
+                                    dataIndex: 'username',
+                                    key: 'username',
+                                    sorter: (a, b) => a.username.charCodeAt(0) - b.username.charCodeAt(0)
+                                },
+                                {
+                                    title: 'Email',
+                                    dataIndex: 'emailaddress',
+                                    key: 'emailaddress'
+                                },
+                                {
+                                    title: 'Etat',
+                                    dataIndex: 'etat',
+                                    key: 'etat',
+                                    render: (record) => <div className='table-data'>
+                                        {
+                                            record === true ?
+                                            <Tag color="green" >Actif</Tag> : 
+                                            <Tag color="red" >Non actif</Tag>
+                                        }
+                                    </div>
+                                },
+                                {
+                                    title: 'Rôle',
+                                    dataIndex: 'role_name',
+                                    key: 'role_name'
+                                },
+                                {
+                                    render :  (record)=>(
+                                        <Flex align='center' >
+                                            <Space size="middle" >
+                                                <Can  I="update" an="account">
+                                                    <Tooltip title="Editer">
+                                                        <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEdit( "personnel-medical" , record)}} />
+                                                    </Tooltip>
+                                                </Can>
+                                                <Can I="delete" an="account">
+                                                    <Tooltip title="Supprimer">
+                                                        <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{onDelete(record)}} />
+                                                    </Tooltip>
+                                                </Can>
+                                            </Space>
+                                        </Flex>
+                                    )
+                                }
+                            ]}
+                        />
+                    </>
+                },
+                {
+                    key: '3',
                     label: "Personnel pharmacie",
                     children:  <>
                         <Title level={3} >Liste du personnel de la pharmacie</Title>

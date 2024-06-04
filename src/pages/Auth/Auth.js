@@ -28,13 +28,15 @@ function Auth() {
         setLoading(true)
         auth(values)
         .then((response) => {
-          if (response?.data?.username !== null) {
+          if (response?.data && response?.data?.username !== null) {
             sessionStorage.setItem(
               "userConnected",
               JSON.stringify(response.data)
             );
+            form.resetFields();
             navigate("/home", { replace: true });
             message.success("Bienvenue dans votre espace de gestion");
+            
             
           } else {
             message.error("Login et/ou mot de passe incorrect(s)");
@@ -42,7 +44,6 @@ function Auth() {
         })
         .finally(()=>{
           setLoading(false);
-          form.resetFields();
         })
       })
       .catch((info) => {
