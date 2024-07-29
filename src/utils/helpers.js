@@ -65,6 +65,9 @@ export const getBreadCrumbLabel = (item) => {
         case "rendez-vous":
             label = "Rendez-vous"
             break;
+        case "mon-agenda":
+            label = "Mon agenda"
+            break;
         case "patients":
             label = "Patients"
             break;

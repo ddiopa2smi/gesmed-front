@@ -128,6 +128,13 @@ const MySpace = () => {
                     onClick : ()=>{navigate("/myspace/rendez-vous")}
                 },
                 space === "smed" && {
+                    key: 'mon-agenda',
+                    icon: <CalendarOutlined  />,
+                    label: "Mon agenda" , 
+                    title: "Mon agenda" , 
+                    onClick : ()=>{navigate("/myspace/mon-agenda")}
+                },
+                space === "smed" && {
                     key: 'patients',
                     icon: <TeamOutlined  />,
                     label: "Liste des patients" , 
@@ -296,6 +303,9 @@ const MySpace = () => {
                 break;
             case "new-rv":
                 setCurrentSelectedKeys("patients");
+                break;
+            case "mon-agenda":
+                setCurrentSelectedKeys("mon-agenda");
                 break;
             case "dossier":
                 setCurrentSelectedKeys("patients");
