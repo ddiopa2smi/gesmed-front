@@ -41,7 +41,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
             onFinish={createRV}
         >
             <Title level={4} > Patient {currentRecord?.num_patient} / {currentRecord?.prenom_patient} {currentRecord?.nom_patient} </Title>
-            <Row>
+            {/* <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item 
                         name="medecin" 
@@ -105,7 +105,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                         <DatePicker placeholder='Sélectionner' showTime  />
                     </Form.Item>
                 </Col>
-            </Row>
+            </Row> */}
            
             <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>

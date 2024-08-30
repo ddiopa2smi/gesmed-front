@@ -3,6 +3,8 @@ import { Card, Flex, Space, Typography, theme } from 'antd'
 import React from 'react'
 import medicine_image from './../../assets/medicine_image.svg'
 import pharma_image from './../../assets/pharma_image.svg'
+import dentist_image from './../../assets/dentist_image.svg'
+import gynecologie_image from './../../assets/gynecologie_image.svg'
 import { Link } from 'react-router-dom'
 const {Text} = Typography;
 function Home() {
@@ -27,6 +29,22 @@ function Home() {
                         <Link to={"/myspace/dashboard"}>
                             <Card className='home-card' >
                                 <img src={pharma_image} alt='pharma_image' onClick={()=>{sessionStorage.setItem("space","spharma")}} />
+                            </Card>
+                        </Link>
+                    </Flex>
+                    <Flex vertical  align='center'>
+                        <Text> Service Dentiste</Text>
+                        <Link to={"/espace-dentist"}>
+                            <Card className='home-card' >
+                                <img src={dentist_image} alt='dentist_image' onClick={()=>{sessionStorage.setItem("space","sdentist")}} />
+                            </Card>
+                        </Link>
+                    </Flex>
+                    <Flex vertical  align='center'>
+                        <Text> Service Gynécologie</Text>
+                        <Link to={"/espace-gynecologie"}>
+                            <Card className='home-card' >
+                                <img src={gynecologie_image} alt='gynecologie_image' onClick={()=>{sessionStorage.setItem("space","sgynecologie")}} />
                             </Card>
                         </Link>
                     </Flex>

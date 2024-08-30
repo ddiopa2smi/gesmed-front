@@ -1,5 +1,5 @@
 import React, { useState , useEffect } from 'react'
-import { Modal, Button, Card,Col,DatePicker,Form,Row,Typography, message, Space, Tooltip, Spin, Flex} from "antd"
+import { Modal, Button, Card,Col,DatePicker,Form,Row,Typography, message, Space, Tooltip, Spin, Flex, Tree} from "antd"
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router';
 import TextArea from 'antd/es/input/TextArea';
@@ -16,6 +16,70 @@ import BackButton from '../../components/common/BackButton/BackButton';
 
 const {Title} = Typography;
 
+const options = [
+  {
+    label: "Registre d'accueil",
+    value: 'registre_accueil',
+  },
+  {
+    label: 'Résultats NFS',
+    value: 'resultat_nfs',
+  },
+  {
+    label: 'Résultats SKAO',
+    value: 'resultat_skao',
+  },
+  {
+    label: 'Résultats ECBU',
+    value: 'resultat_ecbu',
+  },
+  {
+    label: 'Résultats SRV',
+    value: 'resultat_srv',
+  },
+  {
+    label: 'Résultats TB',
+    value: 'resultat_tb',
+  },
+  {
+    label: 'Résultats divers',
+    value: 'resultat_divers',
+  },
+  {
+    label: 'Résultats Biochimie (référence bulletin analyse)',
+    value: 'resultat_biochimie',
+  },
+  {
+    label: 'Résultats glycémie',
+    value: 'resultat_glycemie',
+  },
+  {
+    label: 'PV VIH (référence bulletin PCR,CV)',
+    value: 'pv_vih',
+  },
+  {
+    label: 'Palu (GE,TDR,codification)',
+    value: 'palu',
+  },
+  {
+    label: "Bulletin d'analyse",
+    value: 'bulletin_analyse',
+  },
+  {
+    label: 'Bulletin de demande de sang',
+    value: 'bulletin_demande_sang',
+  },
+  {
+    label: 'Régistre bio-Ndar',
+    value: 'registre_bio_ndar',
+  },
+  {
+    label: 'Régistre Gen Expert et IDRt',
+    value: 'registre_gen_expert',
+  }
+];
+
+
 function Analyse() {
   const navigate = useNavigate();
   const userConnected  = JSON.parse(sessionStorage.getItem("userConnected"));
@@ -28,6 +92,10 @@ function Analyse() {
 
   const [analysesPrescrites , setAnalysesPrescrites] = useState(editPrescription?.listActes || []);
   const currentPatient  = JSON.parse(sessionStorage.getItem("currentPatient"));
+
+  const onChange = (checkedValues) => {
+    console.log('checked = ', checkedValues);
+  };
 
   const save = () => {
     form
@@ -97,6 +165,21 @@ function Analyse() {
             layout="vertical"
             onFinish={save}
         >
+            <Tree
+                checkable
+                //onCheck={onCheck}
+                //checkedKeys={header}
+                //treeData={treeData}
+                treeData={options.map((item)=>{
+                  return {
+                    key : item?.value,
+                    title : item?.label
+                  }
+                })}
+                selectable={false}
+                //height={300}
+            /> 
+
             <Row gutter={[24,24]} align={"middle"} >
               <Col xs={24} sm={24} md={8} lg={8} xl={8} >
                 <Form.Item 
@@ -190,6 +273,7 @@ function Analyse() {
             
           </Form>
 
+         
           <Modal 
               title={"Nouvelle prescription analyse"}
               footer={null}
