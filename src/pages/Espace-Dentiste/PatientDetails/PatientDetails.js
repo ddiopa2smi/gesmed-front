@@ -1,5 +1,5 @@
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Card, Flex, Space, Tabs, Typography } from 'antd'
+import { Alert, Avatar, Button, Card, Col, Flex, Row, Space, Tabs, Timeline, Typography } from 'antd'
 import React from 'react'
 import teeth from "./../../../assets/numerotation-des-dents.jpg"
 import ToothComponent from '../components/ToothComponent';
@@ -9,27 +9,47 @@ function PatientDetails() {
         {
           key: '1',
           label: 'Informations du patient',
-          children: 'Content of Tab Pane 1',
+          children: 'Informations du patient',
         },
         {
           key: '2',
           label: 'Historique des rendez-vous',
-          children: 'Content of Tab Pane 2',
+          children: 'Historique des rendez-vous',
         },
         {
           key: '3',
           label: 'Traitements à venir',
-          children: 'Content of Tab Pane 3',
+          children: 'Traitements à venir',
         },
         {
             key: '4',
             label: 'Enregistrement médical',
             children: <Card>
-             <Flex justify='space-between' align='center' >
-             <ToothComponent />
-              <img src={teeth} height={500} width={500} alt="teeth" style={{objectFit: "cover"}} />
-              
-             </Flex>
+              <Row gutter={[24,24]} align='middle' >
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                  <ToothComponent />
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                  <Timeline
+                    items={[
+                      {
+                        children: 'Create a services site 2015-09-01',
+                      },
+                      {
+                        children: <>
+                          <Alert message="Informational Notes" type="info" showIcon />
+                        </>,
+                      },
+                      {
+                        children: 'Technical testing 2015-09-01',
+                      },
+                      {
+                        children: 'Network problems being solved 2015-09-01',
+                      },
+                    ]}
+                  />
+                </Col>
+              </Row>
               
             </Card>,
         },

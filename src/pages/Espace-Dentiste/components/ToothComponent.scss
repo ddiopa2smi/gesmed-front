@@ -1,9 +1,9 @@
 .circle-container {
     position: relative;
-    width: 500px;
-    height: 500px;
+    width: 100%;
+    height:  50vh;
     margin: 0 auto;
-    border: solid red 1px;
+    //border: solid red 1px;
 }
   
 .icon {
@@ -12,5 +12,10 @@
     left: 50%;
     //transform: translate(-50%,-50%);
     transform-origin: center center;
+    width: auto;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
   
