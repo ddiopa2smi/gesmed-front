@@ -36,7 +36,10 @@ import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation
 import GestionPassword from "./pages/GestionPassword/GestionPassword";
 import GestionFicheProduits from "./pages/GestionFicheProduits/GestionFicheProduits";
 import ProtectedRoute from "./components/specific/ProtectedRoute/ProtectedRoute";
-
+import AgendaMedecin from "./pages/AgendaMedecin/AgendaMedecin";
+import { gynecologieRouter } from "./pages/Espace-Gynecologue/GynecologieRouting.tsx";
+import { dentistRouter } from "./pages/Espace-Dentiste/Routing.tsx";
+import { pharmacieRouter } from "./pages/Espace-Pharmacie/Routing.tsx";
 export const router = createBrowserRouter(
     [
         {
@@ -71,6 +74,10 @@ export const router = createBrowserRouter(
                 {
                     path : "rendez-vous",
                     element : <RendezVous />
+                },
+                {
+                    path : "mon-agenda",
+                    element : <AgendaMedecin />
                 },
                 {
                     path : "patients",
@@ -260,7 +267,11 @@ export const router = createBrowserRouter(
                     path : "*",
                     element : <NotFound />
                 },
+                
             ]
         },
+        pharmacieRouter,
+        gynecologieRouter ,
+        dentistRouter 
     ]
 )

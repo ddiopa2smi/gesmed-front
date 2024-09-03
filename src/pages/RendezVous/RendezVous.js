@@ -58,7 +58,7 @@ function RendezVous() {
     useEffect(() => {
       
     }, [segmentedValue])
-    
+
 
     return (
         <Card loading={isLoading} >

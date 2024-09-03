@@ -25,6 +25,7 @@ function FicheProduit() {
     const currentRecord = state?.currentRecord;
     const [form] = Form.useForm();
     const {data : listMedicaments , isLoading , error} = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
+    //console.log(listMedicaments)
     const {data : familleMedocsList , isLoading : familleMedocsListLoading , onRefresh : listFamilleMedocRefresh} = useFetch(endpoints.familleMedoc.LIST);
     const {data : conditionnementsList , isLoading : conditionnementsListLoading , onRefresh : conditionnementsListRefresh} = useFetch(endpoints.conditionnements.LIST);
     const {data : formesGaleniqueList , isLoading : formesGaleniqueListLoading , onRefresh : formesGaleniqueListRefresh} = useFetch(endpoints.forme_galenique.LIST);
@@ -224,6 +225,27 @@ function FicheProduit() {
                 }}
             >
                 <Row gutter={[24,24]} >
+                    <Col xs={24} sm={12} md={8} lg={12} xl={12} >
+                        <Form.Item 
+                            label="DCI (Dénomination commune internationale)"
+                            name="dci" 
+                        >
+                            <Select
+                                style={{width:'100%',background:"transparent"}}
+                                showSearch
+                                placeholder="Choisir..."
+                                optionFilterProp="children" 
+                                filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                loading={isLoading}
+                            >     
+                                {
+                                    listMedicaments.map((item)=>(
+                                        <Option key={item.codeacte}  value={item.codeacte} > {item.libacte} </Option>
+                                    ))
+                                }  
+                            </Select>
+                        </Form.Item>
+                    </Col>
                     <Col xs={24} sm={12} md={8} lg={12} xl={12} >
                         <Form.Item 
                             label="Produit"

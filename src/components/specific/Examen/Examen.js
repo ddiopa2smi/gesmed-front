@@ -1,11 +1,11 @@
-import { Col, Form, Radio, Row, Typography, Card, InputNumber, Checkbox, message,Divider } from 'antd';
+import { Col, Form, Radio, Row, Typography, Card, InputNumber, Checkbox, message,Divider, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { postActions } from '../../../actions/actions';
 import { endpoints } from '../../../constants/endpoints.constants';
 import FormFooter from '../../common/FormFooter/FormFooter';
 
 const {Text} = Typography;
-
+const {Option} = Select;
 function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
     const [form] = Form.useForm();
     const [loading , setLoading] = useState(false);
@@ -272,7 +272,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                     </Row>
                     <Divider orientation="left" > Urine </Divider>
                     <Row gutter={[12,12]} >
-                            <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
+                            <Col xs={24} sm={12} md={8} lg={6} xl={6}  >
                                 <Form.Item 
                                     label="G"
                                     name={"urine_gl"} 
@@ -280,7 +280,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     <InputNumber min={0} placeholder='G' style={{width : "100%"}}/>
                                 </Form.Item> 
                             </Col>
-                            <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
+                            <Col xs={24} sm={12} md={8} lg={6} xl={6}  >
                                 <Form.Item 
                                     label="CC"
                                     name={"urine_cc"} 
@@ -288,13 +288,43 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     <InputNumber min={0} placeholder='CC' style={{width : "100%"}}/>
                                 </Form.Item> 
                             </Col>
-                            <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
+                            <Col xs={24} sm={12} md={8} lg={6} xl={6}  >
                                 <Form.Item 
                                     label="ALB"
                                     name={"urine_alb"} 
                                 >
                                     <InputNumber min={0} placeholder='ALB' style={{width : "100%"}}/>
                                 </Form.Item> 
+                            </Col>
+
+                            {/* Nouveau */}
+                            <Col  xs={24} sm={12} md={8} lg={6} xl={6}>
+                                <Form.Item 
+                                    name="coloration_urine" 
+                                    label="Coloration urine"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: 'Veuillez sélectionner ',
+                                        },
+                                    ]}
+                                    //initialValue={dayjs(new Date())}
+                                >
+                                    <Select
+                                        style={{width:'100%',background:"transparent"}}
+                                        showSearch
+                                        placeholder="Coloration urine"
+                                        optionFilterProp="children" 
+                                        filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                                        //filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                        loading={false}
+                                    >    
+                                        <Option key={1}  value={"JAUNE"} > JAUNE </Option>
+                                        <Option key={2}  value={"MAMBRE"} > MAMBRE </Option>
+                                        <Option key={3}  value={"MARRON"} > MARRON </Option>
+                                                    
+                                    </Select>
+                                </Form.Item>
                             </Col>
                         </Row>
                 </Card>
