@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import FormFooter from '../../../components/common/FormFooter/FormFooter'
-import { Button, Card, Col, DatePicker, Divider, Flex, Form, Input, Row, Select, Space, Typography } from 'antd'
+import { Button, Card, Col, DatePicker, Divider, Flex, Form, Input, Modal, Row, Select, Space, Typography } from 'antd'
 import BackButton from '../../../components/common/BackButton/BackButton'
 import ReloadButton from '../../../components/common/ReloadButton/ReloadButton'
 import AddAndEditDropdown from '../../../components/common/AddAndEditDropdown/AddAndEditDropdown'
@@ -74,7 +74,44 @@ function Diagnostic() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const [loading , setLoading] = useState(false);
+    const [pathologieSelected  , setPathologieSelected] = useState(null);
+    const [motifSelected  , setMotifSelected] = useState(null);
+    const [regionSelected  , setRegionSelected] = useState(null);
+    
+    const [open , setOpen] = useState(false);
+    const [currentSelectableTask , setCurrentSelectableTask] = useState("");
+    const [operationType , setOperationType] = useState(null);
 
+    const itemsMotif = [
+        {
+            key: '0',
+            label: (<span onClick={()=>{openModal("add","MOTIF")}} >Ajouter</span>) ,
+        },
+        {
+            label: <span onClick={()=>{openModal("update","MOTIF")}} >Modifier</span>,
+            key: '1',
+            disabled : motifSelected === null ? true : false
+        },
+    ];
+
+    const itemsPathologie = [
+        {
+            label: <span onClick={()=>{openModal("add","PATHOLOGIE")}} >Ajouter</span> ,
+            key: '0',
+        },
+        {
+            label: <span onClick={()=>{openModal("update","PATHOLOGIE")}} >Modifier</span>,
+            key: '1',
+            disabled : pathologieSelected === null ? true : false
+        },
+    ];
+
+
+    const openModal = (operation , selectableTask) => {
+        setOpen(true);
+        setOperationType(operation);
+        setCurrentSelectableTask(selectableTask);
+    }
     const save = () => {
         console.log("save here")
     }
@@ -165,22 +202,6 @@ function Diagnostic() {
                                 name="code_patho" 
                                 style={{width:"90%"}}
                             >
-                                
-                                {/* <Select
-                                    style={{width:'100%',background:"transparent"}}
-                                    showSearch
-                                    placeholder="Pathologie"
-                                    optionFilterProp="children" 
-                                    loading={pathologiesLoading}
-                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                >     
-                                    {
-                                        pathologies.map((item , key)=>(
-                                            <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
-                                        ))
-                                    }
-                                        
-                                </Select> */}
                                 <Select
                                     style={{width:'100%',background:"transparent"}}
                                     showSearch
@@ -197,7 +218,7 @@ function Diagnostic() {
                                         
                                 </Select>
                             </Form.Item>
-                            <AddAndEditDropdown items={[]} />
+                            <AddAndEditDropdown items={itemsPathologie} />
                         </Flex>        
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
@@ -221,7 +242,7 @@ function Diagnostic() {
                                         }
                                 </Select>
                             </Form.Item>
-                            <AddAndEditDropdown items={[]} />
+                            <AddAndEditDropdown items={itemsMotif} />
                         </Flex>
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
@@ -278,7 +299,7 @@ function Diagnostic() {
 
             </Form>
 
-            {/* <Modal
+            <Modal
                 title={currentSelectableTask === "PATHOLOGIE" && "Pathologie" || currentSelectableTask === "MOTIF" && "Motif" || currentSelectableTask === "REGION" && "Région" }
                 open={open}
                 //width={700}
@@ -291,13 +312,25 @@ function Diagnostic() {
                 footer={null}
                 destroyOnClose
             >
-                {currentSelectableTask === "PATHOLOGIE" && <AddPathologie  setOpen={setOpen} operationType={operationType} onRefresh={pathologiesRefreshList} currentRecord={pathologieSelected} /> }
+                {
+                    currentSelectableTask === "PATHOLOGIE" && 
+                    // <AddPathologie  setOpen={setOpen} operationType={operationType} onRefresh={pathologiesRefreshList} currentRecord={pathologieSelected} /> 
+                    <></>
+                }
 
-                {currentSelectableTask === "MOTIF" && <AddMotif  setOpen={setOpen} operationType={operationType} onRefresh={motifsRefreshList} currentRecord={motifSelected} /> }
+                {
+                    currentSelectableTask === "MOTIF" && 
+                    // <AddMotif  setOpen={setOpen} operationType={operationType} onRefresh={motifsRefreshList} currentRecord={motifSelected} /> 
+                    <></>
+                }
 
-                {currentSelectableTask === "REGION" && <AddRegion  setOpen={setOpen} operationType={operationType} onRefresh={regionsRefreshList} currentRecord={regionSelected} />}
+                {
+                    currentSelectableTask === "REGION" && 
+                    // <AddRegion  setOpen={setOpen} operationType={operationType} onRefresh={regionsRefreshList} currentRecord={regionSelected} />
+                    <></>
+                }
                 
-            </Modal> */}
+            </Modal>
             
             
         </Card>
