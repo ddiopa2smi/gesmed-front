@@ -1,15 +1,49 @@
 import { UserOutlined } from '@ant-design/icons';
-import { Alert, Avatar, Button, Card, Col, Flex, Row, Space, Tabs, Timeline, Typography } from 'antd'
+import { Alert, Avatar, Button, Card, Col, Descriptions, Flex, Row, Space, Tabs, Timeline, Typography } from 'antd'
 import React from 'react'
 import teeth from "./../../../assets/numerotation-des-dents.jpg"
 import ToothComponent from '../components/ToothComponent';
+import { useLocation } from 'react-router';
+import NotSpecified from '../../../components/common/NotSpecified/NotSpecified';
+import { formatDate } from '../../../utils/helpers';
 const  {Text , Title} = Typography;
 function PatientDetails() {
+    const location = useLocation();
+    const patient = location.state.currentPatient;
     const items = [
         {
           key: '1',
           label: 'Informations du patient',
-          children: 'Informations du patient',
+          children: <Descriptions
+            column={2}
+            layout="horizontal" /*layout={window.screen.height < 992 && 'vertical'}*/
+          >
+            <Descriptions.Item label="Nom">
+              {patient?.nom_patient || <NotSpecified />}
+            </Descriptions.Item>
+            <Descriptions.Item label="Prénom">
+              {patient?.prenom_patient || <NotSpecified />}
+            </Descriptions.Item>
+            <Descriptions.Item label="Sexe">
+              {patient?.sexe_patient || <NotSpecified />}
+            </Descriptions.Item>
+            <Descriptions.Item label="Date de naissance">
+              {(patient?.datenaiss_patient &&
+                formatDate(patient?.datenaiss_patient)) || <NotSpecified />}
+            </Descriptions.Item>
+            <Descriptions.Item label="Age">
+              {`${patient?.age_patient} an(s)` || <NotSpecified />}
+            </Descriptions.Item>
+            <Descriptions.Item label="Groupe sanguin">
+              {patient?.group_sanguin || <NotSpecified />}
+            </Descriptions.Item>
+            <Descriptions.Item label="Téléphone">
+              {patient?.tel_patient || <NotSpecified />}
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {patient?.email_patient || <NotSpecified />}
+            </Descriptions.Item>
+          </Descriptions>,
         },
         {
           key: '2',
@@ -57,9 +91,9 @@ function PatientDetails() {
     return (
         <Card>
             <Flex justify="space-between" align="center">
-                <Space align='start' >
+                <Space align="end" >
                     <Avatar  size={64} icon={<UserOutlined/>} />
-                    <Title level={3}>Mr Mohammed</Title>
+                    <Title level={3}> {patient?.prenom_patient} {patient?.nom_patient} </Title>
                 </Space>
                 <Button type='primary' >Créer un rendez-vous</Button>
             </Flex>

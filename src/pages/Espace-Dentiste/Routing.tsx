@@ -7,6 +7,7 @@ import Patients from "./Patients/Patients";
 import Treatments from "./Treatments/Treatments";
 import Staff from "./Staff/Staff";
 import PatientDetails from "./PatientDetails/PatientDetails";
+import Diagnostic from "./Diagnostic/Diagnostic";
 
 export const dentistRouter : RouteObject = {
     path : "espace-dentist",
@@ -33,7 +34,16 @@ export const dentistRouter : RouteObject = {
                 },
                 {
                     path : "details",
-                    element : <PatientDetails />
+                    children : [
+                        {
+                            path : "",
+                            element : <PatientDetails /> 
+                        },
+                        {
+                            path : "diagnostic",
+                            element : <Diagnostic /> 
+                        },
+                    ]
                 },
             ]
         },

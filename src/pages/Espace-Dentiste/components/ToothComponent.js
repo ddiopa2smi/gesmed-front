@@ -1,16 +1,19 @@
 import React, { useState } from 'react'
 import "./ToothComponent.scss"
-import { Button } from 'antd';
+import { Button, Modal, Typography } from 'antd';
+import { useNavigate } from 'react-router';
 
+const {Text} = Typography;
 const teethItems = Array.from({ length: 32 }, (_, index) => ({
   key: index + 1,
   isSelected: false,
   transformPosition: index * 11.3
 }));
 function ToothComponent() {
-
+  const navigate = useNavigate();
   const [items , setItems] = useState(teethItems);
-    
+  const [toothSelected , setToothSelected] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
   
     return (
         <div className='circle-container' >
@@ -27,12 +30,14 @@ function ToothComponent() {
                           element.isSelected = true
                         }
                       }
+                      setIsVisible(true)
+                      setToothSelected(element)
                     });
                     setItems([...copyItems])
                   }} 
                   className="icon" 
                   size="small"
-                  type='text' 
+                  type='text'   
                   key={index} 
                   style={{"transform": `rotate(${item.transformPosition}deg) translate(200px) rotate(${item.transformPosition === 0 ? item.transformPosition : (-item.transformPosition) }deg)` }} 
                 >
@@ -46,6 +51,19 @@ function ToothComponent() {
                 </Button>
               ))
             }
+
+            <Modal
+              open={isVisible}
+              onCancel={()=>{
+                setIsVisible(false);
+              }}
+            >
+              <Text>
+                {(toothSelected && toothSelected !== null) && `La dent ${toothSelected?.key} sélectionnée` }
+              </Text>
+              <br/>
+              <Button type="primary" onClick={()=>{navigate("/espace-dentist/patients/details/diagnostic", {replace : false})}}  >Diagnostiquer</Button>
+            </Modal>
         </div>
 
     )
