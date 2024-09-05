@@ -1,15 +1,30 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Alert, Avatar, Button, Card, Col, Descriptions, Flex, Row, Space, Tabs, Timeline, Typography } from 'antd'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import teeth from "./../../../assets/numerotation-des-dents.jpg"
 import ToothComponent from '../components/ToothComponent';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import NotSpecified from '../../../components/common/NotSpecified/NotSpecified';
 import { formatDate } from '../../../utils/helpers';
 const  {Text , Title} = Typography;
 function PatientDetails() {
+    const navigate = useNavigate();
     const location = useLocation();
     const patient = location.state.currentPatient;
+    
+    const queryParams = new URLSearchParams(location.search);
+    const [currentTab , setCurrentTab] = useState(queryParams.get("tab"));
+
+    const onChangeTab = (key) => {
+      setCurrentTab(key)
+      
+    }
+    useEffect(() => {
+      navigate(`/espace-dentist/patients/details?tab=${currentTab}`,{state : {currentPatient : patient} , replace : false});
+      return () => {
+      }
+    }, [currentTab])
+    
     const items = [
         {
           key: '1',
@@ -67,18 +82,16 @@ function PatientDetails() {
                   <Timeline
                     items={[
                       {
-                        children: 'Create a services site 2015-09-01',
-                      },
-                      {
                         children: <>
-                          <Alert message="Informational Notes" type="info" showIcon />
+                          &#129463;
+                          <Text> Diagnostic du {formatDate(new Date())} </Text>
+                          <br/>
+                          <br/>
+                          <Alert message="Carie de la dent" type="warning" showIcon />
                         </>,
                       },
                       {
                         children: 'Technical testing 2015-09-01',
-                      },
-                      {
-                        children: 'Network problems being solved 2015-09-01',
                       },
                     ]}
                   />
@@ -98,7 +111,7 @@ function PatientDetails() {
                 <Button type='primary' >Créer un rendez-vous</Button>
             </Flex>
             <br/>
-            <Tabs defaultActiveKey="1" items={items}  />
+            <Tabs defaultActiveKey="1" onChange={(activeKey)=> onChangeTab(activeKey)} activeKey={currentTab} items={items}  />
 
             
             

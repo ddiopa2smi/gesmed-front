@@ -3,7 +3,7 @@ import "./ToothComponent.scss"
 import { Button, Modal, Typography } from 'antd';
 import { useNavigate } from 'react-router';
 
-const {Text} = Typography;
+const {Text , Title} = Typography;
 const teethItems = Array.from({ length: 32 }, (_, index) => ({
   key: index + 1,
   isSelected: false,
@@ -29,9 +29,10 @@ function ToothComponent() {
                         }else{
                           element.isSelected = true
                         }
+                        setToothSelected(element)
                       }
                       setIsVisible(true)
-                      setToothSelected(element)
+                      
                     });
                     setItems([...copyItems])
                   }} 
@@ -57,12 +58,16 @@ function ToothComponent() {
               onCancel={()=>{
                 setIsVisible(false);
               }}
+              footer={null}
             >
-              <Text>
-                {(toothSelected && toothSelected !== null) && `La dent ${toothSelected?.key} sélectionnée` }
-              </Text>
               <br/>
-              <Button type="primary" onClick={()=>{navigate("/espace-dentist/patients/details/diagnostic", {replace : false})}}  >Diagnostiquer</Button>
+              <center>
+                <Title level={3}>
+                  {(toothSelected && toothSelected !== null) && `La dent ${toothSelected?.key} sélectionnée` }
+                </Title>
+                <br/>
+                <Button type="primary" onClick={()=>{navigate("/espace-dentist/patients/details/diagnostic", {replace : false})}}  >Diagnostiquer</Button>
+              </center>
             </Modal>
         </div>
 

@@ -63,7 +63,7 @@ function Patients() {
     }
 
     const onOpenMedicalFolder = (record) => {
-        navigate("/espace-dentist/patients/details",{state : {currentPatient : record} , replace : false});
+        navigate("/espace-dentist/patients/details?tab=2",{state : {currentPatient : record} , replace : false});
         sessionStorage.setItem("currentPatient",JSON.stringify(record))
     }
 
