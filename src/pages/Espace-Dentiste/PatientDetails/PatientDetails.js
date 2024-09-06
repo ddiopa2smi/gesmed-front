@@ -87,7 +87,17 @@ function PatientDetails() {
                           <Text> Diagnostic du {formatDate(new Date())} </Text>
                           <br/>
                           <br/>
-                          <Alert message="Carie de la dent" type="warning" showIcon />
+                          <Alert 
+                            message="Carie de la dent" 
+                            type="warning"  
+                            action={<>
+                              <Space>
+                                <Button size='small' type='link' onClick={null} >Prescrire</Button>
+                                <Button size='small' type='link' onClick={null} >Remèdes</Button>
+                              </Space>
+                            </>} 
+                            showIcon 
+                          />
                         </>,
                       },
                       {

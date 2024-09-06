@@ -702,8 +702,7 @@ const MySpace = () => {
                         collapsed={collapsed}
                         //width={250}
                         width={"20%"}
-                    >
-                            
+                    >  
                         {menu}
                     </Sider>
                 </div> 
@@ -797,18 +796,6 @@ const MySpace = () => {
                     </Header>
                     
                     <Content className='content' style={{marginLeft: screenWidth > 992 ? (collapsed ? "6%" : "20%") : 0}} >
-                        {
-                            space === "spharma" && <Title level={3} > Espace Pharmacie</Title>
-                        }
-                        {
-                            space === "sdentist" && <Title level={3} > Espace Odontologie (Dentiste)</Title>
-                        }
-                        {
-                            space === "smed" && <Title level={3} > Espace Médical</Title>
-                        }
-                        {
-                            space === "sgynecologie" && <Title level={3} > Espace Gynécologie</Title>
-                        }
                         
                         <Breadcrumb items={breadCrumbItems}/> 
                         <br/>
