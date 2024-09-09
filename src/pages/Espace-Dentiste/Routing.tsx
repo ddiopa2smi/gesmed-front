@@ -8,6 +8,8 @@ import Treatments from "./Treatments/Treatments";
 import Staff from "./Staff/Staff";
 import PatientDetails from "./PatientDetails/PatientDetails";
 import Diagnostic from "./Diagnostic/Diagnostic";
+import Peripherals from "./Peripherals/Peripherals";
+import NewPeripheral from "./NewPeripheral/NewPeripheral";
 
 export const dentistRouter : RouteObject = {
     path : "espace-dentist",
@@ -50,6 +52,19 @@ export const dentistRouter : RouteObject = {
         {
             path : "treatments",
             element : <Treatments />
+        },
+        {
+            path : "peripherals",
+            children : [
+                {
+                    path : "",
+                    element : <Peripherals /> 
+                },
+                {
+                    path : "new-peripheral",
+                    element : <NewPeripheral /> 
+                },
+            ]
         },
         {
             path : "staff",

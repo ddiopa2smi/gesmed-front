@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import "./MySpace.scss";
 import { Outlet, useLocation, useNavigate, /*useParams*/ } from 'react-router';
 //import { useDispatch, useSelector } from 'react-redux';
-import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined, LockOutlined} from '@ant-design/icons';
+import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined, LockOutlined, ThunderboltOutlined} from '@ant-design/icons';
 import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb, theme, AutoComplete, Input, Flex} from 'antd';
 //import { setLightMode , setDarkMode } from './../../reducers/theme.reducers';
 import {TbMoonStars} from "react-icons/tb";
@@ -256,6 +256,13 @@ const MySpace = () => {
             label: "Treatments" , 
             title: "Treatments" , 
             onClick : ()=>{navigate("/espace-dentist/treatments")}
+        },
+        space === "sdentist" && {
+            key: 'peripherals',
+            icon: <ThunderboltOutlined />,
+            label: "Périphériques" , 
+            title: "Périphériques" , 
+            onClick : ()=>{navigate("/espace-dentist/peripherals")}
         },
         space === "sdentist" && {
             key: 'staff',

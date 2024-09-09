@@ -3,7 +3,7 @@ import useFetch from '../../../utils/hooks/useFetch'
 import { endpoints } from '../../../constants/endpoints.constants'
 import { ClockCircleOutlined, DeleteOutlined, EditOutlined , ExportOutlined, FilterOutlined, FolderOutlined, HomeOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Button, Card, Flex, Space, Typography , Image, Dropdown, Modal ,message, Tooltip, Input } from 'antd'
+import { Breadcrumb, Button, Card, Flex, Space, Typography , Image, Dropdown, Modal ,message, Tooltip, Input, Tag } from 'antd'
 import { useNavigate } from 'react-router';
 import DataTable from '../../../components/common/DataTable/DataTable';
 import { deletePopup, formatDate, getTypePatient } from '../../../utils/helpers';
@@ -18,13 +18,92 @@ import ReloadButton from '../../../components/common/ReloadButton/ReloadButton';
 import ExcellExportButton from '../../../components/common/ExcellExportButton/ExcellExportButton';
 import AdvancedSearchButton from '../../../components/common/AdvancedSearchButton/AdvancedSearchButton';
 import SearchBar from '../../../components/common/SearchBar/SearchBar';
+import AddTreatment from '../components/AddTreatment/AddTreatment';
 
 
 const {Title , Text} = Typography;
 
+const data = [
+    {
+      key: '1',
+      nom_traitement: 'Consultation générale',
+      prix: 50,
+      duration_estimation: '30 min',
+      visite_type: 'Première visite',
+    },
+    {
+      key: '2',
+      nom_traitement: 'Blanchiment des dents',
+      prix: 200,
+      duration_estimation: '1h',
+      visite_type: 'Visite de suivi',
+    },
+    {
+      key: '3',
+      nom_traitement: 'Détartrage',
+      prix: 80,
+      duration_estimation: '45 min',
+      visite_type: 'Première visite',
+    },
+    {
+      key: '4',
+      nom_traitement: 'Extraction dentaire',
+      prix: 150,
+      duration_estimation: '1h 30 min',
+      visite_type: 'Urgence',
+    },
+    {
+      key: '5',
+      nom_traitement: 'Couronne dentaire',
+      prix: 500,
+      duration_estimation: '2h',
+      visite_type: 'Visite de suivi',
+    }
+];
+  
+const dataCopy = [
+    {
+      key: '1',
+      nom_traitement: 'Consultation générale',
+      prix: 50,
+      duration_estimation: '30 min',
+      visite_type: 'Première visite',
+    },
+    {
+      key: '2',
+      nom_traitement: 'Blanchiment des dents',
+      prix: 200,
+      duration_estimation: '1h',
+      visite_type: 'Visite de suivi',
+    },
+    {
+      key: '3',
+      nom_traitement: 'Détartrage',
+      prix: 80,
+      duration_estimation: '45 min',
+      visite_type: 'Première visite',
+    },
+    {
+      key: '4',
+      nom_traitement: 'Extraction dentaire',
+      prix: 150,
+      duration_estimation: '1h 30 min',
+      visite_type: 'Urgence',
+    },
+    {
+      key: '5',
+      nom_traitement: 'Couronne dentaire',
+      prix: 500,
+      duration_estimation: '2h',
+      visite_type: 'Visite de suivi',
+    }
+];
+  
+
+
 function Treatments() {
     const navigate = useNavigate();
-    const {data , dataCopy , setDataCopy , isLoading , onRefresh} = useFetch(endpoints.patients.LIST)
+    //const {data , dataCopy , setDataCopy , isLoading , onRefresh} = useFetch(endpoints.patients.LIST)
     const {getColumnSearchProps} = useSearch()
     const patientsList = data;
     const [open , setOpen] = useState(false);
@@ -55,22 +134,16 @@ function Treatments() {
                 .then((response)=>{
                     if (response.data.Deleted === true) {
                         message.success("Ligne retirée avec succès");
-                        onRefresh()
+                        //onRefresh()
                     }
                 })
             }
         })
     }
 
-    const onOpenMedicalFolder = (record) => {
+    const viewDetails = (record) => {
         navigate("/espace-dentist/patients/details?tab=2",{state : {currentPatient : record} , replace : false});
         sessionStorage.setItem("currentPatient",JSON.stringify(record))
-    }
-
-    const onCreateRV = (record) => {
-        setOperationType("rv");
-        setOpen(true);
-        setCurrentRecord({...record});
     }
 
     const onExport = () => {
@@ -96,13 +169,13 @@ function Treatments() {
                 <Space>
                     <SearchBar 
                         data={data}
-                        setDataCopy={setDataCopy}
-                        listKeys={['num_patient','nom_patient','prenom_patient']}
+                        //setDataCopy={setDataCopy}
+                        listKeys={['nom_traitement','prix']}
                     />
-                    <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
+                    {/* <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp; */}
                 </Space>
                 <Space>
-                    <ReloadButton onRefresh={onRefresh} /> &nbsp;&nbsp;
+                    <ReloadButton onRefresh={/*onRefresh*/null} /> &nbsp;&nbsp;
                     {/* <Tooltip title="Recherche avancée" >
                         <Button type='text' shape="circle" icon={<IoFilter size={20}/>} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
                     </Tooltip>  */}
@@ -129,46 +202,38 @@ function Treatments() {
             <br/>
 
             <DataTable 
-                dataSource={patientsList}
+                dataSource={data}
                 dataSourceCopy={dataCopy}
-                setDataSourceCopy={setDataCopy}
-                tableLoading={isLoading}
-                rowKey={(record)=>record.num_patient}
+                //setDataSourceCopy={setDataCopy}
+                //tableLoading={isLoading}
+                rowKey={(record)=>record.key}
                 //rowSelected
                 columns={[
                     {
-                        title: 'N°',
-                        dataIndex: 'num_patient',
-                        key: 'num_patient',
-                        ...getColumnSearchProps('num_patient')
+                        title: 'Nom du traitement',
+                        dataIndex: 'nom_traitement',
+                        key: 'nom_traitement',
+                        ...getColumnSearchProps('nom_traitement')
                     },
                     {
-                        title: 'Nom',
-                        dataIndex: 'nom_patient',
-                        key: 'nom_patient',
-                        sorter: (a, b) => a.nom_patient.charCodeAt(0) - b.nom_patient.charCodeAt(0),
-                        ...getColumnSearchProps('nom_patient')
+                        title: 'Prix',
+                        dataIndex: 'prix',
+                        key: 'prix',
+                        sorter: (a, b) => a.prix - b.prix,
+                        ...getColumnSearchProps('prix')
                     },
                     {
-                        title: 'Prénom',
-                        dataIndex: 'prenom_patient',
-                        key: 'prenom_patient',
-                        ...getColumnSearchProps('prenom_patient')
+                        title:  "Durée d'estimation",
+                        dataIndex: 'duration_estimation',
+                        key: 'duration_estimation',
+                        ...getColumnSearchProps('duration_estimation')
                     },
                     {
-                        title: 'Date RV',
-                        dataIndex: 'date_rv',
-                        key: 'date_rv',
+                        title: 'Type de visite',
+                        dataIndex: 'visite_type',
+                        key: 'visite_type',
                         render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {formatDate(record)} </span>
-                        </div>
-                    },
-                    {
-                        title: 'Date de création',
-                        dataIndex: 'date_creation',
-                        key: 'date_creation',
-                        render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {formatDate(record)} </span>
+                            <Tag color='cyan' > {record} </Tag>
                         </div>
                     },
                     {
@@ -178,23 +243,18 @@ function Treatments() {
                                     menu={{items :  
                                         [
                                             {
-                                                label: "Ouvrir Dossier Médical" ,
+                                                label: "Voir détails" ,
                                                 key: '0',
-                                                onClick : ()=>{onOpenMedicalFolder(record)},
-                                            },
-                                            {
-                                                label: "Créer RV" ,
-                                                key: '1',
-                                                onClick : ()=>{onCreateRV(record)} ,
+                                                onClick : ()=>{viewDetails(record)},
                                             },
                                             {
                                                 label: "Modifier",
-                                                key: '2',
+                                                key: '1',
                                                 onClick : ()=>{onEdit(record)} , 
                                             }, 
                                             {
                                                 label: "Supprimer" ,
-                                                key: '3',
+                                                key: '2',
                                                 onClick : ()=>{onDelete(record)}
                                             },
                                         ]
@@ -209,65 +269,22 @@ function Treatments() {
                 ]}
             />
 
-            <Modal 
-                // styles={{
-                //     header : {
-                //         background : "red"
-                //     }
-                // }}
-                title={
-                    (operationType === "add" && "Nouveau patient")||
-                    (operationType === "update" && "Mettre à jour les données") || 
-                    (operationType === "rv" && "Créer un Rendez-vous") ||  
-                    (operationType === "ads" && "Recherche avancée") || 
-                    (operationType === "exp" && "Exporter le document")  
-                } 
+            <Modal
+                title={operationType === "add" ? "Nouveau traitement" : "Mettre à jour les données"} 
                 open={open} 
                 onCancel={()=>{
                     setOpen(false);
                     setCurrentRecord(null);
                 }}
                 footer={null}
-                destroyOnClose={operationType=== "ads"? false : true}
+                destroyOnClose
             >
-                {
-                    (operationType === "add" || operationType === "update")  && 
-                    <AddPatient 
-                        setOpen={setOpen}
-                        operationType={operationType}
-                        onRefresh={onRefresh}
-                        currentRecord={currentRecord}
-                    />
-                }
-
-                {
-                    (operationType === "rv") && 
-                    <AddRv 
-                        setOpen={setOpen} 
-                        onRefresh={onRefresh}
-                        currentRecord={currentRecord}
-                    />
-                }
-
-                {
-                    (operationType === "ads") && 
-                    <PatientsAdvancedSearch 
-                        dataSource={patientsList}
-                        dataSourceCopy={dataCopy}
-                        setDataSourceCopy={setDataCopy}
-                        setOpen={setOpen}
-                    />
-                }
-
-                {
-                    (operationType === "exp") && 
-                    <ExportFile 
-                        title="Liste des patients"
-                        data={dataCopy}
-                        setOpen={setOpen}
-                    />
-                }
-                
+                <AddTreatment 
+                    setOpen={setOpen}
+                    operationType={operationType}
+                    //onRefresh={onRefresh}
+                    currentRecord={currentRecord}
+                />
             </Modal>
 
         </Card>
