@@ -41,34 +41,8 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
             onFinish={createRV}
         >
             <Title level={4} > Patient {currentRecord?.num_patient} / {currentRecord?.prenom_patient} {currentRecord?.nom_patient} </Title>
+            
             {/* <Row>
-                <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
-                    <Form.Item 
-                        name="medecin" 
-                        label="Médécin traitant"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Veuillez sélectionner le service',
-                            },
-                        ]}
-                        //initialValue={dayjs(new Date())}
-                    >
-                        <Select
-                            style={{width:'100%',background:"transparent"}}
-                            showSearch
-                            placeholder="Médécin traitant"
-                            optionFilterProp="children" 
-                            filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                            loading={false}
-                        >    
-                            <Option key={1}  value={"MEDECINE_GENERALE"} > MEDECINE GENERALE </Option>
-                                        
-                        </Select>
-                    </Form.Item>
-                </Col>
-            </Row>
-            <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item 
                         name="service" 
@@ -97,6 +71,33 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                         </Select>
                     </Form.Item>
                 </Col>
+
+                <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
+                    <Form.Item 
+                        name="medecin" 
+                        label="Médécin traitant"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Veuillez sélectionner le service',
+                            },
+                        ]}
+                        //initialValue={dayjs(new Date())}
+                    >
+                        <Select
+                            style={{width:'100%',background:"transparent"}}
+                            showSearch
+                            placeholder="Médécin traitant"
+                            optionFilterProp="children" 
+                            filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                            loading={false}
+                        >    
+                            <Option key={1}  value={"cheikh"} > Dr Cheickh DIOUF </Option>
+                                        
+                        </Select>
+                    </Form.Item>
+                </Col>
+
                 <Col xs={24} sm={24} md={24} lg={24} xl={24} >
                     <Form.Item 
                         label="Date du rendez-vous"
@@ -106,6 +107,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                     </Form.Item>
                 </Col>
             </Row> */}
+
            
             <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
