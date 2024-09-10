@@ -300,6 +300,36 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                             </Form.Item>
                         </Col>
                     </Row>
+                    <Row gutter={[24,24]} >
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                            <Form.Item
+                                name="profession_patient"
+                                label="Profession du patient"
+                                // rules={[
+                                //     {
+                                //         required: true,
+                                //         message: 'Champ obligatoire',
+                                //     },
+                                // ]}
+                            >
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                            <Form.Item
+                                name="profession_conjoint"
+                                label="Profession du conjoint"
+                                // rules={[
+                                //     {
+                                //         required: true,
+                                //         message: 'Champ obligatoire',
+                                //     },
+                                // ]}
+                            >
+                                <Input/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </>
             }
             <Row gutter={[24,24]} >

@@ -15,7 +15,7 @@ import { getBreadCrumbLabel, logoutPopup } from '../../utils/helpers';
 import LoadingBar from 'react-top-loading-bar';
 import { LoadingContext } from '../../utils/providers/LoadingProvider';
 import logo from './../../assets/logo.png'
-import { RiStethoscopeFill } from 'react-icons/ri';
+import { RiStethoscopeFill, RiStethoscopeLine } from 'react-icons/ri';
 
 const { Header, Sider, Content } = Layout;
 const { Countdown } = Statistic;
@@ -224,7 +224,27 @@ const MySpace = () => {
             title: "Accueil" , 
             onClick : ()=>{navigate("/espace-gynecologie/home")}
         },
-       
+        space === "sgynecologie" && {
+            key: 'patients',
+            icon: <TeamOutlined  />,
+            label: "Patients" , 
+            title: "Patients" , 
+            onClick : ()=>{navigate("/espace-gynecologie/patients")}
+        },
+        space === "sgynecologie" && {
+            key: 'appointments',
+            icon: <CalendarOutlined  />,
+            label: "Rendez-vous" , 
+            title: "Rendez-vous" , 
+            onClick : ()=>{navigate("/espace-gynecologie/appointments")}
+        },
+        space === "sgynecologie" && {
+            key: 'consultations',
+            icon: <RiStethoscopeLine />,
+            label: "Consultations" , 
+            title: "Consultations" , 
+            onClick : ()=>{navigate("/espace-gynecologie/consultations")}
+        },
     ]
 
 
