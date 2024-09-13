@@ -1,4 +1,4 @@
-import { Col, Form, Radio, Row, Typography, Card, InputNumber, Checkbox, message,Divider, Select, DatePicker } from 'antd';
+import { Col, Form, Radio, Row, Typography, Card, InputNumber, Checkbox, message,Divider, Select, DatePicker, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { postActions } from '../../../actions/actions';
 import { endpoints } from '../../../constants/endpoints.constants';
@@ -7,11 +7,13 @@ import FormFooter from '../../common/FormFooter/FormFooter';
 const {Text} = Typography;
 const {Option} = Select;
 function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
+    //console.log(currentRecord)
     const [form] = Form.useForm();
     const [loading , setLoading] = useState(false);
     const [isImcAlertVisible , setIsImcAlertVisible] = useState(false);
     const [imcAlert , setImcAlert] = useState("");
     const [regles, setRegles] =useState(false);
+    const [reglesDouloureuses, setReglesDouloureuses] =useState(false);
     
     const imcAlertMessage = (imc) => {
         if (imc<18.5) {
@@ -126,6 +128,13 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                 }
                 else if (!allValues.regles) {
                     setRegles(false)
+                }
+
+                if (allValues.regles_douloureuses) {
+                    setReglesDouloureuses(true)
+                }
+                else if (!allValues.regles_douloureuses) {
+                    setReglesDouloureuses(false)
                 }
             }}
             preserve={false}
@@ -372,44 +381,64 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Row gutter={[24,24]} >
-                        <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
-                            <Form.Item 
-                                label="Règles"
-                                name="regles" 
-                            >
-                                <Radio.Group>
-                                    <Radio value={true}>Oui</Radio>
-                                    <Radio value={false}>Non</Radio>
-                                </Radio.Group>
-                            </Form.Item>
-                        </Col>
-                        {
-                            regles &&
-                            <>
-                                <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
-                                    <Form.Item 
-                                        label="Règles douloureuses"
-                                        name="regles_douloureuses" 
-                                    >
-                                        <Radio.Group>
-                                            <Radio value={true}>Oui</Radio>
-                                            <Radio value={false}>Non</Radio>
-                                        </Radio.Group>
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12} md={8} lg={8} xl={8}  >
-                                    <Form.Item 
-                                        label="Dernières règles"
-                                        name="date_regle" 
-                                    >
-                                        <DatePicker placeholder='Date' format="DD/MM/YYYY" />
-                                    </Form.Item>
-                                </Col>
-                            </>
-                        }
-                        
-                    </Row>
+                    {
+                        (currentRecord && currentRecord.sexe_patient !== "MA") &&
+                        <Row gutter={[24,24]} >
+                            <Col xs={24} sm={12} md={6} lg={6} xl={6}  >
+                                <Form.Item 
+                                    label="Règles"
+                                    name="regles" 
+                                >
+                                    <Radio.Group>
+                                        <Radio value={true}>Oui</Radio>
+                                        <Radio value={false}>Non</Radio>
+                                    </Radio.Group>
+                                </Form.Item>
+                            </Col>
+                            {
+                                regles &&
+                                <>
+                                    <Col xs={24} sm={12} md={6} lg={6} xl={6}  >
+                                        <Form.Item 
+                                            label="Règles douloureuses"
+                                            name="regles_douloureuses" 
+                                        >
+                                            <Radio.Group>
+                                                <Radio value={true}>Oui</Radio>
+                                                <Radio value={false}>Non</Radio>
+                                            </Radio.Group>
+                                        </Form.Item>
+                                    </Col>
+                                    {
+                                        reglesDouloureuses && 
+                                        <Col xs={24} sm={12} md={6} lg={6} xl={6}  >
+                                            <Form.Item 
+                                                label="Ecoulement"
+                                                name="ecoulement" 
+                                            >
+                                                <Radio.Group>
+                                                    <Space direction="vertical" >
+                                                        <Radio value={"1"}>Faible</Radio>
+                                                        <Radio value={"2"}>Moyen</Radio>
+                                                        <Radio value={"3"}>Abondant</Radio>
+                                                    </Space>
+                                                </Radio.Group>
+                                            </Form.Item>
+                                        </Col>
+                                    }
+                                    <Col xs={24} sm={12} md={6} lg={6} xl={6}  >
+                                        <Form.Item 
+                                            label="Date des dernières règles"
+                                            name="date_regle" 
+                                        >
+                                            <DatePicker placeholder='Date' format="DD/MM/YYYY" />
+                                        </Form.Item>
+                                    </Col>
+                                </>
+                            }
+                            
+                        </Row>
+                    }
                     <Divider orientation="left" > Vision </Divider>
                     <Row gutter={[24,24]} >
                         <Col xs={24} sm={12} md={12} lg={12} xl={12} >

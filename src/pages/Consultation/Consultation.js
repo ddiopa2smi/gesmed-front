@@ -1,4 +1,4 @@
-import {Modal ,Card , Row , Col , Form,  Input , InputNumber , Typography , Select , Button, DatePicker, message, Flex, Divider, Space, Dropdown } from 'antd'
+import {Modal ,Card , Row , Col , Form,  Input , InputNumber , Typography , Select , Button, DatePicker, message, Flex, Divider, Space, Dropdown, Alert } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
@@ -48,6 +48,10 @@ function Consultation() {
     const [initConsultation , setInitConsultation] = useState(null);
     const [consultationDataLoading , setConsultationDataLoading] = useState(false)
     const [refetch , setRefetch] = useState(null)
+
+
+    const [isImcAlertVisible , setIsImcAlertVisible] = useState(false);
+    const [imcAlert , setImcAlert] = useState("");
 
     const refreshConsultation = () => {
         setRefetch(Date.now())
@@ -175,6 +179,34 @@ function Consultation() {
         })
     }
 
+
+    const imcAlertMessage = (imc) => {
+        let result = "";
+        if (imc<18.5) {
+            result+="Insuffisance pondérale (maigreur)";
+        }
+        else if (imc>= 18.5 && imc< 25) {
+            result+="Corpulence normale";
+        }
+        else if (imc>= 25 && imc< 30) {
+            setIsImcAlertVisible(true);
+            result+="Surpoids";
+        }
+        else if (imc>= 30 && imc< 35) {
+            result+="Obésité modérée";
+        }
+        else if (imc>= 35 && imc< 40) {
+            result+="Obésité sévère";
+        }
+        else if (imc >= 40) {
+            result+="Obésité morbide ou massive";
+        } 
+
+        return result;
+    }
+
+    
+    
     
    //console.log(initConsultation)
 
@@ -316,6 +348,7 @@ function Consultation() {
                                 setMotifSelected(element);
                             }
                         });
+                        form.setFieldValue("motif_ref",changedValues.code_motifcons)
                     }
 
                     if (changedValues.code_region) {
@@ -531,6 +564,7 @@ function Consultation() {
                         >
                             <InputNumber min={0} disabled />
                         </Form.Item>
+                        <Alert message={imcAlertMessage(form.getFieldValue("imc"))} />
                     </Col>
                 </Row>
 
@@ -593,6 +627,55 @@ function Consultation() {
                             label="Date fin repos"
                         >
                             <DatePicker disabled placeholder='Fin' format="dddd, DD MMMM YYYY" />
+                        </Form.Item>
+                        
+                    </Col>
+                </Row>
+                
+                <Divider>Référencement</Divider>
+                
+                <Row gutter={[24,24]}>
+                    
+                    <Col xs={24} sm={12} md={6} lg={6} xl={6} >
+                        <Form.Item 
+                            name="date_ref" 
+                            label="Date "
+                        >
+                            <DatePicker style={{color:"green"}} placeholder='Début' format="dddd, DD MMMM YYYY" />
+                        </Form.Item>
+                        
+                    </Col>
+                    <Col xs={24} sm={12} md={6} lg={6} xl={6} >
+                        <Form.Item 
+                            name="structure_ref" 
+                            label="Structure médicale"
+                        >
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12} md={6} lg={6} xl={6} >
+                        <Form.Item 
+                            name="motif_ref" 
+                            label="Motif"
+                        >
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12} md={6} lg={6} xl={6} >
+                        <Form.Item 
+                            name="moyen_transport_ref" 
+                            label="Moyen de transport"
+                        >
+                            <Select
+                                style={{width:'100%',background:"transparent"}}
+                                showSearch
+                                placeholder="Pathologie"
+                                optionFilterProp="children" 
+                                filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                            >     
+                               <Option key={"1"}  value={"ambulance"} > Ambulance </Option>
+                               <Option key={"2"}  value={"personnel"} > Personnel </Option>
+                            </Select>
                         </Form.Item>
                         
                     </Col>

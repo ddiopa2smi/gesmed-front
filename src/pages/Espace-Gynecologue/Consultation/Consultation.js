@@ -355,28 +355,38 @@ function Consultation() {
                     }
 
                     if (changedValues.grossesse_semaine) {
-                        console.log(changedValues.grossesse_semaine)
-                        if (changedValues.grossesse_semaine > 12) {
-                            setCpn({first : true})
-                        } else if(changedValues.grossesse_semaine <= 12 && changedValues.grossesse_semaine > 18 ){
-                            setCpn({first : true , second : true})
-                        } else if(changedValues.grossesse_semaine > 22){
-                            setCpn({first : true , second : true , third : true})
-                        } else if(changedValues.grossesse_semaine > 28){
-                            setCpn({first : true , second : true , third : true , fourth : true})
-                        } else if(changedValues.grossesse_semaine > 32){
-                            setCpn({first : true , second : true , third : true , fourth : true , fifth  : true})
-                        } else if(changedValues.grossesse_semaine > 36){
-                            setCpn({first : true , second : true , third : true , fourth : true , fifth  : true , sixth : true})
-                        } else if(changedValues.grossesse_semaine > 38){
-                            setCpn({first : true , second : true , third : true , fourth : true , fifth  : true , sixth : true , seventh : true})
-                        } else if(changedValues.grossesse_semaine >= 40){
+                        if (changedValues.grossesse_semaine >= 0 && changedValues.grossesse_semaine < 12) { 
+                            setCpn({first : false , second : true , third : true , fourth : true, fifth  : true , sixth : true , seventh : true , eighth : true})
+                            form.setFieldValue("cpn","cpn1")
+                        } else if (changedValues.grossesse_semaine >= 12 && changedValues.grossesse_semaine < 18) { 
+                            setCpn({first : true , second : false , third : true , fourth : true, fifth  : true , sixth : true , seventh : true , eighth : true})
+                            form.setFieldValue("cpn","cpn2")
+                        } else if(changedValues.grossesse_semaine >= 18 && changedValues.grossesse_semaine < 22 ){
+                            setCpn({first : true , second : true , third : false , fourth : true, fifth  : true , sixth : true , seventh : true , eighth : true})
+                            form.setFieldValue("cpn","cpn3")
+                        } else if(changedValues.grossesse_semaine >= 22 && changedValues.grossesse_semaine < 28){
+                            setCpn({first : true , second : true , third : true , fourth : false, fifth  : true , sixth : true , seventh : true , eighth : true})
+                            form.setFieldValue("cpn","cpn4")
+                        } else if(changedValues.grossesse_semaine >= 28 && changedValues.grossesse_semaine < 32){
+                            setCpn({first : true , second : true , third : true , fourth : true, fifth  : false , sixth : true , seventh : true , eighth : true})
+                            form.setFieldValue("cpn","cpn5")
+                        } else if(changedValues.grossesse_semaine >= 32 && changedValues.grossesse_semaine < 36){
+                            setCpn({first : true , second : true , third : true , fourth : true, fifth  : true , sixth : false , seventh : true , eighth : true})
+                            form.setFieldValue("cpn","cpn6")
+                        } else if(changedValues.grossesse_semaine >= 36 && changedValues.grossesse_semaine < 38){
+                            setCpn({first : true , second : true , third : true , fourth : true, fifth  : true , sixth : true , seventh : false , eighth : true})
+                            form.setFieldValue("cpn","cpn7")
+                        } else if(changedValues.grossesse_semaine >= 38 && changedValues.grossesse_semaine <= 40){
+                            setCpn({first : true , second : true , third : true , fourth : true, fifth  : true , sixth : true , seventh : true , eighth : false})
+                            form.setFieldValue("cpn","cpn8")
+                        } else if(changedValues.grossesse_semaine >40){
                             setCpn({first : true , second : true , third : true , fourth : true, fifth  : true , sixth : true , seventh : true , eighth : true})
                         }
                     }
 
                 }}
 
+            
                 onFinish={save}
             >
                 <Divider/>
@@ -414,19 +424,6 @@ function Consultation() {
                                 name="code_motifcons" 
                                 style={{width:"90%"}}
                             >
-                                {/* <Select
-                                    showSearch
-                                    placeholder="Motif de consultation"
-                                    optionFilterProp="children" 
-                                    loading={motifsLoading}
-                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                >     
-                                        {
-                                            motifs.map((item , key)=>(
-                                                <Option key={key}  value={item.code_motifcons} > {item.libelle_motifcons} </Option>
-                                            ))
-                                        }
-                                </Select> */}
                                 <Select
                                     showSearch
                                     placeholder="Motif de consultation"
@@ -490,15 +487,17 @@ function Consultation() {
                                     label="CPN"
                                     name="cpn" 
                                 >
-                                    <Radio.Group>
-                                        <Radio value={"cpn1"} disabled={cpn.first} >CPN1 (0 à 12 semaines) </Radio>
-                                        <Radio value={"cpn2"} disabled={cpn.second} >CPN2 (18 semaines)  </Radio>
-                                        <Radio value={"cpn3"} disabled={cpn.third} >CPN3 (22 semaines) </Radio>
-                                        <Radio value={"cpn4"} disabled={cpn.fourth} >CPN4 (28 semaines) </Radio>
-                                        <Radio value={"cpn5"} disabled={cpn.fifth} >CPN5 (32 semaines) </Radio>
-                                        <Radio value={"cpn6"} disabled={cpn.sixth} >CPN6 (36 semaines) </Radio>
-                                        <Radio value={"cpn7"} disabled={cpn.seventh} >CPN7 (38 semaines) </Radio>
-                                        <Radio value={"cpn8"} disabled={cpn.eighth} >CPN8 (40 semaines) </Radio>
+                                    <Radio.Group >
+                                        <Space direction="vertical"> 
+                                            <Radio value={"cpn1"} disabled={cpn.first} >CPN1 (0 à 12 semaines) </Radio>
+                                            <Radio value={"cpn2"} disabled={cpn.second} >CPN2 (12 à 18 semaines) </Radio>
+                                            <Radio value={"cpn3"} disabled={cpn.third} >CPN3 (18 à 22 semaines) </Radio>
+                                            <Radio value={"cpn4"} disabled={cpn.fourth} >CPN4 (22 à 28 semaines) </Radio>
+                                            <Radio value={"cpn5"} disabled={cpn.fifth} >CPN5 (28 à 32 semaines) </Radio>
+                                            <Radio value={"cpn6"} disabled={cpn.sixth} >CPN6 (32 à 36 semaines) </Radio>
+                                            <Radio value={"cpn7"} disabled={cpn.seventh} >CPN7 (36 à 38 semaines) </Radio>
+                                            <Radio value={"cpn8"} disabled={cpn.eighth} >CPN8 (38 à 40 semaines) </Radio>
+                                        </Space>
                                     </Radio.Group>
                                 </Form.Item>
                             </Flex>

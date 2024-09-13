@@ -7,6 +7,7 @@ import Appointements from "./Appointments/Appointments";
 import Patients from "./Patients/Patients";
 import PatientDetails from "./PatientDetails/PatientDetails";
 import Consultation from "./Consultation/Consultation";
+import DetailsConsultation from "./DetailsConsultation/DetailsConsultation";
 
 export const gynecologieRouter : RouteObject = {
     path : "espace-gynecologie",
@@ -48,7 +49,16 @@ export const gynecologieRouter : RouteObject = {
         },
         {
             path : "consultations",
-            element : <Consultations />
+            children : [
+                {
+                    path : "",
+                    element : <Consultations /> 
+                },
+                {
+                    path : "details-consultation",
+                    element : <DetailsConsultation /> 
+                },
+            ]
         },
     ]
 }
