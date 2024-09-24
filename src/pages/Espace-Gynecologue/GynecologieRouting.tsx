@@ -22,13 +22,15 @@ export const gynecologieRouter : RouteObject = {
             element : <Home />
         },
         {
+            id : "patients",
             path : "patients",
             children : [
                 {
-                    path : "",
-                    element : <Patients />
+                   index : true,
+                    element : <Patients />,
                 },
                 {
+                    id : "details",
                     path : "details",
                     children : [
                         {
@@ -36,9 +38,23 @@ export const gynecologieRouter : RouteObject = {
                             element : <PatientDetails /> 
                         },
                         {
+                            path : ":id",
+                            children : [
+                                {
+                                    index : true,
+                                    element : <PatientDetails /> 
+                                },
+                                {
+                                    path : "consultation",
+                                    element : <Consultation /> 
+                                },
+                            ]
+                        },
+                        {
                             path : "consultation",
                             element : <Consultation /> 
                         },
+                        
                     ]
                 },
             ]

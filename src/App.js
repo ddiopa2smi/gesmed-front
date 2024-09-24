@@ -35,8 +35,8 @@ function App() {
                 itemSelectedColor : '#ffff'
               },
               Menu : {
-                itemSelectedBg : PRIMARY_COLOR,
-                itemSelectedColor : "#ffffff",
+                itemSelectedBg : isDark ? PRIMARY_COLOR  : "hsl(145, 63%, 95%)",
+                itemSelectedColor : isDark ? "#fff"  : PRIMARY_COLOR  ,
               }
             }
         }}

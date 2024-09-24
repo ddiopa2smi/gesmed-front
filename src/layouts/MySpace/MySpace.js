@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import "./MySpace.scss";
-import { Outlet, useLocation, useNavigate, /*useParams*/ } from 'react-router';
+import { Outlet, useLocation, useMatch, useNavigate, /*useParams*/ } from 'react-router';
 //import { useDispatch, useSelector } from 'react-redux';
 import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined, LockOutlined, ThunderboltOutlined} from '@ant-design/icons';
 import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb, theme, AutoComplete, Input, Flex} from 'antd';
@@ -10,7 +10,7 @@ import {HiOutlineSun} from "react-icons/hi";
 import { postActions } from '../../actions/actions';
 import { endpoints } from '../../constants/endpoints.constants';
 import { ThemeContext } from '../../utils/providers/ThemeProvider';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getBreadCrumbLabel, logoutPopup } from '../../utils/helpers';
 import LoadingBar from 'react-top-loading-bar';
 import { LoadingContext } from '../../utils/providers/LoadingProvider';
@@ -48,9 +48,7 @@ const MySpace = () => {
     const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
     const [breadCrumbItems , setBreadCrumbItems] = useState([]);
 
-    
-
-    const  logout = () => {
+    const logout = () => {
         logoutPopup()
         .then((result)=>{
             if(result.isConfirmed){
@@ -653,12 +651,41 @@ const MySpace = () => {
                 break;
         }
         
+        // const pathname = location.pathname;
+        // const splitPathname = pathname.split("/");
+        // const breadCItems = [{
+        //     title : <Link to="/home" > <HomeOutlined/> </Link>
+        // }]
+
+        // let link = "";
+        // splitPathname.forEach((element , index) => {
+        //     if (element !== "") {
+        //         link+=`/${element}`;
+        //         if (index === splitPathname.length -1) {
+        //             breadCItems.push({
+        //                 title : getBreadCrumbLabel(element)
+        //             })
+        //         }else{
+        //             // if ((element !== "myspace") && (element !== "settings")) {
+        //             //     breadCItems.push({
+        //             //         title : <Link to={link} > {getBreadCrumbLabel(element)} </Link>
+        //             //     })
+        //             // }
+        //             breadCItems.push({
+        //                 title : <Link to={link} > {getBreadCrumbLabel(element)} </Link>
+        //             })
+        //         }
+        //     }
+        // });
+        // setBreadCrumbItems(breadCItems)
+
+
         const pathname = location.pathname;
+        console.log(location)
         const splitPathname = pathname.split("/");
         const breadCItems = [{
             title : <Link to="/home" > <HomeOutlined/> </Link>
         }]
-
         let link = "";
         splitPathname.forEach((element , index) => {
             if (element !== "") {
@@ -674,7 +701,7 @@ const MySpace = () => {
                     //     })
                     // }
                     breadCItems.push({
-                        title : <Link to={link} > {getBreadCrumbLabel(element)} </Link>
+                        title : <Link to={link} state={location.state} > {getBreadCrumbLabel(element)} </Link>
                     })
                 }
             }

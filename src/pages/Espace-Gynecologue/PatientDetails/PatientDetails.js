@@ -1,28 +1,65 @@
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Card, Descriptions, Flex, Space, Tabs, Typography } from 'antd'
+import { Avatar, Button, Card, Descriptions, Flex, List, Modal, Space, Tabs, Typography } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import NotSpecified from '../../../components/common/NotSpecified/NotSpecified';
 import { formatDate } from '../../../utils/helpers';
+import { images } from '../../../constants/app.constants';
+import AddRv from '../../../components/specific/AddRv/AddRv';
+import { getActions } from '../../../actions/actions';
+import { endpoints } from '../../../constants/endpoints.constants';
+
 const  {Title} = Typography;
+
+
+const historiques = [
+  {
+    title: 'Consultation 1',
+  },
+  {
+    title: 'Consultation 2',
+  },
+  {
+    title: 'Consultation 3',
+  },
+  {
+    title: 'Consultation 4',
+  },
+];
 function PatientDetails() {
     const navigate = useNavigate();
     const location = useLocation();
-    const patient = location.state.currentPatient;
-    
+    const {id} = useParams();
+    //const patient = location.state.currentPatient;
+    const [loading , setLoading] = useState(false);
+    const [patient , setPatient] = useState(null);
+    const [open , setOpen] = useState(false);
+
     const queryParams = new URLSearchParams(location.search);
-    const [currentTab , setCurrentTab] = useState(queryParams.get("tab"));
+    const [currentTab , setCurrentTab] = useState(queryParams.get("tab") || "1");
 
     const onChangeTab = (key) => {
       setCurrentTab(key)
     }
 
     const doConsultation = () => {
-        navigate(`/espace-gynecologie/patients/details/consultation`,{state : {currentPatient : patient} , replace : false});
+      navigate(`/espace-gynecologie/patients/details/${patient.num_patient}/consultation`,{state : {currentPatient : patient} , replace : false});
+    }
+
+    const onCreateRV = (record) => {
+      setOpen(true);
+      //setCurrentRecord({...record});
     }
 
     useEffect(() => {
-      navigate(`/espace-gynecologie/patients/details?tab=${currentTab}`,{state : {currentPatient : patient} , replace : false});
+      setLoading(true)
+      getActions(`${endpoints.patients.GET_PATIENT}/${id}`)
+      .then((response)=>{
+        setPatient(response.data)
+      })
+      .finally(()=>setLoading(false))
+      //navigate(`/espace-gynecologie/patients/details/123?tab=${currentTab}`,{state : {currentPatient : patient} , replace : false});
+      navigate(`${location.pathname}?tab=${currentTab}`);
       return () => {
       }
     }, [currentTab])
@@ -64,24 +101,52 @@ function PatientDetails() {
         },
         {
           key: '2',
-          label: 'Historique des rendez-vous',
-          children: 'Historique des rendez-vous',
+          label: 'Historique des consultations',
+          children: <List
+            itemLayout="horizontal"
+            dataSource={historiques}
+            renderItem={(item, index) => (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={<Avatar src={images.consultant} />}
+                  title={<a>{item.title}</a>}
+                  description="Diagnostic de la consultation ici"
+                />
+              </List.Item>
+            )}
+          />,
         }
       ];
+
+    
     return (
-        <Card>
+        <Card loading={loading} >
             <Flex justify="space-between" align="center">
                 <Space align="end" >
-                    <Avatar  size={64} icon={<UserOutlined/>} />
+                    <Avatar  size={96} src={images.profil} icon={<UserOutlined/>} />
                     <Title level={3}> {patient?.prenom_patient} {patient?.nom_patient} </Title>
                 </Space>
                 <Space>
-                    <Button type='primary' >Créer un rendez-vous</Button>
+                    <Button type='primary' onClick={()=>{onCreateRV(patient)}} >Créer un rendez-vous</Button>
                     <Button type='primary' onClick={doConsultation} >Consultation</Button>
                 </Space>
             </Flex>
             <br/>
             <Tabs defaultActiveKey="1" onChange={(activeKey)=> onChangeTab(activeKey)} activeKey={currentTab} items={items}  />
+
+            <Modal 
+                title="Créer un Rendez-vous" 
+                open={open} 
+                onCancel={()=>{
+                    setOpen(false);
+                }}
+                footer={null}
+            >
+                <AddRv 
+                    setOpen={setOpen} 
+                    currentRecord={patient}
+                />
+            </Modal>
         </Card>
 
 

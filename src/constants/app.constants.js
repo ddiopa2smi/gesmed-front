@@ -8,5 +8,7 @@ export const codesPrescriptions = {
 
 
 export const images = {
-    excell : require("./../assets/excell.png")
+    excell : require("./../assets/excell.png"),
+    profil : require("./../assets/profil.jpg"),
+    consultant : require("./../assets/consultant.png"),
 }

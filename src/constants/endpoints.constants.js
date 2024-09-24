@@ -32,7 +32,8 @@ export const endpoints = {
     } ,
     patients : {
         LIST: "/api/smed/Patient/list",
-        LIST_TYPE : "/api/smed/Patient/listType" ,
+        LIST_TYPE : "/api/smed/Patient/listType",
+        GET_PATIENT : "/api/smed/Patient",
         ADD : "/api/smed/Patient/add" ,
         UPDATE : "/api/smed/Patient/update" ,
         DELETE : "/api/smed/Patient/delete",

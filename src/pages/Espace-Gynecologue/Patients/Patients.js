@@ -63,8 +63,9 @@ function Patients() {
     }
 
     const onOpenMedicalFolder = (record) => {
-        navigate("/espace-gynecologie/patients/details?tab=1",{state : {currentPatient : record} , replace : false});
-        sessionStorage.setItem("currentPatient",JSON.stringify(record))
+        //navigate("/espace-gynecologie/patients/details?tab=1",{state : {currentPatient : record} , replace : false});
+        navigate(`/espace-gynecologie/patients/details/${record.num_patient}`);
+        //sessionStorage.setItem("currentPatient",JSON.stringify(record))
     }
 
     const onCreateRV = (record) => {
