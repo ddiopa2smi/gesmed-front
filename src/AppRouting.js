@@ -40,11 +40,13 @@ import AgendaMedecin from "./pages/AgendaMedecin/AgendaMedecin";
 import { gynecologieRouter } from "./pages/Espace-Gynecologue/GynecologieRouting.tsx";
 import { dentistRouter } from "./pages/Espace-Dentiste/Routing.tsx";
 import { pharmacieRouter } from "./pages/Espace-Pharmacie/Routing.tsx";
+import { radiologieRouter } from "./pages/Espace-Radiologie/Routing.tsx";
+import { analyseRouter } from "./pages/Espace-analyse/Routing.tsx";
 export const router = createBrowserRouter(
     [
         {
             path : "/",
-            element : <Navigate to={"/login"} />
+            element : <Navigate to={"/home"} />
         },
         {
             path : "/login",
@@ -272,6 +274,8 @@ export const router = createBrowserRouter(
         },
         pharmacieRouter,
         gynecologieRouter ,
-        dentistRouter 
+        dentistRouter ,
+        radiologieRouter,
+        analyseRouter
     ]
 )

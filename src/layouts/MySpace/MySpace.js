@@ -57,7 +57,7 @@ const MySpace = () => {
                     console.log(response.data);
                     if (response.data.Disconnect === true) {
                         sessionStorage.clear();
-                        navigate("/" , {replace : true});
+                        navigate("/login" , {replace : true});
                         message.success("Déconnexion éffectuée avec succès");
                     }
                     else {
