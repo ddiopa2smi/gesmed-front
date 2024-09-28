@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import "./MySpace.scss";
 import { Outlet, useLocation, useMatch, useNavigate, /*useParams*/ } from 'react-router';
 //import { useDispatch, useSelector } from 'react-redux';
-import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined, LockOutlined, ThunderboltOutlined} from '@ant-design/icons';
+import { MenuFoldOutlined,MenuUnfoldOutlined,UserOutlined, LogoutOutlined , SettingOutlined, TeamOutlined, DashboardOutlined, BellOutlined, SnippetsOutlined, ApartmentOutlined, FolderOutlined, EditOutlined, FileOutlined, StockOutlined, CarOutlined, RightCircleOutlined, LeftCircleOutlined, AppstoreOutlined, SafetyOutlined, HourglassOutlined, HomeOutlined, CalendarOutlined, SearchOutlined, LockOutlined, ThunderboltOutlined, ClockCircleOutlined} from '@ant-design/icons';
 import { Avatar, Dropdown, Layout, Menu , message , Statistic, Tooltip, Drawer, Typography, notification, Button, Breadcrumb, theme, AutoComplete, Input, Flex} from 'antd';
 //import { setLightMode , setDarkMode } from './../../reducers/theme.reducers';
 import {TbMoonStars} from "react-icons/tb";
@@ -291,6 +291,72 @@ const MySpace = () => {
         },
     ]
 
+    const analyseMenu = [
+        space === "sanalyse" && {
+            key: 'analyses',
+            icon: <TeamOutlined  />,
+            label: "Liste des analyses" , 
+            title: "Liste des analyses" , 
+            onClick : ()=>{navigate("/espace-analyse/analyses")}
+        },
+        space === "sanalyse" && {
+            key: 'historique',
+            icon: <ClockCircleOutlined  />,
+            label: "Historique des analyses" , 
+            title: "Historique des analyses" , 
+            onClick : ()=>{navigate("/espace-analyse/historique")}
+        },
+    ]
+
+    const radiologieMenu = [
+        space === "sradio" && {
+            key: 'rendez-vous',
+            icon: <CalendarOutlined  />,
+            label: "Liste des rendez-vous" , 
+            title: "Liste des rendez-vous" , 
+            onClick : ()=>{navigate("/myspace/rendez-vous")}
+        },
+        space === "sradio" && {
+            key: 'mon-agenda',
+            icon: <CalendarOutlined  />,
+            label: "Mon agenda" , 
+            title: "Mon agenda" , 
+            onClick : ()=>{navigate("/myspace/mon-agenda")}
+        },
+        space === "sradio" && {
+            key: 'patients',
+            icon: <TeamOutlined  />,
+            label: "Liste des patients" , 
+            title: "Liste des patients" , 
+            onClick : ()=>{navigate("/myspace/patients")}
+        },
+        space === "sradio" && {
+            key: 'consultations',
+            icon: <SnippetsOutlined  />,
+            label: "Liste des consultations" , 
+            title: "Liste des consultations" , 
+            onClick : ()=>{navigate("/myspace/consultations")}
+            
+        },
+        space === "sradio" && {
+            key: 'visites',
+            icon: <ApartmentOutlined  />,
+            label: "Visite des lieux" , 
+            title: "Visite des lieux" , 
+            onClick : ()=>{navigate("/myspace/visites")}
+            
+        },
+        
+        space === "sradio" && {
+            key: 'dossier-accident-travail',
+            icon: <FolderOutlined  />,
+            label: "Dossier AT" , 
+            title: "Dossier AT" , 
+            onClick : ()=>{navigate("/myspace/dossier-accident-travail")}
+            
+        },
+    ]
+
     const othersMenu = [
         {
             key: 'facturation',
@@ -313,13 +379,6 @@ const MySpace = () => {
                     title: "Comptes" , 
                     onClick : ()=>{navigate("/myspace/settings/accounts")}
                 },
-                // {
-                //     key: 'users',
-                //     icon: <TeamOutlined  />,
-                //     label: "Utilisateurs" , 
-                //     title: "Utilisateurs" , 
-                //     onClick : ()=>{navigate("/myspace/users")}
-                // },
                 {
                     key: 'privileges',
                     icon: <SafetyOutlined  />,
@@ -358,173 +417,14 @@ const MySpace = () => {
                 width : "100%",
                 background : "transparent"
             }}
-            items={[...medicalMenu, ...pharmacieMenu , ...dentistMenu , ...gynecologieMenu , ...othersMenu ,
-                // {
-                //     key: 'dashboard',
-                //     icon: <DashboardOutlined  />,
-                //     label: "Tableau de bord " ,
-                //     title: "Tableau de bord " ,
-                //     onClick : ()=>{navigate("/myspace/dashboard")} ,
-                // },
-                // space === "smed" && {
-                //     key: 'rendez-vous',
-                //     icon: <CalendarOutlined  />,
-                //     label: "Liste des rendez-vous" , 
-                //     title: "Liste des rendez-vous" , 
-                //     onClick : ()=>{navigate("/myspace/rendez-vous")}
-                // },
-                // space === "smed" && {
-                //     key: 'mon-agenda',
-                //     icon: <CalendarOutlined  />,
-                //     label: "Mon agenda" , 
-                //     title: "Mon agenda" , 
-                //     onClick : ()=>{navigate("/myspace/mon-agenda")}
-                // },
-                // space === "smed" && {
-                //     key: 'patients',
-                //     icon: <TeamOutlined  />,
-                //     label: "Liste des patients" , 
-                //     title: "Liste des patients" , 
-                //     onClick : ()=>{navigate("/myspace/patients")}
-                // },
-                // space === "smed" && {
-                //     key: 'consultations',
-                //     icon: <SnippetsOutlined  />,
-                //     label: "Liste des consultations" , 
-                //     title: "Liste des consultations" , 
-                //     onClick : ()=>{navigate("/myspace/consultations")}
-                    
-                // },
-                // space === "smed" && {
-                //     key: 'visites',
-                //     icon: <ApartmentOutlined  />,
-                //     label: "Visite des lieux" , 
-                //     title: "Visite des lieux" , 
-                //     onClick : ()=>{navigate("/myspace/visites")}
-                    
-                // },
-                
-                // space === "smed" && {
-                //     key: 'dossier-accident-travail',
-                //     icon: <FolderOutlined  />,
-                //     label: "Dossier AT" , 
-                //     title: "Dossier AT" , 
-                //     onClick : ()=>{navigate("/myspace/dossier-accident-travail")}
-                    
-                // },
-                // {
-                //     key: 'facturation',
-                //     icon: <ApartmentOutlined  />,
-                //     label: "Facturation" , 
-                //     title: "Facturation" , 
-                //     onClick : ()=>{navigate("/myspace/facturation")}
-                    
-                // },
-                // space === "spharma" && {
-                //     key: 'fiche-produit',
-                //     icon: <FileOutlined  />,
-                //     label: "Fiche Produit" , 
-                //     title: "Fiche Produit" , 
-                //     onClick : ()=>{navigate("/myspace/fiche-produit")}
-                // },
-                // space === "spharma" && {
-                //     key: 'gestion-fiche-produits',
-                //     icon: <FileOutlined  />,
-                //     label: "Gestion fiche produits" , 
-                //     title: "Gestion fiche produits" , 
-                //     onClick : ()=>{navigate("/myspace/gestion-fiche-produits")}
-                // },
-                // space === "spharma" && {
-                //     key: 'commandes-produits',
-                //     icon: <AppstoreOutlined  />,
-                //     label: "Commandes Produits" , 
-                //     title: "Commandes Produits" , 
-                //     onClick : ()=>{navigate("/myspace/commandes-produits")}
-                    
-                // },
-                // space === "spharma" && {
-                //     key: 'entrees-produits',
-                //     icon: <RightCircleOutlined  />,
-                //     label: "Entrées Produits" , 
-                //     title: "Entrées Produits" , 
-                //     onClick : ()=>{navigate("/myspace/entrees-produits")},
-                    
-                // },
-                // space === "spharma" && {
-                //     key: 'sorties-produits',
-                //     icon: <LeftCircleOutlined  />,
-                //     label: "Sorties Produits" , 
-                //     title: "Sorties Produits" , 
-                //     onClick : ()=>{navigate("/myspace/sorties-produits")}
-                    
-                // },
-                // space === "spharma" && {
-                //     key: 'situation-stocks',
-                //     icon: <StockOutlined  />,
-                //     label: "Situation des stocks" , 
-                //     title: "Situation des stocks" , 
-                //     onClick : ()=>{navigate("/myspace/situation-stocks")}
-                    
-                // },
-                // space === "spharma" && {
-                //     key: 'saisie-inventaire',
-                //     icon: <EditOutlined  />,
-                //     label: "Saisie Inventaire" , 
-                //     title: "Saisie Inventaire" , 
-                //     onClick : ()=>{navigate("/myspace/saisie-inventaire")}
-                    
-                // },
-                // space === "spharma" && {
-                //     key: 'fournisseurs',
-                //     icon: <CarOutlined  />,
-                //     label: "Liste des fournisseurs" , 
-                //     title: "Liste des fournisseurs" , 
-                //     onClick : ()=>{navigate("/myspace/fournisseurs")}
-                    
-                // },
-                // {
-                //     key : "settings" ,
-                //     label: "Paramètres" , 
-                //     title: "Paramètres" , 
-                //     icon: <SettingOutlined  />,
-                //     children : [
-                //         {
-                //             key: 'accounts',
-                //             icon: <TeamOutlined  />,
-                //             label: "Comptes" , 
-                //             title: "Comptes" , 
-                //             onClick : ()=>{navigate("/myspace/settings/accounts")}
-                //         },
-                //         // {
-                //         //     key: 'users',
-                //         //     icon: <TeamOutlined  />,
-                //         //     label: "Utilisateurs" , 
-                //         //     title: "Utilisateurs" , 
-                //         //     onClick : ()=>{navigate("/myspace/users")}
-                //         // },
-                //         {
-                //             key: 'privileges',
-                //             icon: <SafetyOutlined  />,
-                //             label: "Privilèges" , 
-                //             title: "Privilèges" , 
-                //             onClick : ()=>{navigate("/myspace/settings/privileges")}
-                //         },
-                //         {
-                //             key: 'gestion-mot-de-passe',   
-                //             label: "Gestion de mot de passe" , 
-                //             title: "Gestion de mot de passe" , 
-                //             icon: <LockOutlined  />,
-                //             onClick : ()=>{navigate("/myspace/settings/gestion-mot-de-passe")}   
-                //         },
-                //         {
-                //             key: 'profil',   
-                //             label: "Mon profil" , 
-                //             title: "Mon profil" , 
-                //             icon: <UserOutlined  />,
-                //             onClick : ()=>{navigate("/myspace/settings/profil")}   
-                //         },
-                //     ]
-                // }
+            items={[
+                ...medicalMenu, 
+                ...pharmacieMenu , 
+                ...dentistMenu , 
+                ...gynecologieMenu , 
+                ...analyseMenu,
+                ...radiologieMenu,
+                ...othersMenu
             ]}
         />
     )

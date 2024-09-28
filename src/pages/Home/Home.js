@@ -16,6 +16,7 @@ function Home() {
     const navigate = useNavigate();
     const homeMenus = [
         {
+            id : 1,
             label : "Service médical",
             cover : medicine_image ,
             onClick : ()=>{
@@ -26,6 +27,7 @@ function Home() {
             }
         },
         {
+            id : 2,
             label : "Service pharmacie",
             cover : pharma_image ,
             onClick : ()=>{
@@ -34,6 +36,7 @@ function Home() {
             }
         },
         {
+            id : 3,
             label : "Service dentiste",
             cover : dentist_image ,
             onClick : ()=>{
@@ -42,6 +45,7 @@ function Home() {
             }
         },
         {
+            id : 4,
             label : "Service Gynécologie",
             cover : gynecologie_image ,
             onClick : ()=>{
@@ -50,6 +54,7 @@ function Home() {
             }
         },
         {
+            id : 5,
             label : "Service Analyse",
             cover : analyse_image ,
             onClick : ()=>{
@@ -58,27 +63,28 @@ function Home() {
             }
         },
         {
+            id : 6,
             label : "Service Radiologie",
             cover : radiologie_image ,
             onClick : ()=>{
                 navigate("/espace-radiologie")
                 sessionStorage.setItem("space","sradio")
             }
-        },
+        }
     
     ]
     const {
         token: { colorBgElevated },
     } = theme.useToken();
     return (
-        <div style={{background : colorBgElevated , width :"100%",height : "100vh",paddingTop : 32}} >
-            <Title level={1} style={{textAlign : "center"}} > Bienvenue sur l'espace de gestion de <span style={{color:"var(--app-color)"}} >GESMED</span> </Title>
+        <div style={{background : colorBgElevated , width :"100%",minHeight : "100vh", height : "auto", padding :"0px 24px"}} >
+            <Title level={1} style={{margin : "32px 0px"}} > Bienvenue sur l'espace de gestion de <span style={{color:"var(--app-color)"}} >GESMED</span> </Title>
             <div className='container' >
                 <Space size="large" wrap >
                     {
-                        homeMenus.map((item , index)=> (
+                        homeMenus.map((item)=> (
                             <HomeCard 
-                                key={index}
+                                key={item.id}
                                 cover={item.cover}
                                 label={item.label}
                                 onClick={item.onClick}
