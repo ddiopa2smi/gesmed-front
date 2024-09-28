@@ -53,12 +53,12 @@ function Visites() {
 
             <Flex justify="flex-end" align="center" >
                 <Space>
-                    <Tooltip title="Recherche avancée" >
+                    {/* <Tooltip title="Recherche avancée" >
                         <Button type='text' shape="circle" icon={<SearchOutlined/>}  /> &nbsp;&nbsp;
                     </Tooltip> 
                     <Tooltip title="Exporter" >
                         <Button type='text' shape="circle" icon={<ExportOutlined/>}  /> &nbsp;&nbsp;
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title="Actualiser" >
                         <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={onRefresh} /> &nbsp;&nbsp;
                     </Tooltip> 

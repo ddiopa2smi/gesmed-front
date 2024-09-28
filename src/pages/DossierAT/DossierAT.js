@@ -55,9 +55,9 @@ function DossierAT() {
 
       <Flex justify="flex-end" align="center" >
           <Space>
-              <Tooltip title="Recherche avancée" >
-                  <Button type='text' shape="circle" icon={<SearchOutlined/>} /*onClick={onDisplayAdvancedSearch}*/ />
-              </Tooltip> 
+              {/* <Tooltip title="Recherche avancée" >
+                  <Button type='text' shape="circle" icon={<SearchOutlined/>}/>
+              </Tooltip>  */}
               {/* <Tooltip title="Exporter" >
                   <Button type='text' shape="circle" icon={<ExportOutlined/>} onClick={onExport} />
               </Tooltip> 	 */}

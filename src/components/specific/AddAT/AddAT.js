@@ -54,12 +54,12 @@ const AddAT = ({setIsModalVisible , currentRecord, operationType , onRefresh}) =
                     //     date_guerison_prevue,
                     //     date_consolidation
                     // }
-                    console.log(values);
+                    //console.log(values);
                         // postActions("/api/smed/DossierAT/list")
                         // .then((response)=>{
                         //     onRefresh();
                         // })
-                        console.log(values);
+                        //console.log(values);
                         setIsModalVisible(false);
                     break;
                 case "update":
@@ -190,7 +190,7 @@ const AddAT = ({setIsModalVisible , currentRecord, operationType , onRefresh}) =
                         <Form.Item 
                             label="Date/Heure Accident"
                             name="date_at" 
-                            initialValue={currentRecord?.date_at||null}
+                            initialValue={currentRecord === null ? dayjs(new Date()) : dayjs(new Date(currentRecord?.date_at))}
                         >
                             <DatePicker placeholder='Sélectionner' showTime  />
                         </Form.Item>
@@ -199,7 +199,7 @@ const AddAT = ({setIsModalVisible , currentRecord, operationType , onRefresh}) =
                         <Form.Item 
                             label="Date de déclaration"
                             name="date_declaration" 
-                            initialValue={currentRecord?.date_declaration||null}
+                            initialValue={currentRecord === null ? dayjs(new Date()) : dayjs(new Date(currentRecord?.date_declaration))}
                         >
                             <DatePicker placeholder='Sélectionner'  format="DD/MM/YYYY" />
                         </Form.Item>
@@ -301,7 +301,7 @@ const AddAT = ({setIsModalVisible , currentRecord, operationType , onRefresh}) =
                         <Form.Item 
                             label="Heure"
                             name="heure_premiers_soins" 
-                            initialValue={(currentRecord && currentRecord.heure_premiers_soins)||null}
+                            initialValue={currentRecord === null ? dayjs(new Date()) : dayjs(new Date(currentRecord?.heure_premiers_soins))}
                         >
                             <TimePicker placeholder="Entrer l'heure" />
                         </Form.Item>
@@ -458,7 +458,7 @@ const AddAT = ({setIsModalVisible , currentRecord, operationType , onRefresh}) =
                         <Form.Item 
                             label="Date prévue"
                             name="date_prevue" 
-                            initialValue={null}
+                            initialValue={currentRecord === null ? dayjs(new Date()) : dayjs(new Date(currentRecord?.date_prevue))}
                         >
                             <DatePicker placeholder='Sélectionner'  format="DD/MM/YYYY" />
                         </Form.Item>
@@ -521,7 +521,7 @@ const AddAT = ({setIsModalVisible , currentRecord, operationType , onRefresh}) =
                         <Form.Item 
                             label="Date de guérison"
                             name="date_guerison" 
-                            initialValue={null}
+                            initialValue={currentRecord === null ? dayjs(new Date()) : dayjs(new Date(currentRecord?.date_guerison))}
                         >
                             <DatePicker placeholder='Sélectionner'  format="DD/MM/YYYY" />
                         </Form.Item>
@@ -530,7 +530,7 @@ const AddAT = ({setIsModalVisible , currentRecord, operationType , onRefresh}) =
                         <Form.Item 
                             label="Date de consolidation"
                             name="date_consolidation" 
-                            initialValue={null}
+                            initialValue={currentRecord === null ? dayjs(new Date()) : dayjs(new Date(currentRecord?.date_consolidation))}
                         >
                             <DatePicker placeholder='Sélectionner'  format="DD/MM/YYYY" />
                         </Form.Item>
