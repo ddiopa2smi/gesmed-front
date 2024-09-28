@@ -11,4 +11,5 @@ export const images = {
     excell : require("./../assets/excell.png"),
     profil : require("./../assets/profil.jpg"),
     consultant : require("./../assets/consultant.png"),
+    radiologie : require("./../assets/radiologie.jpg"),
 }

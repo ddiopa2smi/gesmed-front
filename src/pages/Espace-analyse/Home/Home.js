@@ -4,11 +4,8 @@ const { Text, Title } = Typography;
 function Home() {
   return (
     <Card>
-      {/* <Text>Bienvenue sur votre espace d' Analyse</Text> */}
-      <Title level={3}>Liste des analyses à faire</Title>
-
       <Flex align="center" justify="space-between">
-        <Title level={3}>Liste des analyses à faire</Title>
+        <Title level={3}>Accueil</Title>
         <Button>Actualiser</Button>
       </Flex>
     </Card>

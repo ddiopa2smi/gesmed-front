@@ -100,7 +100,7 @@ const MySpace = () => {
 
 
     const medicalMenu = [
-        {
+        space === "smed" && {
             key: 'dashboard',
             icon: <DashboardOutlined  />,
             label: "Tableau de bord " ,
@@ -310,50 +310,25 @@ const MySpace = () => {
 
     const radiologieMenu = [
         space === "sradio" && {
-            key: 'rendez-vous',
-            icon: <CalendarOutlined  />,
-            label: "Liste des rendez-vous" , 
-            title: "Liste des rendez-vous" , 
-            onClick : ()=>{navigate("/myspace/rendez-vous")}
-        },
-        space === "sradio" && {
-            key: 'mon-agenda',
-            icon: <CalendarOutlined  />,
-            label: "Mon agenda" , 
-            title: "Mon agenda" , 
-            onClick : ()=>{navigate("/myspace/mon-agenda")}
-        },
-        space === "sradio" && {
-            key: 'patients',
+            key: 'dashboard',
             icon: <TeamOutlined  />,
-            label: "Liste des patients" , 
-            title: "Liste des patients" , 
-            onClick : ()=>{navigate("/myspace/patients")}
+            label: "Tableau de bord" , 
+            title: "Tableau de bord" , 
+            onClick : ()=>{navigate("/espace-radiologie/dashboard")}
         },
         space === "sradio" && {
-            key: 'consultations',
-            icon: <SnippetsOutlined  />,
-            label: "Liste des consultations" , 
-            title: "Liste des consultations" , 
-            onClick : ()=>{navigate("/myspace/consultations")}
-            
+            key: 'radiologies',
+            icon: <TeamOutlined  />,
+            label: "Liste des radiologies" , 
+            title: "Liste des radiologies" , 
+            onClick : ()=>{navigate("/espace-radiologie/radiologies")}
         },
         space === "sradio" && {
-            key: 'visites',
-            icon: <ApartmentOutlined  />,
-            label: "Visite des lieux" , 
-            title: "Visite des lieux" , 
-            onClick : ()=>{navigate("/myspace/visites")}
-            
-        },
-        
-        space === "sradio" && {
-            key: 'dossier-accident-travail',
-            icon: <FolderOutlined  />,
-            label: "Dossier AT" , 
-            title: "Dossier AT" , 
-            onClick : ()=>{navigate("/myspace/dossier-accident-travail")}
-            
+            key: 'historique',
+            icon: <ClockCircleOutlined  />,
+            label: "Historique des radiologies" , 
+            title: "Historique des radiologies" , 
+            onClick : ()=>{navigate("/espace-radiologie/historique")}
         },
     ]
 
