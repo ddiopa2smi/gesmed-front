@@ -78,7 +78,7 @@ function Home() {
     } = theme.useToken();
     return (
         <div style={{background : colorBgElevated , width :"100%",minHeight : "100vh", height : "auto", padding :"0px 24px"}} >
-            <Title level={1} style={{margin : "32px 0px"}} > Bienvenue sur l'espace de gestion de <span style={{color:"var(--app-color)"}} >GESMED</span> </Title>
+            <Title level={1} style={{margin : "32px 0px",textAlign: "center"}} > Bienvenue sur l'espace de gestion de <span style={{color:"var(--app-color)"}} >GESMED</span> </Title>
             <div className='container' >
                 <Space size="large" wrap >
                     {
