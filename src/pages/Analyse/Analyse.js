@@ -165,7 +165,7 @@ function Analyse() {
             layout="vertical"
             onFinish={save}
         >
-            <Tree
+            {/* <Tree
                 checkable
                 //onCheck={onCheck}
                 //checkedKeys={header}
@@ -178,10 +178,10 @@ function Analyse() {
                 })}
                 selectable={false}
                 //height={300}
-            /> 
+            />  */}
 
-            <Row gutter={[24,24]} align={"middle"} >
-              <Col xs={24} sm={24} md={8} lg={8} xl={8} >
+            <Row gutter={[24,24]} align={"stretch"} >
+              <Col xs={24} sm={24} md={6} lg={6} xl={6} >
                 <Form.Item 
                     label="Date Analyse"
                     name="datepresc" 
@@ -193,10 +193,10 @@ function Analyse() {
                     ]}
                     initialValue={dayjs(new Date())}
                 >
-                    <DatePicker format="DD/MM/YYYY" />
+                    <DatePicker format="DD/MM/YYYY" style={{width:"100%"}} />
                 </Form.Item>
               </Col>
-              <Col xs={24} sm={24} md={8} lg={8} xl={8} >
+              <Col xs={24} sm={24} md={10} lg={10} xl={10} >
                   <Form.Item 
                       label="Diagnostic"
                       name="diagnostic" 
@@ -211,7 +211,7 @@ function Analyse() {
                   </Form.Item>
               </Col>
               <Col xs={24} sm={24} md={8} lg={8} xl={8} >
-                <Button type="primary" onClick={()=>{setIsModalVisible(true);}} > Ajouter prescription(s) </Button>
+                <Button type="primary" style={{marginTop : 32}} onClick={()=>{setIsModalVisible(true);}} > Ajouter prescription(s) </Button>
               </Col>
             </Row>
             <br/>         

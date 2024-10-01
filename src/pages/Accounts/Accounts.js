@@ -19,6 +19,9 @@ function Accounts() {
     const {data , isLoading , error} = useFetch(endpoints.users.LIST);
     const [dataSourceCopy , setDataSourceCopy] = useState([]);
     //const usersList = data;
+
+    console.log(data);  
+    
     const usersListWithoutOwnAccount = data.filter(element => element?.login !== userConnected.login);
     const personnelMedicalList = usersListWithoutOwnAccount.filter(element=>element?.perim === 'MED');
     //console.log(personnelMedicalList)
@@ -43,7 +46,7 @@ function Accounts() {
                 
             <Flex justify="flex-end" align="center" flex={"auto"} wrap='wrap' >
                 <Space>
-                    <Can I="create" an="account" >
+                    <Can I="create" an="account">
                         <Dropdown
                             menu={{
                                 items : [

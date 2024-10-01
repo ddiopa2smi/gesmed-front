@@ -3,7 +3,7 @@ import { formatDate } from '../../../utils/helpers';
 import DataTable from '../../../components/common/DataTable/DataTable';
 import EditButton from '../../../components/common/EditButton/EditButton';
 import DeleteButton from '../../../components/common/DeleteButton/DeleteButton';
-import { Button, Flex, Space, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Flex, Space, Tag, Tooltip, Typography } from 'antd';
 import {RiStethoscopeLine} from "react-icons/ri"
 
 const {Title} = Typography
@@ -24,7 +24,7 @@ function Analyses() {
         },
     ]
   return (
-    <div>
+    <Card>
       <Title level={4}>
             Liste des analyses à faire
         </Title>
@@ -72,7 +72,7 @@ function Analyses() {
                 <Flex justify="center" align="center">
                     <Space>
                         <Tooltip title="Traiter">
-                            <RiStethoscopeLine cursor="pointer" size={18} onClick={()=>{console.log("Traiter")}} />
+                            <Button type='text' icon={<RiStethoscopeLine cursor="pointer" size={18} onClick={()=>{console.log("Traiter")}} />} />
                         </Tooltip>
                         <EditButton
                             onEdit={() => {
@@ -90,7 +90,7 @@ function Analyses() {
             },
             ]}
         />
-    </div>
+    </Card>
   )
 }
 

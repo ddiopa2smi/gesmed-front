@@ -85,6 +85,9 @@ function AppointmentSchedule( props : AppointmentScheduleInterface) {
                         <tr className='sch-tr'>
                             <td className='sch-td' > 9h  </td>
                         </tr>
+                        <tr className='sch-tr'>
+                            <td className='sch-td' > 10h  </td>
+                        </tr>
                     </tbody>
                     
                     

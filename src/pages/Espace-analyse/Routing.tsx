@@ -4,6 +4,7 @@ import MySpace from "../../layouts/MySpace/MySpace";
 import Home from "./Home/Home";
 import Analyses from "./Analyses/Analyses";
 import Historique from "./Historique/Historique";
+import DetailsAnalyse from "./DetailsAnalyse/DetailsAnalyse";
 
 export const analyseRouter : RouteObject = {
     path : "espace-analyse",
@@ -19,11 +20,27 @@ export const analyseRouter : RouteObject = {
         },
         {
             path : "analyses",
-            element : <Analyses />
+            children: [
+                {
+                    index : true,
+                    path : "",
+                    element : <Analyses />
+                }
+            ]
         },
         {
             path : "historique",
-            element : <Historique />
+            children: [
+                {
+                    index : true,
+                    path : "",
+                    element : <Historique />
+                },
+                {
+                    path : "details/:id",
+                    element : <DetailsAnalyse />
+                },
+            ]
         },
     ]
 }
