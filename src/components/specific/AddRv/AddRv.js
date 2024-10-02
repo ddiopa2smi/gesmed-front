@@ -7,6 +7,21 @@ import dayjs from "dayjs"
 
 const {Title} = Typography;
 const {Option} = Select;
+
+const typesRV = [
+    {
+        id : "rv_defaut",
+        label : "RV par défaut"
+    },
+    {
+        id : "rv_convocation",
+        label : "RV sur convocation"
+    },
+    {
+        id : "rv_update",
+        label : "RV de mise à jour"
+    },
+]
 function AddRv({setOpen , onRefresh , currentRecord}) {
     const [form] = Form.useForm();
     const [formLoading , setFormLoading] = useState(false);
@@ -71,7 +86,8 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                         </Select>
                     </Form.Item>
                 </Col>
-
+            </Row>
+            <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item 
                         name="medecin" 
@@ -97,13 +113,42 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                         </Select>
                     </Form.Item>
                 </Col>
-
-                <Col xs={24} sm={24} md={24} lg={24} xl={24} >
+            </Row>
+            <Row>
+                <Col xs={24} sm={24} md={24} lg={12} xl={12} >
                     <Form.Item 
                         label="Date du rendez-vous"
                         name="date_rv" 
                     >
                         <DatePicker placeholder='Sélectionner' showTime  />
+                    </Form.Item>
+                </Col>
+                <Col  xs={24} sm={24} md={24} lg={12} xl={12}>
+                    <Form.Item 
+                        name="type_rv" 
+                        label="Type de rendez-vous"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Veuillez sélectionner le type de rendez-vous',
+                            },
+                        ]}
+                        initialValue="rv_defaut"
+                    >
+                        <Select
+                            style={{width:'100%',background:"transparent"}}
+                            showSearch
+                            placeholder="Type de rendez-vous médical"
+                            optionFilterProp="children" 
+                            filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                            loading={false}
+                        >  
+                            {
+                                typesRV.map((item)=>(
+                                    <Option key={item.id}  value={item.id} > {item.label} </Option>
+                                ))
+                            }  
+                        </Select>
                     </Form.Item>
                 </Col>
             </Row>

@@ -1,4 +1,4 @@
-import { Col, Form, Input, InputNumber, message, Row, Typography } from "antd";
+import { Button, Col, Form, Input, InputNumber, message, Row, Typography } from "antd";
 import React, { useState } from "react";
 import FormFooter from "../../common/FormFooter/FormFooter";
 import { postActions } from "../../../actions/actions";
@@ -37,7 +37,7 @@ function AddDureeValidite() {
         onFinish={save}
         preserve
       >
-        <Row gutter={[24, 24]}>
+        <Row gutter={[24, 24]} align='middle' >
           <Col xs={24} sm={24} md={12} lg={8} xl={8}>
             <Form.Item
               name="libelle_motifcons"
@@ -56,7 +56,7 @@ function AddDureeValidite() {
                 placeholder="Entrer une durée en heure(s)"
               />
             </Form.Item>
-            <FormFooter onCancel={() => {}} loading={loading} htmlType="submit" />
+            <Button type='primary' htmlType="submit" loading={loading} >Enregistrer</Button>
 
           </Col>
         </Row>

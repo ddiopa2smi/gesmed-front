@@ -22,6 +22,11 @@ function ConfigPage() {
       label: "Durée de validité prescription",
       children: <AddDureeValidite />,
     },
+    {
+      key: "2",
+      label: "Autres configs",
+      children: <div>Autres configs</div> ,
+    },
   ];
   return (
     <Card>
