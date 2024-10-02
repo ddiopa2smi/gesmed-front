@@ -54,6 +54,7 @@ function AddDureeValidite() {
               <InputNumber
                 style={{ width: "100%" }}
                 placeholder="Entrer une durée en heure(s)"
+                suffix="heure(s)"
               />
             </Form.Item>
             <Button type='primary' htmlType="submit" loading={loading} >Enregistrer</Button>

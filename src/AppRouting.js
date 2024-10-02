@@ -43,6 +43,7 @@ import { pharmacieRouter } from "./pages/Espace-Pharmacie/Routing.tsx";
 import { radiologieRouter } from "./pages/Espace-Radiologie/Routing.tsx";
 import { analyseRouter } from "./pages/Espace-analyse/Routing.tsx";
 import ConfigPage from "./pages/ConfigPage/ConfigPage.js";
+import PrescriptionsGroupes from "./pages/PrescriptionsGroupes/PrescriptionsGroupes.js";
 export const router = createBrowserRouter(
     [
         {
@@ -141,6 +142,10 @@ export const router = createBrowserRouter(
                             element : <DetailsConsultation />
                         },
                     ]
+                },
+                {
+                    path : "prescriptions-groupes",
+                    element : <PrescriptionsGroupes />
                 },
                 {
                     path : "visites",

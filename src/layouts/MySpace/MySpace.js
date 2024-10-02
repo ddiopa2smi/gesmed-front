@@ -198,6 +198,19 @@ const MySpace = () => {
       },
     },
     space === "smed" && {
+      key: "prescriptions-groupes",
+      icon: (
+        <RiStethoscopeLine
+          size={16}
+        />
+      ),
+      label: "Prescriptions groupés",
+      title: "Prescriptions groupés",
+      onClick: () => {
+        navigate("/myspace/prescriptions-groupes");
+      },
+    },
+    space === "smed" && {
       key: "visites",
       icon: <ApartmentOutlined />,
       label: "Visite des lieux",
@@ -863,7 +876,7 @@ const MySpace = () => {
                 )}{" "}
                 &nbsp;&nbsp;&nbsp;
                 <Tooltip placement="bottomRight" title={<>Notifications</>}>
-                  <Badge count={5} >
+                  <Badge count={5}>
                     <Button
                       type="text"
                       icon={<BellOutlined style={{ fontSize: 24 }} />}
@@ -891,7 +904,11 @@ const MySpace = () => {
                     }
                   >
                     <Text>
-                      {userConnected ? userConnected?.username : ""} <br/> <div style={{marginTop : -5}} > {userConnected?.role_name} </div>
+                      {userConnected ? userConnected?.username : ""} <br />{" "}
+                      <div style={{ marginTop: -5 }}>
+                        {" "}
+                        {userConnected?.role_name}{" "}
+                      </div>
                     </Text>
                   </Button>
                 </Dropdown>
