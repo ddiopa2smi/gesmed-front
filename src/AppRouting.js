@@ -42,6 +42,7 @@ import { dentistRouter } from "./pages/Espace-Dentiste/Routing.tsx";
 import { pharmacieRouter } from "./pages/Espace-Pharmacie/Routing.tsx";
 import { radiologieRouter } from "./pages/Espace-Radiologie/Routing.tsx";
 import { analyseRouter } from "./pages/Espace-analyse/Routing.tsx";
+import ConfigPage from "./pages/ConfigPage/ConfigPage.js";
 export const router = createBrowserRouter(
     [
         {
@@ -261,6 +262,10 @@ export const router = createBrowserRouter(
                         {
                             path : "profil",
                             element : <Profil />
+                        },
+                        {
+                            path : "config",
+                            element : <ConfigPage />
                         },
                     ]
                     

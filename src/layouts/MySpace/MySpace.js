@@ -35,6 +35,7 @@ import {
   ThunderboltOutlined,
   ClockCircleOutlined,
   DollarCircleOutlined,
+  ToolOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -489,6 +490,15 @@ const MySpace = () => {
           icon: <UserOutlined />,
           onClick: () => {
             navigate("/myspace/settings/profil");
+          },
+        },
+        {
+          key: "config",
+          label: "Configurations",
+          title: "Configurations",
+          icon: <ToolOutlined />,
+          onClick: () => {
+            navigate("/myspace/settings/config");
           },
         },
       ],
