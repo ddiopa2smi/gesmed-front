@@ -243,6 +243,83 @@ const Ordonnance = () => {
                     <Col xs={24} sm={24} md={4} lg={4} xl={4}  >
                         <Button type='primary' ghost disabled={posologieButtonStatus}  onClick={()=>{setIsModalVisible(true)}} >Posologie</Button>
                     </Col>
+                </Row><Row gutter={[24,24]} align={"middle"} >
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4} >
+                        <Form.Item 
+                            label="Date Ordonnance"
+                            name="datepresc" 
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Champ obligatoire',
+                                },
+                            ]}
+                            initialValue={dayjs(new Date())}
+                        >
+                            <DatePicker format="DD/MM/YYYY" />
+                        </Form.Item>
+                    </Col>
+                    
+                    <Col xs={24} sm={24} md={8} lg={8} xl={8} >
+                        <Form.Item 
+                            label="Médicament"
+                            name="medicament" 
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Sélection obligatoire',
+                                },
+                            ]}
+                            
+                        >
+                            <Select
+                                style={{width:'100%',background:"transparent"}}
+                                showSearch
+                                placeholder="Médicament"
+                                optionFilterProp="children" 
+                                filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                loading={selectMedicamentsListLoading}
+                            >     
+                                    {
+                                        listMedicaments.map((item)=>(
+                                            <Option key={item.codeacte}  value={item.codeacte} > {item.libacte} </Option>
+                                        ))
+                                    }
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4} >
+                        <Form.Item 
+                            label="Quantité en stock"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Sélection obligatoire',
+                                },
+                            ]}
+                            initialValue={1}
+                        >
+                            <InputNumber disabled /> 
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4} >
+                        <Form.Item 
+                            label="Qte à prescrire"
+                            name="qte_presc" 
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Champ obligatoire',
+                                },
+                            ]}
+                            initialValue={editPrescription?.qte_presc || 1}
+                        >
+                            <InputNumber min={1} />
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={4} lg={4} xl={4}  >
+                        <Button type='primary' ghost disabled={posologieButtonStatus}  onClick={()=>{setIsModalVisible(true)}} >Posologie</Button>
+                    </Col>
                 </Row>
                 
                 <br/>

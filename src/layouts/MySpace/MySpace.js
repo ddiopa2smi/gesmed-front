@@ -204,8 +204,8 @@ const MySpace = () => {
           size={16}
         />
       ),
-      label: "Prescriptions groupés",
-      title: "Prescriptions groupés",
+      label: "Prescriptions groupées",
+      title: "Prescriptions groupées",
       onClick: () => {
         navigate("/myspace/prescriptions-groupes");
       },
