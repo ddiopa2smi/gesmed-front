@@ -44,6 +44,7 @@ import { radiologieRouter } from "./pages/Espace-Radiologie/Routing.tsx";
 import { analyseRouter } from "./pages/Espace-analyse/Routing.tsx";
 import ConfigPage from "./pages/ConfigPage/ConfigPage.js";
 import PrescriptionsGroupes from "./pages/PrescriptionsGroupes/PrescriptionsGroupes.js";
+import VisiteDetails from "./pages/VisiteDetails/VisiteDetails.js";
 export const router = createBrowserRouter(
     [
         {
@@ -149,7 +150,16 @@ export const router = createBrowserRouter(
                 },
                 {
                     path : "visites",
-                    element : <Visites />
+                    children : [
+                        {
+                            path : "",
+                            element : <Visites />
+                        },
+                        {
+                            path : "details",
+                            element : <VisiteDetails />
+                        },
+                    ]
                 },
                 {
                     path : "dossier-accident-travail",

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Breadcrumb, Button, Card, Flex, Modal, Space, Tooltip, Typography} from "antd"
 import { useNavigate } from 'react-router';
-import { HomeOutlined , ExclamationCircleFilled, EditOutlined, DeleteOutlined, SearchOutlined, ExportOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { HomeOutlined , ExclamationCircleFilled, EditOutlined, DeleteOutlined, SearchOutlined, ExportOutlined, ReloadOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import { deleteActions, getActions } from '../../actions/actions';
 import { endpoints } from '../../constants/endpoints.constants';
 import { tableTypes } from '../../constants/app.constants';
@@ -9,6 +9,8 @@ import useFetch from '../../utils/hooks/useFetch';
 import { deletePopup, formatDate } from '../../utils/helpers';
 import DataTable from '../../components/common/DataTable/DataTable';
 import AddVisite from '../../components/specific/AddVisite/AddVisite';
+import DeleteButton from '../../components/common/DeleteButton/DeleteButton';
+import EditButton from '../../components/common/EditButton/EditButton';
 
 const { Title } = Typography;
 
@@ -23,8 +25,12 @@ function Visites() {
         setOperationType("add");
         setOpen(true);
     }
-    const onEdit = (record) => {
 
+    const onView = (record) => {
+        navigate("/myspace/visites/details", {state : {visite : record }})
+    }
+    const onEdit = (record) => {
+        //console.log(record)
         setOperationType("update");
         setOpen(true);
         setCurrentRecord({...record});
@@ -98,11 +104,17 @@ function Visites() {
                             <Flex justify="center" align="center" >
                                 <Space>
                                     <Tooltip title="Editer">
-                                        <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEdit(record)}} />
+                                        <Button type='text' icon={<EyeOutlined/>} onClick={()=>{onView(record)}} />
                                     </Tooltip>
-                                    <Tooltip title="Supprimer">
+                                    <EditButton 
+                                        onEdit={()=>{onEdit(record)}}
+                                    />
+                                    <DeleteButton 
+                                        onDelete={()=>{onDelete(record)}}
+                                    />
+                                    {/* <Tooltip title="Supprimer">
                                         <Button type='link' danger icon={<DeleteOutlined/>} onClick={()=>{ onDelete(record) }} />
-                                    </Tooltip>
+                                    </Tooltip> */}
                                 </Space>
                             </Flex>
                         )
