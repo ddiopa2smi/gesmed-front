@@ -119,6 +119,12 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                     <Form.Item 
                         label="Date du rendez-vous"
                         name="date_rv" 
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Ce champ est obligatoire',
+                            },
+                        ]}
                     >
                         <DatePicker placeholder='Sélectionner' showTime  />
                     </Form.Item>
