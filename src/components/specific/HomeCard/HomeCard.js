@@ -5,15 +5,12 @@ import "./HomeCard.scss"
 const { Text , Title } = Typography
 function HomeCard({cover , label , onClick}) {
   return (
-    <Flex vertical  align='center' >
-        <Card className='home-card' onClick={onClick} >
-            <center>
-                <img src={cover} alt='medicine_image' />
-            </center>
-            <Title level={5} type='secondary' > {label} </Title>
-        </Card>
-        
-    </Flex>
+    <Card className='home-card' onClick={onClick} >
+        <center>
+            <img src={cover} alt='medicine_image' />
+        </center>
+        <Title level={5} type='secondary' style={{textAlign:"center" , marginTop : "1em"}} > {label} </Title>
+    </Card>
   )
 }
 

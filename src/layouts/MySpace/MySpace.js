@@ -518,6 +518,37 @@ const MySpace = () => {
     },
   ];
 
+  
+  const accueilMenu = [
+    space === "saccueil" && {
+      key: "dashboard",
+      icon: <DashboardOutlined />,
+      label: "Tableau de bord",
+      title: "Tableau de bord",
+      onClick: () => {
+        navigate("/espace-accueil/dashboard");
+      },
+    },
+    space === "saccueil" && {
+      key: "rendez-vous",
+      icon: <CalendarOutlined />,
+      label: "Liste des rendez-vous",
+      title: "Liste des rendez-vous",
+      onClick: () => {
+        navigate("/espace-accueil/rendez-vous");
+      },
+    },
+    space === "saccueil" && {
+      key: "patients",
+      icon: <TeamOutlined />,
+      label: "Patients",
+      title: "Patients",
+      onClick: () => {
+        navigate("/espace-accueil/patients");
+      },
+    }
+  ];
+
   const menu = (
     <Menu
       theme="light"
@@ -538,6 +569,7 @@ const MySpace = () => {
         ...gynecologieMenu,
         ...analyseMenu,
         ...radiologieMenu,
+        ...accueilMenu,
         ...othersMenu,
       ]}
     />

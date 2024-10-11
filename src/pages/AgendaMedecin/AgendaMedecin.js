@@ -1,8 +1,11 @@
-import { Calendar, Card, Typography , Badge, Modal } from 'antd'
+import { Calendar, Card, Typography , Badge, Modal, Avatar, Tooltip } from 'antd'
 import React, { useState } from 'react'
 import useFetch from '../../utils/hooks/useFetch';
 import { endpoints } from '../../constants/endpoints.constants';
 import dayjs from 'dayjs';
+import { AntDesignOutlined, UserOutlined } from '@ant-design/icons';
+import DayAppointment from '../../components/specific/DayAppointment/DayAppointment.tsx';
+
 const {Title} = Typography
 
 function AgendaMedecin() {
@@ -24,20 +27,34 @@ function AgendaMedecin() {
 
 
               if ((date === todayDate) && (month === todayMonth) && (year === todayYear)) {
-                return <ul>
-                {
-                  dataCopy.map((item)=>(
-                    <li key={item?.num_ordre} >
+                return <div>
+                  <Avatar.Group>
                       {
-                        item?.num_ordre
+                        dataCopy.map((item)=>(
+                          <Tooltip key={item.num_ordre} title={`${item.prenom_patient} ${item.nom_patient}`} placement="top">
+                            <Avatar style={{ backgroundColor: '#87d068' }}  >
+                              {`${item.prenom_patient[0].toUpperCase()}${item.nom_patient[0].toUpperCase()}`}
+                            </Avatar>
+                          </Tooltip>
+                        ))
                       }
-                      {
-                        item?.nom_patient
-                      }
-                    </li>
-                  ))
-                }
-              </ul>;
+                  </Avatar.Group>
+                    
+                  {/* <ul>
+                    {
+                      dataCopy.map((item)=>(
+                        <li key={item?.num_ordre} >
+                          {
+                            item?.num_ordre
+                          }
+                          {
+                            item?.nom_patient
+                          }
+                        </li>
+                      ))
+                    }
+                  </ul> */}
+                </div>
               }
               
             } ;
@@ -54,6 +71,7 @@ function AgendaMedecin() {
 
         <Modal 
           title={"Liste des RV"} 
+          width={1000}
           open={open} 
           onCancel={()=>{
               setOpen(false);
@@ -62,7 +80,11 @@ function AgendaMedecin() {
           destroyOnClose
         >
             
-            
+            <DayAppointment
+              total={dataCopy.length} 
+              dentists={[]}
+              data={dataCopy}
+            />
         </Modal>
     </Card>
   )
