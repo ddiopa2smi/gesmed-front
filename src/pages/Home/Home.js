@@ -81,6 +81,24 @@ function Home() {
                 sessionStorage.setItem("space","saccueil")
             }
         },
+        {
+            id : 8,
+            label : "Service Hospitalisation",
+            cover : administration_image ,
+            onClick : ()=>{
+                navigate("/espace-hospitalisation")
+                sessionStorage.setItem("space","shospitalisation")
+            }
+        },
+        {
+            id : 9,
+            label : "Service Infirmerie",
+            cover : administration_image ,
+            onClick : ()=>{
+                navigate("/espace-infirmerie")
+                sessionStorage.setItem("space","sinfirmerie")
+            }
+        },
     ]
     const {
         token: { colorBgElevated },

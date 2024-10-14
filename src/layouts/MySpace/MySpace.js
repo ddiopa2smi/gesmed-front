@@ -549,6 +549,75 @@ const MySpace = () => {
     }
   ];
 
+  const hospitalisationMenu = [
+    space === "shospitalisation" && {
+      key: "dashboard",
+      icon: <DashboardOutlined />,
+      label: "Tableau de bord",
+      title: "Tableau de bord",
+      onClick: () => {
+        navigate("/espace-hospitalisation/dashboard");
+      },
+    },
+    space === "shospitalisation" && {
+      key: "hospitalisations",
+      icon: <RiStethoscopeLine />,
+      label: "Hospitalisations",
+      title: "Hospitalisations",
+      onClick: () => {
+        navigate("/espace-hospitalisation/hospitalisations");
+      },
+    },
+    space === "shospitalisation" && {
+      key: "historique-soins",
+      icon: <ClockCircleOutlined />,
+      label: "Historique des soins",
+      title: "Historique des soins",
+      onClick: () => {
+        navigate("/espace-hospitalisation/historique-soins");
+      },
+    },
+  ];
+
+  const infirmerieMenu = [
+    space === "sinfirmerie" && {
+      key: "dashboard",
+      icon: <DashboardOutlined />,
+      label: "Tableau de bord",
+      title: "Tableau de bord",
+      onClick: () => {
+        navigate("/espace-infirmerie/dashboard");
+      },
+    },
+    space === "sinfirmerie" && {
+      key: "patients",
+      icon: <TeamOutlined />,
+      label: "Patients",
+      title: "Patients",
+      onClick: () => {
+        navigate("/espace-infirmerie/patients");
+      },
+    },
+    space === "sinfirmerie" && {
+      key: "consultations",
+      icon: <RiStethoscopeLine />,
+      label: "Consultations",
+      title: "Consultations",
+      onClick: () => {
+        navigate("/espace-infirmerie/consultations");
+      },
+    },
+    space === "sinfirmerie" && {
+      key: "suivi-traitement",
+      icon: <FolderOutlined />,
+      label: "Suivi des traitements",
+      title: "Suivi des traitements",
+      onClick: () => {
+        navigate("/espace-infirmerie/suivi-traitement");
+      },
+    },
+  ];
+
   const menu = (
     <Menu
       theme="light"
@@ -570,6 +639,8 @@ const MySpace = () => {
         ...analyseMenu,
         ...radiologieMenu,
         ...accueilMenu,
+        ...hospitalisationMenu,
+        ...infirmerieMenu,
         ...othersMenu,
       ]}
     />

@@ -46,6 +46,8 @@ import ConfigPage from "./pages/ConfigPage/ConfigPage.js";
 import PrescriptionsGroupes from "./pages/PrescriptionsGroupes/PrescriptionsGroupes.js";
 import VisiteDetails from "./pages/VisiteDetails/VisiteDetails.js";
 import { accueilRouter } from "./pages/Espace-Accueil/Routing.tsx";
+import { hospitalisationRouter } from "./pages/Espace-Hospitalisation/Routing.tsx";
+import { infirmerieRouter } from "./pages/Espace-Infirmerie/Routing.tsx";
 export const router = createBrowserRouter(
     [
         {
@@ -298,6 +300,8 @@ export const router = createBrowserRouter(
         gynecologieRouter ,
         dentistRouter ,
         radiologieRouter,
-        analyseRouter
+        analyseRouter,
+        hospitalisationRouter,
+        infirmerieRouter
     ]
 )

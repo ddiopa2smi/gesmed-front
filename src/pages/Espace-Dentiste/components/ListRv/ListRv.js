@@ -85,7 +85,7 @@ function ListRv() {
                         key: 'prenom_patient',
                         ...getColumnSearchProps('prenom_patient')
                     },
-                    // {
+                    // {    
                     //     title: 'Age',
                     //     dataIndex: 'age_patient',
                     //     key: 'age_patient',

@@ -43,6 +43,7 @@ function Appointments() {
                 {
                     status: "registered",
                     date: new Date('2024-09-06T09:00:00'),
+                    
                     patientFullname: "Jean Martin",
                     duration: 30
                 },
