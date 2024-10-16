@@ -7,7 +7,6 @@ import { formatDate } from "../../../utils/helpers";
 const { Title, Text } = Typography;
 function RadioDetails() {
   const { id } = useParams();
-  console.log(id);
   return (
     <div>
       <Card>

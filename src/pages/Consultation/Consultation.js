@@ -309,6 +309,32 @@ function Consultation() {
                                     navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
                                 }
                             }, 
+                            {
+                                label: <span> Hospitalisation </span>,
+                                key: '3',
+                                onClick : ()=>{
+                                    sessionStorage.removeItem("editPrescription");
+                                    sessionStorage.setItem("prescription",JSON.stringify({  
+                                        codepresc : codesPrescriptions.IMG,
+                                        numcons : initConsultation.numcons ,
+                                        medecin : initConsultation.medecin
+                                    }));
+                                    navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
+                                }
+                            }, 
+                            {
+                                label: <span> Infirmerie </span>,
+                                key: '4',
+                                onClick : ()=>{
+                                    sessionStorage.removeItem("editPrescription");
+                                    sessionStorage.setItem("prescription",JSON.stringify({  
+                                        codepresc : codesPrescriptions.IMG,
+                                        numcons : initConsultation.numcons ,
+                                        medecin : initConsultation.medecin
+                                    }));
+                                    navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
+                                }
+                            },
                         ]}}
                         trigger={['click']}
                     >

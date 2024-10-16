@@ -5,6 +5,7 @@ import Home from "./Home/Home";
 import Analyses from "./Analyses/Analyses";
 import Historique from "./Historique/Historique";
 import DetailsAnalyse from "./DetailsAnalyse/DetailsAnalyse";
+import TraitementAnalyse from "./TraitementAnalyse/TraitementAnalyse";
 
 export const analyseRouter : RouteObject = {
     path : "espace-analyse",
@@ -23,9 +24,12 @@ export const analyseRouter : RouteObject = {
             children: [
                 {
                     index : true,
-                    path : "",
                     element : <Analyses />
-                }
+                },
+                {
+                    path : "details/:id",
+                    element : <TraitementAnalyse />
+                },
             ]
         },
         {

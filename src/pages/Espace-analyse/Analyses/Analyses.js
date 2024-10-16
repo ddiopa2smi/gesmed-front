@@ -1,13 +1,17 @@
 import React, { useState } from 'react'
-import { formatDate } from '../../../utils/helpers';
+import { deletePopup, formatDate } from '../../../utils/helpers';
 import DataTable from '../../../components/common/DataTable/DataTable';
 import EditButton from '../../../components/common/EditButton/EditButton';
 import DeleteButton from '../../../components/common/DeleteButton/DeleteButton';
-import { Button, Card, Flex, Space, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Flex, message, Space, Tag, Tooltip, Typography } from 'antd';
 import {RiStethoscopeLine} from "react-icons/ri"
+import { deleteActions } from '../../../actions/actions';
+import { endpoints } from '../../../constants/endpoints.constants';
+import { useNavigate } from 'react-router';
 
 const {Title} = Typography
 function Analyses() {
+    const navigate = useNavigate();
     const [isLoading , setLoading] = useState(false);
     const listPrescription = [
         {
@@ -23,9 +27,29 @@ function Analyses() {
             traite : false
         },
     ]
+
+    const doTreatment = (id) => {
+        navigate(`/espace-analyse/analyses/details/${id}`)
+    };
+
+    const onDelete = (id) => {
+        deletePopup()
+        .then((result)=>{
+            if (result.isConfirmed) {
+                alert("Confirmed")
+                // deleteActions(`${endpoints.patients.DELETE}/${record?.num_patient}`)
+                // .then((response)=>{
+                //     if (response.data.Deleted === true) {
+                //         message.success("Ligne retirée avec succès");
+                //         onRefresh()
+                //     }
+                // })
+            }
+        })
+    }
   return (
     <Card>
-      <Title level={4}>
+      <Title level={3}>
             Liste des analyses à faire
         </Title>
         <br />
@@ -72,16 +96,16 @@ function Analyses() {
                 <Flex justify="center" align="center">
                     <Space>
                         <Tooltip title="Traiter">
-                            <Button type='text' icon={<RiStethoscopeLine cursor="pointer" size={18} onClick={()=>{console.log("Traiter")}} />} />
+                            <Button onClick={()=>{doTreatment(record.numpresc)}} type='text' icon={<RiStethoscopeLine cursor="pointer" size={18} onClick={()=>{console.log("Traiter")}} />} />
                         </Tooltip>
-                        <EditButton
+                        {/* <EditButton
                             onEdit={() => {
                             console.log("Edit");
                             }}
-                        />
+                        /> */}
                         <DeleteButton
                             onDelete={() => {
-                                console.log("Delete");
+                                onDelete(record.numpresc);
                             }}
                         />
                     </Space>
