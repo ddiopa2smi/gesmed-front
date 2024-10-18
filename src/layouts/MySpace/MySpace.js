@@ -233,6 +233,15 @@ const MySpace = () => {
 
   const pharmacieMenu = [
     space === "spharma" && {
+      key: "dashboard",
+      icon: <DashboardOutlined />,
+      label: "Tableau de bord ",
+      title: "Tableau de bord ",
+      onClick: () => {
+        navigate("/myspace/dashboard");
+      },
+    },
+    space === "spharma" && {
       key: "gestion-fiche-produits",
       icon: <FileOutlined />,
       label: "Gestion fiche produits",

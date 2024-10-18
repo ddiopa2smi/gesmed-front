@@ -149,7 +149,7 @@ function NewMouvementSortie() {
                         >
                             <Radio.Group >
                                 <Space direction="vertical">
-                                    <Radio value={1}>Appro comptoir</Radio>
+                                    <Radio value={1}>Livraison comptoir</Radio>
                                     <Radio value={2}>Produits périmés</Radio>
                                     <Radio value={3}>Déstockage (gratuité)</Radio>
                                     <Radio value={4}>Défaut</Radio>
