@@ -48,7 +48,7 @@ function Facturation() {
                         nom_patient: 'Jean Dupont',
                         pu: 150.00,  // Prix unitaire
                         pt: 300.00,  // Prix total
-                        date_visite: '2024-10-18',
+                        date_visite: new Date().toISOString(),
                     },
                     {
                         key: '2',
@@ -57,7 +57,7 @@ function Facturation() {
                         nom_patient: 'Marie Martin',
                         pu: 100.00,
                         pt: 200.00,
-                        date_visite: '2024-10-17',
+                        date_visite: new Date().toISOString(),
                     }
                 ]}
                 setDataSourceCopy={null}
@@ -67,9 +67,6 @@ function Facturation() {
                         title: 'Code facture',
                         dataIndex: 'code_facture',
                         key: 'code_facture',
-                        render: (record) => <div className='table-data'>
-                                {formatDate(record)} 
-                        </div>,
                     },
                     {
                         title: 'Code produit',

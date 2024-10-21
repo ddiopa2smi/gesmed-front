@@ -48,7 +48,6 @@ function FicheProduit() {
         form
         .validateFields()
         .then((values) => {
-            console.log(values)
             postActions(endpoints.fiche_produit.ADD,values)
             .then((response)=>{
                 if (response?.data) {
@@ -110,7 +109,7 @@ function FicheProduit() {
         if(operation === "add"){
             setFamilleMedocSelected(null)
         }
-        setOpen2(true);
+        setOpen2(true); 
         setOperationType(operation);
         setCurrentSelectableTask(selectableTask);
     }
