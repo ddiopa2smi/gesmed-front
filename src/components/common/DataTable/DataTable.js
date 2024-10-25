@@ -11,11 +11,13 @@ function DataTable({
     columns,
     rowSelected,
     pagination,
-    components
+    components,
+    selectedRowKeys ,
+    setSelectedRowKeys
 }) {
 
     const [tableCount , setTableCount] = useState(null);
-    const [selectedRowKeys , setSelectedRowKeys] = useState([]);
+    //const [selectedRowKeys , setSelectedRowKeys] = useState([]);
     const [sortedInfo, setSortedInfo] = useState({});
 
     const onSelectChange = (newSelectedRowKeys) => {
@@ -73,7 +75,7 @@ function DataTable({
             }}
             components={components}
             pagination={pagination}
-            footer={()=> selectedRowKeys.length !== 0 ? `${selectedRowKeys.length}/${dataSourceCopy.length} ligne(s) sélectionné(es)` :  `${dataSourceCopy?.length} lignes au total`}
+            footer={()=> selectedRowKeys?.length !== 0 ? `${selectedRowKeys?.length}/${dataSourceCopy.length} ligne(s) sélectionné(es)` :  `${dataSourceCopy?.length} lignes au total`}
         />
     )
 }

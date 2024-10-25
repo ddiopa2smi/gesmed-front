@@ -229,7 +229,182 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                         </Col>
                     </>
                 }
+
             </Row>
+            {
+                
+                typePatient !== 4 && 
+                <>
+                    <Row gutter={[24,24]}>
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12} >
+                            <Form.Item
+                                name="direction"
+                                label="Direction"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Sélection obligatoire',   
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    style={{width:'100%',background:"transparent"}}
+                                    showSearch
+                                    placeholder="Direction"
+                                    optionFilterProp="children" 
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    loading={false}
+                                >    
+                                    {
+                                        [
+                                            {
+                                                id : 1 ,
+                                                name : "Direction1"
+                                            },
+                                            {
+                                                id : 2 ,
+                                                name : "Direction2"
+                                            },
+                                            {
+                                                id : 3 ,
+                                                name : "Direction3"
+                                            },
+                                        ]?.map((item,index)=>(
+                                            <Option key={index}  value={item?.id} > {item?.name} </Option>
+                                        ))
+                                    }
+                                                
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12} >
+                            <Form.Item 
+                                name="departement" 
+                                label="Département"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Sélection obligatoire',   
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    style={{width:'100%',background:"transparent"}}
+                                    showSearch
+                                    placeholder="Département"
+                                    optionFilterProp="children" 
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    loading={false}
+                                >    
+                                    {
+                                        [
+                                            {
+                                                id : 1,
+                                                name : "Département1"
+                                            },
+                                            {
+                                                id : 2,
+                                                name : "Département2"
+                                            },
+                                            {
+                                                id : 3,
+                                                name : "Département3"
+                                            },
+                                        ]?.map((item,index)=>(
+                                            <Option key={index}  value={item?.id} > {item?.name} </Option>
+                                        ))
+                                    }
+                                                
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={[24,24]}>
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12} >
+                            <Form.Item
+                                name="service"
+                                label="Service"
+                                rules={[
+                                    {
+                                    required: true,
+                                    message: 'Sélection obligatoire',   
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    style={{width:'100%',background:"transparent"}}
+                                    showSearch
+                                    placeholder="Service"
+                                    optionFilterProp="children" 
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    loading={false}
+                                >    
+                                    {
+                                        [
+                                            {
+                                                id : 1 ,
+                                                name : "Service1"
+                                            },
+                                            {
+                                                id : 2 ,
+                                                name : "Service2"
+                                            },
+                                            {
+                                                id : 3 ,
+                                                name : "Service3"
+                                            },
+                                        ]?.map((item,index)=>(
+                                            <Option key={index}  value={item?.id} > {item?.name} </Option>
+                                        ))
+                                    }
+                                                
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12} md={12} lg={12} xl={12} >
+                            <Form.Item 
+                                name="bureau" 
+                                label="Bureau"
+                                rules={[
+                                    {
+                                    required: true,
+                                    message: 'Sélection obligatoire',   
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    style={{width:'100%',background:"transparent"}}
+                                    showSearch
+                                    placeholder="Bureau"
+                                    optionFilterProp="children" 
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                    loading={false}
+                                >    
+                                    {
+                                        [
+                                            {
+                                                id : 1 ,
+                                                name : "Bureau1"
+                                            },
+                                            {
+                                                id : 2 ,
+                                                name : "Bureau2"
+                                            },
+                                            {
+                                                id : 3 ,
+                                                name : "Bureau3"
+                                            },
+                                        ]?.map((item,index)=>(
+                                            <Option key={index}  value={item?.id} > {item?.name} </Option>
+                                        ))
+                                    }
+                                                
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </>
+            }
             
             {
                 // Must fixed the search of patients when enter the matricule later 
@@ -305,12 +480,6 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                             <Form.Item
                                 name="profession_patient"
                                 label="Profession du patient"
-                                // rules={[
-                                //     {
-                                //         required: true,
-                                //         message: 'Champ obligatoire',
-                                //     },
-                                // ]}
                             >
                                 <Input/>
                             </Form.Item>
@@ -319,12 +488,6 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                             <Form.Item
                                 name="profession_conjoint"
                                 label="Profession du conjoint"
-                                // rules={[
-                                //     {
-                                //         required: true,
-                                //         message: 'Champ obligatoire',
-                                //     },
-                                // ]}
                             >
                                 <Input/>
                             </Form.Item>
@@ -481,6 +644,42 @@ function AddPatient({ setOpen , operationType , onRefresh , currentRecord}) {
                     </Form.Item>
                 </Col>
             </Row>
+
+            {
+                typePatient === 4 && 
+                <Row gutter={[24,24]}>
+                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                        <Form.Item
+                            name="ville"
+                            label="Ville"
+                            initialValue={currentRecord?.ville}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Champ obligatoire',
+                                }
+                            ]}
+                        >
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                        <Form.Item
+                            name="quartier"
+                            label="Quartier"
+                            initialValue={currentRecord?.quartier}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Champ obligatoire',
+                                }
+                            ]}
+                        >
+                            <Input/>
+                        </Form.Item>
+                    </Col>
+                </Row>
+            }
 
             <Row gutter={[24,24]}>
                 <Col xs={24} sm={24} md={24} lg={24} xl={24}>
