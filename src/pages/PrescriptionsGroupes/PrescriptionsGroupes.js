@@ -9,6 +9,7 @@ import {
   Row,
   Select,
   Space,
+  Tag,
   Typography,
 } from "antd";
 import React, { useState } from "react";
@@ -29,7 +30,7 @@ import useSearch from "../../utils/hooks/useSearch";
 import { useEffect } from "react";
 
 const { Option } = Select;
-const { Title , Text } = Typography;
+const { Title, Text } = Typography;
 
 function PrescriptionsGroupes() {
   const [form] = Form.useForm();
@@ -46,7 +47,7 @@ function PrescriptionsGroupes() {
   const [prescriptionType, setPrescriptionType] = useState(
     codesPrescriptions.ORD
   );
-  const [selectedPatients , setSelectedPatients] = useState([]);
+  const [selectedPatients, setSelectedPatients] = useState([]);
   const handleChange = (value) => {
     console.log(`selected ${value}`);
   };
@@ -55,16 +56,24 @@ function PrescriptionsGroupes() {
     setOpen(true);
   };
 
-  const save = () => {};
+  const save = () => {
+    setOpen(false);
+  };
 
-  useEffect(() => {
-    console.log(selectedPatients)
-  
-    return () => {
-      
+  const filterListBySelectedPatients = (list1 , list2) => {
+    const result = [];
+    if (list2.length > 0) {
+      list1.forEach((element) => {
+        list2.forEach((id) => {
+          if (element.num_patient === id) {
+            result.push(element);
+          }
+        });
+      });
     }
-  }, [selectedPatients])
-  
+    return result;
+  };
+
   return (
     <Card>
       <Title level={3}>Prescriptions groupées</Title>
@@ -110,7 +119,7 @@ function PrescriptionsGroupes() {
         {prescriptionType === codesPrescriptions.ANA && <GroupAnalyse />}
         {/*{prescriptionType === codesPrescriptions.IMG && <GroupImagerie />} */}
 
-        <br />
+        {/* <br />
         <Row gutter={[8, 8]}>
           <Col xs={24} sm={24} md={24} lg={24} xl={24}>
             <Form.Item
@@ -157,20 +166,35 @@ function PrescriptionsGroupes() {
               />
             </Form.Item>
           </Col>
-        </Row>
+        </Row> */}
 
         <br />
-        <Row gutter={[8, 8]}>
-          <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+        <Row gutter={[8, 8]} align="middle" >
+          
+          <Col xs={24} sm={24} md={20} lg={20} xl={20}>
+            <Card size="small" bordered>
+              {
+                selectedPatients?.length === 0 ?
+                <Text type="secondary"  > Aucun patient sélectionné (cliquer sur Ajouter des patients) </Text> :
+              filterListBySelectedPatients(patientsListCopy, selectedPatients)?.map((item) => (
+                <Tag onClose={() => { setSelectedPatients(selectedPatients.filter((elt) => elt !== item.num_patient)) }} key={item.num_patient} closable>
+                  {" "}
+                  {`${item.prenom_patient} ${item.nom_patient}`}{" "}
+                </Tag>
+              ))}
+            </Card>
+          </Col>
+          <Col xs={24} sm={24} md={4} lg={4} xl={4}>
             <Button
-              type="primary" ghost
+              type="primary"
+              ghost
               onClick={() => {
                 openModal();
               }}
             >
               Ajouter des patients{" "}
             </Button>
-            <br/>
+            <br />
           </Col>
         </Row>
 
@@ -182,8 +206,13 @@ function PrescriptionsGroupes() {
           }}
           footer={null}
           width={1000}
+          destroyOnClose
         >
-          <Text>Sélectionner les patients concernés parmi la liste des patients</Text>
+          <Text type='secondary' >
+            Sélectionner les patients concernés parmi la liste des patients 
+          </Text>
+          <br />
+          <br />
           <DataTable
             dataSource={patientsList}
             dataSourceCopy={patientsListCopy}
@@ -234,15 +263,16 @@ function PrescriptionsGroupes() {
                 key: "direction",
                 filters: [
                   {
-                    text: 'Direction1',
-                    value: 'direction1',
+                    text: "Direction générale",
+                    value: "direction1",
                   },
                   {
-                    text: 'Direction2',
-                    value: 'direction2',
+                    text: "Direction interne",
+                    value: "direction2",
                   },
                 ],
-                onFilter: (value, record) => record.address.indexOf(value) === 0,
+                onFilter: (value, record) =>
+                  record.address.indexOf(value) === 0,
               },
               {
                 title: "Département",
@@ -250,15 +280,20 @@ function PrescriptionsGroupes() {
                 key: "departement",
                 filters: [
                   {
-                    text: 'Département1',
-                    value: 'departement1',
+                    text: "Département de la chirurgie",
+                    value: "departement1",
                   },
                   {
-                    text: 'Département2',
-                    value: 'departement2',
+                    text: "Département des soins infirmiers",
+                    value: "departement2",
+                  },
+                  {
+                    text: "Département Informatique et systèmes d'informations",
+                    value: "departement3",
                   },
                 ],
-                onFilter: (value, record) => record.address.indexOf(value) === 0,
+                onFilter: (value, record) =>
+                  record.address.indexOf(value) === 0,
               },
               {
                 title: "Service",
@@ -266,15 +301,32 @@ function PrescriptionsGroupes() {
                 key: "service",
                 filters: [
                   {
-                    text: 'Service1',
-                    value: 'service1',
+                    text: "Service des urgences",
+                    value: "service1",
                   },
                   {
-                    text: 'Service2',
-                    value: 'service2',
+                    text: "Service de la radiologie",
+                    value: "service2",
+                  },
+                  {
+                    text: "Service Analyse",
+                    value: "service3",
+                  },
+                  {
+                    text: "Service dentiste",
+                    value: "service4",
+                  },
+                  {
+                    text: "Service hospitalisation",
+                    value: "service5",
+                  },
+                  {
+                    text: "Pharmacie",
+                    value: "service6",
                   },
                 ],
-                onFilter: (value, record) => record.address.indexOf(value) === 0,
+                onFilter: (value, record) =>
+                  record.address.indexOf(value) === 0,
               },
               {
                 title: "Bureau",
@@ -282,27 +334,44 @@ function PrescriptionsGroupes() {
                 key: "bureau",
                 filters: [
                   {
-                    text: 'Bureau1',
-                    value: 'bureau1',
+                    text: "Bureau des admissions et services clients",
+                    value: "bureau1",
                   },
                   {
-                    text: 'Bureau2',
-                    value: 'bureau2',
+                    text: "Bureau de gestion des ressources humaines",
+                    value: "bureau2",
                   },
                 ],
-                onFilter: (value, record) => record.address.indexOf(value) === 0,
+                onFilter: (value, record) =>
+                  record.address.indexOf(value) === 0,
               },
             ]}
           />
-          <br/>
-          <Flex align="center" justify="center" >
+          {/* <br />
+          <Flex align="center" justify="center">
             <Space>
-              <Button type="primary" onClick={()=>{setOpen(false)}} ghost >Annuler</Button>
-              <Button type="primary" onClick={()=>{setOpen(false)}} >Ajouter</Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setOpen(false);
+                }}
+                ghost
+              >
+                Annuler
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  save();
+                }}
+              >
+                Ajouter
+              </Button>
             </Space>
-          </Flex>
+          </Flex> */}
         </Modal>
 
+        <br />
         <FormFooter
           onCancel={() => {
             navigate(-1);

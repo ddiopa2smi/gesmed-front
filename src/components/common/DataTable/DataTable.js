@@ -12,7 +12,7 @@ function DataTable({
     rowSelected,
     pagination,
     components,
-    selectedRowKeys ,
+    selectedRowKeys = [],
     setSelectedRowKeys
 }) {
 
