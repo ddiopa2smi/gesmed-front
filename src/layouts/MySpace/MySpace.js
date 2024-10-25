@@ -55,6 +55,8 @@ import {
   Input,
   Flex,
   Badge,
+  Tag,
+  Space,
 } from "antd";
 //import { setLightMode , setDarkMode } from './../../reducers/theme.reducers';
 import { TbMoonStars } from "react-icons/tb";
@@ -199,11 +201,7 @@ const MySpace = () => {
     },
     space === "smed" && {
       key: "prescriptions-groupes",
-      icon: (
-        <RiStethoscopeLine
-          size={16}
-        />
-      ),
+      icon: <RiStethoscopeLine size={16} />,
       label: "Prescriptions groupées",
       title: "Prescriptions groupées",
       onClick: () => {
@@ -527,7 +525,6 @@ const MySpace = () => {
     },
   ];
 
-  
   const accueilMenu = [
     space === "saccueil" && {
       key: "dashboard",
@@ -555,7 +552,7 @@ const MySpace = () => {
       onClick: () => {
         navigate("/espace-accueil/patients");
       },
-    }
+    },
   ];
 
   const hospitalisationMenu = [
@@ -930,7 +927,25 @@ const MySpace = () => {
                 transition: "all ease-in 0.2s",
               }}
             >
-              <h3>GESMED</h3>
+              <Space align="center">
+                <Text strong>GESMED</Text>
+                <span>
+                  {space === "smed" && <Tag color="#3498db">MEDICAL</Tag>}
+                  {space === "spharma" && <Tag color="#27ae60">PHARMACIE</Tag>}
+                  {space === "sdentist" && <Tag color="#9b59b6">DENTISTE</Tag>}
+                  {space === "sgynecologie" && (
+                    <Tag color="#f39c12">GYNECOLOGIE</Tag>
+                  )}
+                  {space === "snanalyse" && <Tag color="#c0392b">ANALYSE</Tag>}
+                  {space === "sradio" && <Tag color="#1abc9c">RADIOLOGIE</Tag>}
+                  {space === "shospitalisation" && (
+                    <Tag color="#2c3e50">HOSPITALISATION</Tag>
+                  )}
+                  {space === "sinfirmerie" && (
+                    <Tag color="#2ecc71">INFIRMERIE</Tag>
+                  )}
+                </span>
+              </Space>
             </div>
             <div
               style={{

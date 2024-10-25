@@ -1,5 +1,5 @@
 import "./Home.scss";
-import { Space, Typography, theme } from "antd";
+import { Layout, Space, Typography, theme } from "antd";
 import React from "react";
 import medicine_image from "./../../assets/medicine_image.svg";
 import pharma_image from "./../../assets/pharma_image.svg";
@@ -101,7 +101,7 @@ function Home() {
     token: { colorBgElevated },
   } = theme.useToken();
   return (
-    <div>
+    <Layout>
       <Title level={1} style={{ margin: "32px 0px", textAlign: "center" }}>
         {" "}
         Bienvenue sur l'espace de gestion de{" "}
@@ -129,7 +129,7 @@ function Home() {
           />
         ))}
       </div>
-    </div>
+    </Layout>
   );
 }
 

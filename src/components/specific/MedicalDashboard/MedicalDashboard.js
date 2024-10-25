@@ -192,7 +192,7 @@ function MedicalDashboard() {
       <br />
       <br />
       <Row gutter={[24, 24]}>
-        <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+        <Col xs={24} sm={24} md={16} lg={16} xl={16}>
           <Card title="Visualisation des graphes">
             <Row gutter={[24, 24]}>
               <Col xs={24} sm={24} md={24} lg={24} xl={24}>
@@ -232,7 +232,7 @@ function MedicalDashboard() {
             </Row>
           </Card>
         </Col>
-        <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+        <Col xs={24} sm={24} md={8} lg={8} xl={8}>
           <Card
             title="Liste des médécins actifs"
             extra={<Link>Voir plus</Link>}
