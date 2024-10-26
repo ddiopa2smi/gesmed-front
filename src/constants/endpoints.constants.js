@@ -118,6 +118,9 @@ export const endpoints = {
     fiche_produit : {
         ADD : "/api/Produit/add",
         LIST : "/api/Produit/list",
+    },
+    services_medicaux : {
+        LIST : "/api/smed/ServiceMedicaux/list"
     }
     
 }

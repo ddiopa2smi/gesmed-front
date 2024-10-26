@@ -16,6 +16,15 @@ function Home() {
   const navigate = useNavigate();
   const homeMenus = [
     {
+      id: 7,
+      label: "Service d'accueil",
+      cover: administration_image,
+      onClick: () => {
+        navigate("/espace-accueil");
+        sessionStorage.setItem("space", "saccueil");
+      },
+    },
+    {
       id: 1,
       label: "Service médical",
       cover: medicine_image,
@@ -69,15 +78,7 @@ function Home() {
         sessionStorage.setItem("space", "sradio");
       },
     },
-    {
-      id: 7,
-      label: "Service d'accueil",
-      cover: administration_image,
-      onClick: () => {
-        navigate("/espace-accueil");
-        sessionStorage.setItem("space", "saccueil");
-      },
-    },
+    
     {
       id: 8,
       label: "Service Hospitalisation",

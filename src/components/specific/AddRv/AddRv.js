@@ -4,6 +4,7 @@ import { postActions } from '../../../actions/actions';
 import { endpoints } from '../../../constants/endpoints.constants';
 import FormFooter from '../../common/FormFooter/FormFooter';
 import dayjs from "dayjs"
+import useFetch from '../../../utils/hooks/useFetch';
 
 const {Title} = Typography;
 const {Option} = Select;
@@ -25,7 +26,7 @@ const typesRV = [
 function AddRv({setOpen , onRefresh , currentRecord}) {
     const [form] = Form.useForm();
     const [formLoading , setFormLoading] = useState(false);
-     
+    const { data : servicesMedicaux , loading : servicesMedicauxLoading } = useFetch(endpoints.services_medicaux.LIST)
     const createRV = () => {
         form
         .validateFields()
@@ -76,13 +77,13 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                             placeholder="Service"
                             optionFilterProp="children" 
                             filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                            loading={false}
+                            loading={servicesMedicauxLoading}
                         >    
-                            <Option key={1}  value={"MEDECINE_GENERALE"} > MEDECINE GENERALE </Option>
-                            <Option key={2}  value={"MATERNITE"} > MATERNITE </Option>
-                            <Option key={3}  value={"RADIOLOGIE"} > RADIOLOGIE </Option>
-                            <Option key={4}  value={"BIOCHIMIE"} > BIOCHIMIE </Option>
-                                        
+                            {
+                            servicesMedicaux.map((item , index)=>(
+                                <Option key={index}  value={item.code_service} > {item.lib_service} </Option>
+                            ))
+                            }               
                         </Select>
                     </Form.Item>
                 </Col>

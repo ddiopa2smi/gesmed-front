@@ -210,11 +210,6 @@ function Patients() {
                                     menu={{items :  
                                         [
                                             {
-                                                label: "Ouvrir Dossier Médical" ,
-                                                key: '0',
-                                                onClick : ()=>{onOpenMedicalFolder(record)},
-                                            },
-                                            {
                                                 label: "Créer RV" ,
                                                 key: '1',
                                                 onClick : ()=>{onCreateRV(record)} ,
