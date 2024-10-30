@@ -61,7 +61,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
             <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item 
-                        name="service" 
+                        name="code_serv" 
                         label="Service"
                         rules={[
                             {
@@ -69,7 +69,6 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                                 message: 'Veuillez sélectionner le service',
                             },
                         ]}
-                        //initialValue={dayjs(new Date())}
                     >
                         <Select
                             style={{width:'100%',background:"transparent"}}

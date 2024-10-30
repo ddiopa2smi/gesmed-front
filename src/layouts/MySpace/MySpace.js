@@ -227,6 +227,15 @@ const MySpace = () => {
         navigate("/myspace/dossier-accident-travail");
       },
     },
+    {
+      key: "facturation",
+      icon: <DollarCircleOutlined />,
+      label: "Facturation",
+      title: "Facturation",
+      onClick: () => {
+        navigate("/myspace/facturation");
+      },
+    },
   ];
 
   const pharmacieMenu = [
@@ -461,15 +470,6 @@ const MySpace = () => {
   ];
 
   const othersMenu = [
-    {
-      key: "facturation",
-      icon: <DollarCircleOutlined />,
-      label: "Facturation",
-      title: "Facturation",
-      onClick: () => {
-        navigate("/myspace/facturation");
-      },
-    },
     {
       key: "settings",
       label: "Paramètres",
@@ -929,7 +929,7 @@ const MySpace = () => {
             >
               <Space align="center">
                 <Text strong>GESMED</Text>
-                <span>
+                {/* <span>
                   {space === "smed" && <Tag color="#3498db">MEDICAL</Tag>}
                   {space === "spharma" && <Tag color="#27ae60">PHARMACIE</Tag>}
                   {space === "sdentist" && <Tag color="#9b59b6">DENTISTE</Tag>}
@@ -944,7 +944,7 @@ const MySpace = () => {
                   {space === "sinfirmerie" && (
                     <Tag color="#2ecc71">INFIRMERIE</Tag>
                   )}
-                </span>
+                </span> */}
               </Space>
             </div>
             <div
@@ -1052,7 +1052,7 @@ const MySpace = () => {
                   ? collapsed
                     ? "5%"
                     : screens.xxl
-                    ? "16%"
+                    ? (screenWidth >= 1600 && screenWidth <= 1670) ? "18.3%" : "16%"
                     : "20%"
                   : 0,
             }}

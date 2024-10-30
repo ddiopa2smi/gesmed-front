@@ -102,7 +102,7 @@ function Home() {
     token: { colorBgElevated },
   } = theme.useToken();
   return (
-    <Layout>
+    <Layout style={{minHeight : "100vh"}} >
       <Title level={1} style={{ margin: "32px 0px", textAlign: "center" }}>
         {" "}
         Bienvenue sur l'espace de gestion de{" "}
