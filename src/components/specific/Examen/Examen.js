@@ -318,13 +318,6 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 <Form.Item 
                                     name="coloration_urine" 
                                     label="Coloration urine"
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: 'Veuillez sélectionner ',
-                                        },
-                                    ]}
-                                    //initialValue={dayjs(new Date())}
                                 >
                                     <Select
                                         style={{width:'100%',background:"transparent"}}

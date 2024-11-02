@@ -7,6 +7,7 @@ import FormFooter from '../../components/common/FormFooter/FormFooter';
 import { useLocation, useNavigate } from 'react-router';
 import { HomeOutlined, UploadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import BackButton from '../../components/common/BackButton/BackButton';
 const { Option } = Select;
 const { Title } = Typography;
 
@@ -16,20 +17,24 @@ const NewAccount = () => {
     const userConnected  = JSON.parse(sessionStorage.getItem("userConnected"));
     const [formLoading , setFormLoading] = useState(false);
     const {data , isLoading  , error}= useFetch(endpoints.users.ROLES_LIST);
+    const {data : servicesMedicaux , isLoading : servicesMedicauxLoading}= useFetch(endpoints.services_medicaux.LIST);
     const usersRoles = data;
     const usersRolesLoading = isLoading;
     const currentAccount = useLocation().state?.currentAccount || null;
+    console.log(currentAccount);
+    
     const type = useLocation().state?.type || null;
-
+    const regexCode = '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$';
 
     const save = () => {
         form.validateFields()   
         .then((values) => {
             setFormLoading(true);
             if (currentAccount === null) {
+                
+                values.perim = "MED";
                 postActions(endpoints.users.ADD,values)
                 .then((response)=>{
-                    setFormLoading(false);
                     if (response && response.data.Created === true) {
                         message.success("Nouveau compte  ajouté avec succès");
                         form.resetFields();
@@ -37,19 +42,16 @@ const NewAccount = () => {
                     } 
                     else {
                         message.error("Désolé , ce compte existe déjà");
-                        navigate(-1);
                     }
                 })
             }else{
-                values.perim = userConnected.perim ;
+                values.perim = currentAccount.perim ;
                 values.new_password = currentAccount.new_password;
                 values.password_confirm = currentAccount.password_confirm;
                 putActions(`${endpoints.users.UPDATE}/${userConnected.login}`,values)
                 .then((response)=>{
-                    setFormLoading(false);
                     if (response && response.data.Updated === true) {
                         message.success("Compte mis à jour avec succès");
-                        navigate(-1);
                     } 
                 })
             }
@@ -57,11 +59,17 @@ const NewAccount = () => {
         })
         .catch((info) => {
             console.log('Validate Failed:', info);
+        })
+        .finally(()=>{
+            setFormLoading(false)
         });
     }
 
     return(
         <Card>
+            <BackButton /> 
+            <br />
+            <br />
             <Title level={3} > {currentAccount === null ? "Créer un nouveau compte" : "Modifier un compte existant"} </Title>
             <Form
                 form={form}
@@ -116,6 +124,34 @@ const NewAccount = () => {
                             <Input placeholder='Votre email' />
                         </Form.Item>
                     </Col>
+
+                    {/* <Col xs={24} sm={24} md={8} lg={6} xl={6} >
+                        <Form.Item
+                            name="perim"
+                            label="Champ d'action"
+                            // rules={[
+                            //     {
+                            //         required: true,
+                            //         message: 'Champ obligatoire',
+                            //     },
+                            // ]}
+                        >
+                            <Select
+                                style={{width:'100%',background:"transparent"}}
+                                //defaultValue={(type==="personnel-medical"&& "MED")||(type==="personnel-pharmacie"&& "PH")}
+                                defaultValue="MED"
+                                showSearch
+                                placeholder="Champ d'action"
+                                optionFilterProp="children" 
+                                disabled
+                                filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                            >     
+                                <Option key={1}  value={"MED"} > Service médical </Option>
+                                <Option key={2}  value={"PH"} > Pharmacie </Option>
+                            </Select>
+                        </Form.Item>
+                    </Col> */}
+                    
                 </Row> 
 
                 <Row gutter={[24,24]}>
@@ -198,26 +234,29 @@ const NewAccount = () => {
                     </Col>
                     <Col xs={24} sm={24} md={8} lg={6} xl={6} >
                         <Form.Item
-                            name="perim"
-                            label="Champ d'action"
-                            // rules={[
-                            //     {
-                            //         required: true,
-                            //         message: 'Champ obligatoire',
-                            //     },
-                            // ]}
+                            name="code_serv"
+                            label="Service"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Champ obligatoire',
+                                }
+                            ]}
                         >
                             <Select
                                 style={{width:'100%',background:"transparent"}}
-                                defaultValue={(type==="personnel-medical"&& "MED")||(type==="personnel-pharmacie"&& "PH")}
                                 showSearch
-                                placeholder="Champ d'action"
+                                placeholder="Service"
                                 optionFilterProp="children" 
-                                disabled
                                 filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                loading={servicesMedicauxLoading}
                             >     
-                                <Option key={1}  value={"MED"} > Service médical </Option>
-                                <Option key={2}  value={"PH"} > Pharmacie </Option>
+                                {
+                                    servicesMedicaux.map((item , key)=>(
+                                        <Option key={key}  value={item?.code_service} > {item?.lib_service} </Option>
+                                    ))
+                                }
+                                    
                             </Select>
                         </Form.Item>
                     </Col>
@@ -225,50 +264,59 @@ const NewAccount = () => {
                 
                 {
                     currentAccount === null && 
-                    <>
-                        <Row gutter={[24,24]}>
-                            <Col xs={24} sm={24} md={8} lg={12} xl={12} >
-                                <Form.Item
-                                    name="new_password"
-                                    label="Mot de passe"
-                                    help="Le mot de passe doit contenir au moins 8 caractères qui doivent inclure une majuscule, une minuscule, un chiffre et un caractère spécial"
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: 'Champ obligatoire',
-                                        },
-                                    ]}
-                                    hasFeedback
-                                >
-                                    <Input.Password minLength={8} placeholder='Votre mot de passe'  />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} sm={24} md={8} lg={12} xl={12} >
-                                <Form.Item
-                                    name="password_confirm"
-                                    label="Confirmation de mot de passe"
-                                    dependencies={['new_password']}
-                                    hasFeedback
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: 'Champ obligatoire',
-                                        },
-                                        ({ getFieldValue }) => ({
-                                            validator(_, value) {
-                                            if (!value || getFieldValue('new_password') === value) {
+                    <Row gutter={[24,24]}>
+                        <Col xs={24} sm={24} md={8} lg={12} xl={12} >
+                            <Form.Item
+                                name="new_password"
+                                label="Mot de passe"
+                                help="Le mot de passe doit contenir au moins 8 caractères qui doivent inclure une majuscule, une minuscule, un chiffre et un caractère spécial"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Champ obligatoire',
+                                    },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            const regex = new RegExp(regexCode);
+                                            if (regex.test(value)) {
                                                 return Promise.resolve();
                                             }
-                                            return Promise.reject(new Error('La confirmation ne correspond pas à votre mot de passe entré'));
-                                            },
-                                        }),
-                                    ]}
-                                >
-                                    <Input.Password minLength={8} placeholder='Confirmer votre mot de passe' />
-                                </Form.Item>
-                            </Col>
-                        </Row> 
-                    </>
+                                            else{
+                                                return Promise.reject(new Error('Ce mot de passe n\'est pas valide'));  
+                                            }
+                                        },
+                                    }),
+                                ]}
+                                hasFeedback
+                            >
+                                <Input.Password minLength={8} placeholder='Votre mot de passe'  />
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={24} md={8} lg={12} xl={12} >
+                            <Form.Item
+                                name="password_confirm"
+                                label="Confirmation de mot de passe"
+                                dependencies={['new_password']}
+                                hasFeedback
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Champ obligatoire',
+                                    },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                        if (!value || getFieldValue('new_password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('La confirmation ne correspond pas à votre mot de passe entré'));
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <Input.Password minLength={8} placeholder='Confirmer votre mot de passe' />
+                            </Form.Item>
+                        </Col>
+                    </Row> 
                 }
 
                 <Divider  orientation="left">Autres informations</Divider>
@@ -339,6 +387,7 @@ const NewAccount = () => {
                 <FormFooter 
                     onCancel={()=>{navigate(-1)}}
                     htmlType={'submit'}
+                    loading={formLoading}
                 />
 
             </Form>

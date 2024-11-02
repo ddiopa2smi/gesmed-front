@@ -10,6 +10,7 @@ import analyse_image from "./../../assets/analyse_image.svg";
 import administration_image from "./../../assets/administration_image.svg";
 import { useNavigate } from "react-router-dom";
 import HomeCard from "../../components/specific/HomeCard/HomeCard";
+import { Typewriter } from "react-simple-typewriter";
 const { Title } = Typography;
 
 function Home() {
@@ -104,9 +105,20 @@ function Home() {
   return (
     <Layout style={{minHeight : "100vh"}} >
       <Title level={1} style={{ margin: "32px 0px", textAlign: "center" }}>
-        {" "}
-        Bienvenue sur l'espace de gestion de{" "}
-        <span style={{ color: "var(--app-color)" }}>GESMED</span>{" "}
+        Bienvenue dans votre service &nbsp; 
+        <span style={{ color: "var(--app-color)" }}>
+          <Typewriter
+            words={["Accueil", "Médical", "Pharmacie", "Dentaire", "Gynécologie", "Analayse" , "Radiologie" , "Hospitalisation", "Infirmerie" ]}
+              loop={5}
+              cursor
+              cursorStyle='_'
+              typeSpeed={70}
+              deleteSpeed={50}
+              delaySpeed={1000}
+              // onLoopDone={handleDone}
+              // onType={handleType}
+            />  
+        </span>
       </Title>
       <div className="container">
         {/* <Space size="large" wrap >
