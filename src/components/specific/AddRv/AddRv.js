@@ -1,5 +1,5 @@
 import { Col, Form, Row, Calendar, message, Typography, Select, DatePicker } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { postActions } from '../../../actions/actions';
 import { endpoints } from '../../../constants/endpoints.constants';
 import FormFooter from '../../common/FormFooter/FormFooter';
@@ -27,6 +27,17 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
     const [form] = Form.useForm();
     const [formLoading , setFormLoading] = useState(false);
     const { data : servicesMedicaux , loading : servicesMedicauxLoading } = useFetch(endpoints.services_medicaux.LIST)
+    const { data : users, isLoading: usersLoading } = useFetch(
+        endpoints.users.LIST
+    );
+    const [medecins , setMedecins] = useState([]);
+    const [medecinsCopy , setMedecinsCopy] = useState([]);
+    useEffect(() => {
+        const temp = users.filter((item)=> item.role_name === "Medecin")
+        setMedecins(temp);
+        setMedecinsCopy(temp);
+    }, [users])
+    
     const createRV = () => {
         form
         .validateFields()
@@ -44,6 +55,9 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                 }
                 setOpen(false);
             })
+            .catch(() => {
+                message.success("Une erreur est survenue lors de la création du Rendez-vous");
+            });
         })
         .catch((info) => {
             console.log('Validate Failed:', info);
@@ -55,6 +69,12 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
             form={form}
             layout="vertical"
             onFinish={createRV}
+            onValuesChange={(changedValues , values)=>{
+                if (changedValues.code_serv) {
+                    const temp = medecins.filter((item)=> item.code_serv === changedValues.code_serv);
+                    setMedecinsCopy(temp);
+                }
+            }}
         >
             <Title level={4} > Patient {currentRecord?.num_patient} / {currentRecord?.prenom_patient} {currentRecord?.nom_patient} </Title>
             
@@ -90,7 +110,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
             <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item 
-                        name="medecin" 
+                        name="id_medecin" 
                         label="Médécin traitant"
                         rules={[
                             {
@@ -98,7 +118,6 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                                 message: 'Veuillez sélectionner le service',
                             },
                         ]}
-                        //initialValue={dayjs(new Date())}
                     >
                         <Select
                             style={{width:'100%',background:"transparent"}}
@@ -108,8 +127,11 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                             filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                             loading={false}
                         >    
-                            <Option key={1}  value={"cheikh"} > Dr Cheickh DIOUF </Option>
-                                        
+                            {
+                                medecinsCopy.map((item , index)=>(
+                                    <Option key={index}  value={item.login} > {item.username} </Option>
+                                ))
+                            }        
                         </Select>
                     </Form.Item>
                 </Col>
@@ -135,7 +157,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                         label="Type de rendez-vous"
                         rules={[
                             {
-                                required: true,
+                                required: false,
                                 message: 'Veuillez sélectionner le type de rendez-vous',
                             },
                         ]}
@@ -160,7 +182,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
             </Row>
 
            
-            <Row>
+            {/* <Row>
                 <Col  xs={24} sm={24} md={24} lg={24} xl={24}>
                     <Form.Item 
                         name="date_rv" 
@@ -175,7 +197,7 @@ function AddRv({setOpen , onRefresh , currentRecord}) {
                         <Calendar fullscreen={false} />
                     </Form.Item>
                 </Col>
-            </Row>
+            </Row> */}
 
 
             <FormFooter 

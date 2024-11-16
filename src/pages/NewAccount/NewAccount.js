@@ -227,8 +227,8 @@ const NewAccount = () => {
                                 optionFilterProp="children" 
                                 filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                             >     
-                                <Option key={1}  value={false} > Bloqué </Option>
-                                <Option key={2}  value={true} > Actif </Option>
+                                <Option key={1}  value={true} > Actif </Option>
+                                <Option key={2}  value={false} > Bloqué </Option>
                             </Select>
                         </Form.Item>
                     </Col>

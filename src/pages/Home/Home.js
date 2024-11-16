@@ -1,5 +1,5 @@
 import "./Home.scss";
-import { Layout, Space, Typography, theme } from "antd";
+import { Button, Flex, Layout, Space, Typography, message, theme } from "antd";
 import React from "react";
 import medicine_image from "./../../assets/medicine_image.svg";
 import pharma_image from "./../../assets/pharma_image.svg";
@@ -11,7 +11,13 @@ import administration_image from "./../../assets/administration_image.svg";
 import { useNavigate } from "react-router-dom";
 import HomeCard from "../../components/specific/HomeCard/HomeCard";
 import { Typewriter } from "react-simple-typewriter";
+import { logoutPopup } from "../../utils/helpers";
+import { postActions } from "../../actions/actions";
+import { endpoints } from "../../constants/endpoints.constants";
+import { LogoutOutlined } from "@ant-design/icons";
+import { codeServices } from "../../constants/app.constants";
 const { Title } = Typography;
+
 
 function Home() {
   const navigate = useNavigate();
@@ -19,6 +25,7 @@ function Home() {
     {
       id: 7,
       label: "Service d'accueil",
+      code : codeServices.ACCUEIL ,
       cover: administration_image,
       onClick: () => {
         navigate("/espace-accueil");
@@ -28,6 +35,7 @@ function Home() {
     {
       id: 1,
       label: "Service médical",
+      code : codeServices.MEDICAL ,
       cover: medicine_image,
       onClick: () => {
         navigate("/myspace/dashboard");
@@ -37,6 +45,7 @@ function Home() {
     {
       id: 2,
       label: "Service pharmacie",
+      code : codeServices.PHARMACIE ,
       cover: pharma_image,
       onClick: () => {
         navigate("/myspace/dashboard");
@@ -46,6 +55,7 @@ function Home() {
     {
       id: 3,
       label: "Service dentiste",
+      code : codeServices.DENTAIRE ,
       cover: dentist_image,
       onClick: () => {
         navigate("/espace-dentist");
@@ -55,6 +65,7 @@ function Home() {
     {
       id: 4,
       label: "Service Gynécologie",
+      code : codeServices.GYNECOLOGIE ,
       cover: gynecologie_image,
       onClick: () => {
         navigate("/espace-gynecologie");
@@ -64,6 +75,7 @@ function Home() {
     {
       id: 5,
       label: "Service Analyse",
+      code : codeServices.ANALYSE ,
       cover: analyse_image,
       onClick: () => {
         navigate("/espace-analyse");
@@ -73,6 +85,7 @@ function Home() {
     {
       id: 6,
       label: "Service Radiologie",
+      code : codeServices.RADIOLOGIE ,
       cover: radiologie_image,
       onClick: () => {
         navigate("/espace-radiologie");
@@ -83,6 +96,7 @@ function Home() {
     {
       id: 8,
       label: "Service Hospitalisation",
+      code : codeServices.HOSPITALISATION ,
       cover: administration_image,
       onClick: () => {
         navigate("/espace-hospitalisation");
@@ -92,6 +106,7 @@ function Home() {
     {
       id: 9,
       label: "Service Infirmerie",
+      code : codeServices.INFIRMERIE ,
       cover: administration_image,
       onClick: () => {
         navigate("/espace-infirmerie");
@@ -102,24 +117,48 @@ function Home() {
   const {
     token: { colorBgElevated },
   } = theme.useToken();
+
+  const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
+  const logout = () => {
+    logoutPopup().then((result) => {
+      if (result.isConfirmed) {
+        postActions(`${endpoints.users.DISCONNECT}`, userConnected).then(
+          (response) => {
+            if (response.data.Disconnect === true) {
+              sessionStorage.clear();
+              navigate("/login", { replace: true });
+              message.success("Déconnexion éffectuée avec succès");
+            } else {
+              message.error("Erreur de déconnexion");
+            }
+          }
+        );
+      }
+    });
+  };
   return (
     <Layout style={{minHeight : "100vh"}} >
-      <Title level={1} style={{ margin: "32px 0px", textAlign: "center" }}>
-        Bienvenue dans votre service &nbsp; 
-        <span style={{ color: "var(--app-color)" }}>
-          <Typewriter
-            words={["Accueil", "Médical", "Pharmacie", "Dentaire", "Gynécologie", "Analayse" , "Radiologie" , "Hospitalisation", "Infirmerie" ]}
-              loop={5}
-              cursor
-              cursorStyle='_'
-              typeSpeed={70}
-              deleteSpeed={50}
-              delaySpeed={1000}
-              // onLoopDone={handleDone}
-              // onType={handleType}
-            />  
-        </span>
-      </Title>
+      
+      
+      <Flex align="center" justify="space-between" style={{margin: "32px 8em 4px 8em"}} >
+        <Title level={1} style={{textAlign: "center" }}>
+          Bienvenue dans votre service &nbsp; 
+          <span style={{ color: "var(--app-color)" }}>
+            <Typewriter
+              words={["Accueil", "Médical", "Pharmacie", "Dentaire", "Gynécologie", "Analayse" , "Radiologie" , "Hospitalisation", "Infirmerie" ]}
+                loop={5}
+                cursor
+                cursorStyle='_'
+                typeSpeed={70}
+                deleteSpeed={50}
+                delaySpeed={1000}
+                // onLoopDone={handleDone}
+                // onType={handleType}
+              />  
+          </span>
+        </Title>
+        <Button type="primary" size="large" onClick={logout} icon={<LogoutOutlined/>} >Déconnexion</Button>
+      </Flex>
       <div className="container">
         {/* <Space size="large" wrap >
                     {
@@ -139,6 +178,7 @@ function Home() {
             cover={item.cover}
             label={item.label}
             onClick={item.onClick}
+            canAccess={userConnected.code_serv === item.code}
           />
         ))}
       </div>

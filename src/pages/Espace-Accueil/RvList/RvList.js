@@ -23,13 +23,14 @@ import Examen from "../../../components/specific/Examen/Examen";
 import { getActions } from "../../../actions/actions";
 import useSearch from "../../../utils/hooks/useSearch";
 import ReloadButton from "../../../components/common/ReloadButton/ReloadButton";
+import { formatDate } from "../../../utils/helpers";
 
 const { Title } = Typography;
 
 function RvList() {
   const navigate = useNavigate();
   const { data, dataCopy, setDataCopy, isLoading, error, onRefresh } = useFetch(
-    endpoints.rendezVous.TODAY_LIST
+    endpoints.rendezVous.LIST
   );
   const {data : services_medicaux} = useFetch(endpoints.services_medicaux.LIST)
   const { getColumnSearchProps } = useSearch();
@@ -37,7 +38,7 @@ function RvList() {
   const [currentRecord, setCurrentRecord] = useState(null);
   const [defaultExamPayload, setDefaultExamPayload] = useState(null);
   const [examActionLoading, setExamActionLoading] = useState(false);
-
+  
   const [segmentedValue, setSegmentedValue] = useState("attente");
 
   const handleExamenClinique = (record) => {
@@ -75,9 +76,9 @@ function RvList() {
 
   return (
     <Card loading={isLoading}>
-      <Title level={3}>Liste des patients du jour</Title>
+      <Title level={3}>Liste des rendez-vous</Title>
 
-      <Flex justify="flex-end" align="center">
+      {/* <Flex justify="flex-end" align="center">
         <Space>
           <ReloadButton onRefresh={onRefresh} />
           <Segmented
@@ -97,7 +98,7 @@ function RvList() {
             }}
           />
         </Space>
-      </Flex>
+      </Flex> */}
 
       <br />
 
@@ -145,24 +146,22 @@ function RvList() {
             title: "Sexe",
             dataIndex: "sexe_patient",
             key: "sexe_patient",
-            ...getColumnSearchProps("sexe_patient"),
+            filters: ["MA","FE"].map((item)=>{
+              return {
+                  text : item,
+                  value : item
+              }
+            }),
+            onFilter: (value, record) =>
+              record.sexe_patient.indexOf(value) === 0,
           },
           {
-            title: "Examens",
-            dataIndex: "effectue",
-            key: "effectue",
-            render: (record) => (
-              <div className="table-data">
-                {!record ? (
-                  <Tag style={{ color: "black" }} color="#fbc531">
-                    {" "}
-                    En Attente{" "}
-                  </Tag>
-                ) : (
-                  <Tag color="#44bd32"> Effectué </Tag>
-                )}
-              </div>
-            ),
+            title: 'Date RV',
+            dataIndex: 'date_rv',
+            key: 'date_rv',
+            render: (record) => <div className='table-data'>
+                <span style={{textOverflow:"ellipsis"}} > {formatDate(record)} </span>
+            </div>
           },
           {
             title: "Service",
@@ -178,22 +177,28 @@ function RvList() {
                 record.service_medical.indexOf(value) === 0,
           },
           {
+            title: "Médécin traitant",
+            dataIndex: "medecin_traitant",
+            key: "medecin_traitant",
+            ...getColumnSearchProps('medecin_traitant')
+          },
+          {
+            title: "Effectué",
+            dataIndex: "effectue",
+            key: "effectue",
             render: (record) => (
-              <Flex align="center">
-                <Space size="middle">
-                  <Tooltip title="Examiner">
-                    <RiStethoscopeLine
-                      cursor="pointer"
-                      size={18}
-                      onClick={() => {
-                        handleExamenClinique(record);
-                      }}
-                    />
-                  </Tooltip>
-                </Space>
-              </Flex>
+              <div className="table-data">
+                {record ? (
+                  <Tag color="#44bd32">
+                    Oui
+                  </Tag>
+                ) : (
+                  <Tag style={{ color: "black" }} color="#fbc531"> Non </Tag>
+                )}
+              </div>
             ),
           },
+          
         ]}
       />
 

@@ -1,11 +1,17 @@
-import { Card, Flex, Typography } from 'antd'
+import { Card, message, Typography } from 'antd'
 import React from 'react'
 import "./HomeCard.scss"
 
-const { Text , Title } = Typography
-function HomeCard({cover , label , onClick}) {
+const { Title } = Typography
+function HomeCard({cover , label , onClick , canAccess}) {
   return (
-    <Card className='home-card' onClick={onClick} >
+    <Card className='home-card' onClick={()=>{
+      if(canAccess){
+        onClick()
+      }else{
+        message.warning("Désolé, vous n'avez pas accès à ce département")
+      }
+    }} >
         <center>
             <img src={cover} alt='medicine_image' />
         </center>

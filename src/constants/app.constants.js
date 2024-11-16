@@ -14,3 +14,16 @@ export const images = {
     consultant : require("./../assets/consultant.png"),
     radiologie : require("./../assets/radiologie.jpg"),
 }
+
+export const codeServices = {
+    ACCUEIL : "ACC",
+    ANALYSE : "ANA",
+    BIO_MEDICAL : "BIO",
+    DENTAIRE : "DEN",
+    GYNECOLOGIE : "GYN",
+    HOSPITALISATION : "HOS",
+    INFIRMERIE : "INF",
+    MEDICAL : "MED",
+    PHARMACIE : "PHA",
+    RADIOLOGIE : "RAD",
+}

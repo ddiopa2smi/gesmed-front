@@ -1,7 +1,8 @@
 export const endpoints = {
     rendezVous : {
         ADD : "/api/smed/Patient/addRV",
-        TODAY_LIST : "/api/smed/Patient/Today/list"
+        TODAY_LIST : "/api/smed/Patient/Today/list",
+        LIST : "/api/smed/Patient/RendezVous/list",
     },
     dossierMedical: {
         DOSSIER : "/api/smed/DossierMedical/getDos" ,

@@ -108,7 +108,6 @@ const MySpace = () => {
       if (result.isConfirmed) {
         postActions(`${endpoints.users.DISCONNECT}`, userConnected).then(
           (response) => {
-            console.log(response.data);
             if (response.data.Disconnect === true) {
               sessionStorage.clear();
               navigate("/login", { replace: true });
