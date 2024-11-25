@@ -178,7 +178,7 @@ function Home() {
             cover={item.cover}
             label={item.label}
             onClick={item.onClick}
-            canAccess={userConnected.code_serv === item.code}
+            canAccess={userConnected.code_serv === item.code || userConnected.role_name ==="Admin"}
           />
         ))}
       </div>

@@ -6,12 +6,13 @@ const { Title } = Typography
 function HomeCard({cover , label , onClick , canAccess}) {
   return (
     <Card className='home-card' onClick={()=>{
-      if(canAccess){
-        onClick()
-      }else{
-        message.warning("Désolé, vous n'avez pas accès à ce département")
-      }
-    }} >
+        if(canAccess){
+          onClick()
+        }else{
+          message.warning("Désolé, vous n'avez pas accès à ce département")
+        }
+      }} 
+    >
         <center>
             <img src={cover} alt='medicine_image' />
         </center>
