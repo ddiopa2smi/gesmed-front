@@ -13,7 +13,7 @@ function CommandesProduits() {
     const [bonsCommandesListCopy , setBonsCommandesListCopy ] = useState([]);
 
     const onAdd = () => {
-        navigate("/myspace/commandes-produits/new-commande-produit")
+        navigate("/espace-pharmacie/commandes-produits/new-commande-produit")
     }
 
     return (

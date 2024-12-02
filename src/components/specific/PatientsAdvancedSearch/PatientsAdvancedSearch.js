@@ -141,7 +141,7 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                 </Col>
             </Row>
             <Row gutter={[24,24]} >
-                <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
                     <Form.Item
                         name="date_rv"
                         label="Date de rendez-vous"
@@ -149,10 +149,7 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                         <RangePicker style={{width:'100%'}} format="DD/MM/YYYY" />
                     </Form.Item>
                 </Col>
-                
-            </Row>
-            <Row gutter={[24,24]} >
-                <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
                     <Form.Item
                         name="date_creation"
                         label="Date de création"

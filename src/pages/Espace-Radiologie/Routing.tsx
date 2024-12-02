@@ -1,10 +1,12 @@
 import React from "react";
 import { Navigate, RouteObject } from "react-router";
 import MySpace from "../../layouts/MySpace/MySpace";
-import Home from "./Home/Home";
-import RadioList from "./RadioList/RadioList";
-import Historique from "./Historique/Historique";
-import RadioDetails from "./RadioDetails/RadioDetails";
+import Dashboard from "./Dashboard/Dashboard";
+import RendezVous from "./RendezVous/RendezVous";
+import Agenda from "./Agenda/Agenda";
+import Patients from "./Patients/Patients";
+import Consultations from "./Consultations/Consultations";
+import DossierMedical from "./DossierMedical/DossierMedical";
 
 export const radiologieRouter : RouteObject = {
     path : "espace-radiologie",
@@ -16,24 +18,37 @@ export const radiologieRouter : RouteObject = {
         },
         {
             path : "dashboard",
-            element : <Home />
+            element : <Dashboard />
         },
         {
-            path : "radiologies",
+            path : "rendez-vous",
+            element : <RendezVous />
+        },
+        {
+            path : "agenda",
+            element : <Agenda />
+        },
+        {
+            path : "patients",
             children : [
                 {
-                    index : true,
-                    element : <RadioList />
+                    path : "",
+                    element : <Patients />
                 },
                 {
-                    path : "details/:id",
-                    element : <RadioDetails />
+                    path : "dossier-medical",
+                    children : [
+                        {
+                            path : ":id",
+                            element : <DossierMedical />
+                        },
+                    ]
                 },
             ]
         },
         {
-            path : "historique",
-            element : <Historique />
+            path : "consultations",
+            element : <Consultations />
         }
     ]
 }

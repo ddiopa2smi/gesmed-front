@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react"
 import { getActions } from "../../actions/actions";
 import { LoadingContext } from "../providers/LoadingProvider";
+import { message } from "antd";
 
 export function useObjectFetch(url) {
     const [data , setData] = useState(null);
@@ -24,6 +25,8 @@ export function useObjectFetch(url) {
                 setDataCopy(response.data)
             })
             .catch((error)=>{
+                console.log(error);
+                message.error(error.message);
                 setError(true);
             })
             .finally(()=>{

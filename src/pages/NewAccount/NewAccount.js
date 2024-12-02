@@ -187,7 +187,7 @@ const NewAccount = () => {
                     <Col xs={24} sm={24} md={8} lg={6} xl={6} >
                         <Form.Item
                             name="pwd_period"
-                            label="Période de validité mot de passe"
+                            label="Validité mot de passe"
                             rules={[
                                 {
                                     required: true,
@@ -198,7 +198,7 @@ const NewAccount = () => {
                             <Select
                                 style={{width:'100%',background:"transparent"}}
                                 showSearch
-                                placeholder="Période de validité mot de passe"
+                                placeholder="Période de validité"
                                 optionFilterProp="children" 
                                 filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                             >     

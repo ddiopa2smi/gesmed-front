@@ -17,7 +17,7 @@ function Consultations() {
     const {data : listConsultations , dataCopy : listConsultationsCopy , setDataCopy : setListConsultationsCopy, isLoading : listConsultationsLoading , onRefresh : refreshListConsultations} = useFetch(endpoints.consultations.LIST);
 
     const openConsultation = (record) => {    
-        navigate("/myspace/consultations/details-consultation" , {state : {currentConsultation : record}});
+        navigate("/espace-medical/consultations/details-consultation" , {state : {currentConsultation : record}});
     }
 
     const onDelete = (record) => {

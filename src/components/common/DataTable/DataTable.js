@@ -68,10 +68,9 @@ function DataTable({
             loading={tableLoading}  
             dataSource={dataSourceCopy} 
             rowKey={rowKey}
-            //size="middle"
             size="small"
-            scroll={window.screen.width < 1200 && {
-                x : 1000,
+            scroll={{
+              x : "max-content"
             }}
             components={components}
             pagination={pagination}

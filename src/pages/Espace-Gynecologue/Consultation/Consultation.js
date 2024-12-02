@@ -259,7 +259,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/ordonnance`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/ordonnance`);
                                 }
                             },
                             {
@@ -272,7 +272,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/analyse`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/analyse`);
                                 }
                             },
                             {
@@ -285,7 +285,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
                                 }
                             }, 
                         ]}}

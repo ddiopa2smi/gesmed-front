@@ -26,7 +26,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
-import RvJour from "../components/RvJour/RvJour";
+import RvList from "../../../components/specific/RvList/RvList";
+import { ServiceType } from "../../../utils/types/types.ts";
 
 const chartData = [
   {
@@ -109,7 +110,7 @@ function Dashboard() {
                 Patients{" "}
               </>
             }
-            extra={<Link to="/myspace/patients">Voir plus</Link>}
+            extra={<Link to="/espace-medical/patients">Voir plus</Link>}
           >
             120
           </Card>
@@ -130,7 +131,7 @@ function Dashboard() {
                 Consultations{" "}
               </>
             }
-            extra={<Link to="/myspace/consultations">Voir plus</Link>}
+            extra={<Link to="/espace-medical/consultations">Voir plus</Link>}
           >
             80
           </Card>
@@ -151,7 +152,7 @@ function Dashboard() {
                 RV du jour{" "}
               </>
             }
-            extra={<Link to="/myspace/rendez-vous">Voir plus</Link>}
+            extra={<Link to="/espace-medical/rendez-vous">Voir plus</Link>}
           >
             220
           </Card>
@@ -181,19 +182,17 @@ function Dashboard() {
       {/* <br/>
         <Row  gutter={[24,24]}>
           <Col  xs={24} sm={12} md={8} lg={6} xl={6} >
-            <Card title={<><TeamOutlined style={{ backgroundColor : "hsl(30,100%, 95%)", color : "hsl(30,100%, 50%)" ,padding:5,borderRadius:8 , fontSize:20}} /> Consultations du jour </>} extra={<Link to="/myspace/patients" >Voir plus</Link>} >
+            <Card title={<><TeamOutlined style={{ backgroundColor : "hsl(30,100%, 95%)", color : "hsl(30,100%, 50%)" ,padding:5,borderRadius:8 , fontSize:20}} /> Consultations du jour </>} extra={<Link to="/espace-medical/patients" >Voir plus</Link>} >
                 120
             </Card>
           </Col>
         </Row> */}
       <br />
-      <br />
-      <Row gutter={[24, 24]}>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-          <RvJour />
-        </Col>
-      </Row>
-      <br />
+
+      <Card>
+        <RvList serviceType={ServiceType.ACCUEIL} today />
+      </Card>
+
       <br />
       <Row gutter={[24, 24]}>
         <Col xs={24} sm={24} md={16} lg={16} xl={16}>
@@ -260,7 +259,7 @@ function Dashboard() {
 
       <br />
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;

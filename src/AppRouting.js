@@ -2,7 +2,6 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 import MySpace from "./layouts/MySpace/MySpace";
 import Auth from "./pages/Auth/Auth";
 import NotFound from "./pages/NotFound/NotFound";
-import Dashboard from "./pages/Dashboard/Dashboard";
 import Patients from "./pages/Patients/Patients";
 import RendezVous from "./pages/RendezVous/RendezVous";
 import NewCommandeProduit from "./pages/NewCommandeProduit/NewCommandeProduit";
@@ -31,13 +30,12 @@ import Visites from "./pages/Visites/Visites";
 import DossierAT from "./pages/DossierAT/DossierAT";
 import Privileges from "./pages/Privileges/Privileges";
 import Privilege from "./pages/Privilege/Privilege";
-import Facturation from "./pages/Facturation/Facturation";
 import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation";
 import GestionPassword from "./pages/GestionPassword/GestionPassword";
 import GestionFicheProduits from "./pages/GestionFicheProduits/GestionFicheProduits";
 import ProtectedRoute from "./components/specific/ProtectedRoute/ProtectedRoute";
 import AgendaMedecin from "./pages/AgendaMedecin/AgendaMedecin";
-import { gynecologieRouter } from "./pages/Espace-Gynecologue/GynecologieRouting.tsx";
+import { gynecologieRouter } from "./pages/Espace-Gynecologue/Routing.tsx";
 import { dentistRouter } from "./pages/Espace-Dentiste/Routing.tsx";
 import { pharmacieRouter } from "./pages/Espace-Pharmacie/Routing.tsx";
 import { radiologieRouter } from "./pages/Espace-Radiologie/Routing.tsx";
@@ -48,6 +46,9 @@ import VisiteDetails from "./pages/VisiteDetails/VisiteDetails.js";
 import { accueilRouter } from "./pages/Espace-Accueil/Routing.tsx";
 import { hospitalisationRouter } from "./pages/Espace-Hospitalisation/Routing.tsx";
 import { infirmerieRouter } from "./pages/Espace-Infirmerie/Routing.tsx";
+import { administrationRouter } from "./pages/EspaceAdministration/Routing.tsx";
+import MedicalDashboard from "./pages/MedicalDashboard/MedicalDashboard.js";
+import PharmacyDashboard from "./pages/PharmacyDashboard/PharmacyDashboard.js";
 export const router = createBrowserRouter(
     [
         {
@@ -67,17 +68,18 @@ export const router = createBrowserRouter(
             element : <NotFound />
         },
         {
-            path : "myspace",
+            path : "espace-medical",
+            //path : "myspace",
             //element : <MySpace />  ,
             element : <ProtectedRoute component={<MySpace />} />  ,
             children : [
                 {
                     path : "",
-                    element : <Navigate to={"/myspace/dashboard"} />
+                    element : <Navigate to={"/espace-medical/dashboard"} />
                 },
                 {
                     path : "dashboard",
-                    element : <Dashboard />,
+                    element : <MedicalDashboard />,
                 },
                 {
                     path : "rendez-vous",
@@ -135,6 +137,44 @@ export const router = createBrowserRouter(
                     ]
                 },
                 {
+                    path : "dossier-medical:id",
+                    children : [
+                        {
+                            path : "" ,
+                            element : <DossierMedical />
+                        } ,
+                        {
+                            path : "consultation" ,
+                            element  : <Consultation />
+                        } ,
+                        {
+                            path : "infos-cliniques",
+                            element : <InfosCliniques />
+                        },
+                        {
+                            path : "prescriptions",
+                            children : [
+                                {
+                                    path : "",
+                                    element : <Prescriptions />
+                                },
+                                {
+                                    path : "ordonnance",
+                                    element : <Ordonnance />
+                                },
+                                {
+                                    path : "analyse",
+                                    element : <Analyse />
+                                },
+                                {
+                                    path : "imagerie",
+                                    element : <Imagerie />
+                                },
+                            ]
+                        },
+                    ]
+                },
+                {
                     path : "consultations",
                     children : [
                         {
@@ -169,13 +209,26 @@ export const router = createBrowserRouter(
                     element : <DossierAT />
                 },
                 {
-                    path : "facturation",
-                    element : <Facturation />
+                    path : "*",
+                    element : <NotFound />
                 },
-                // {
-                //     path : "fiche-produit",
-                //     element : <FicheProduit />
-                // },
+                
+            ]
+        },
+        {
+            path : "espace-pharmacie",
+            //path : "myspace",
+            //element : <MySpace />  ,
+            element : <ProtectedRoute component={<MySpace />} />  ,
+            children : [
+                {
+                    path : "",
+                    element : <Navigate to={"/espace-pharmacie/dashboard"} />
+                },
+                {
+                    path : "dashboard",
+                    element : <PharmacyDashboard />,
+                },
                 {
                     path : "gestion-fiche-produits",
                     children : [
@@ -240,59 +293,6 @@ export const router = createBrowserRouter(
                     path : "fournisseurs",
                     element : <Fournisseurs />
                 },
-                {
-                    path : "settings",
-                    children : [
-                        {
-                            path : "",
-                            element : <Navigate to={"/myspace/settings/accounts"} />
-                        },
-                        {
-                            path : "accounts",
-                            children : [
-                                {
-                                    path : "",
-                                    element : <Accounts />
-                                },
-                                {
-                                    path : "account",
-                                    element : <NewAccount />
-                                },
-                            ]
-                        },
-                        {
-                            path : "privileges",
-                            children : [
-                                {
-                                    path : "",
-                                    element : <Privileges />
-                                },
-                                {
-                                    path : "privilege",
-                                    element : <Privilege />
-                                },
-                            ]
-                        },
-                        {
-                            path : "gestion-mot-de-passe",
-                            element : <GestionPassword />
-                        },
-                        {
-                            path : "profil",
-                            element : <Profil />
-                        },
-                        {
-                            path : "config",
-                            element : <ConfigPage />
-                        },
-                    ]
-                    
-                },
-                {
-                    path : "*",
-                    element : <NotFound />
-                },
-                
             ]
         },
         accueilRouter,
@@ -302,6 +302,7 @@ export const router = createBrowserRouter(
         radiologieRouter,
         analyseRouter,
         hospitalisationRouter,
-        infirmerieRouter
+        infirmerieRouter,
+        administrationRouter
     ]
 )

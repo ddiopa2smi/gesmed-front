@@ -1,5 +1,5 @@
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Modal, Row, Segmented, Select, Space, Tooltip } from 'antd'
+import { Button, Card, Col, Flex, Modal, Row, Segmented, Select, Space, Tooltip, Typography } from 'antd'
 import React, { useState } from 'react'
 import DataTable from '../../common/DataTable/DataTable';
 import useFetch from '../../../utils/hooks/useFetch';
@@ -9,6 +9,7 @@ import AdvancedSearchButton from '../../common/AdvancedSearchButton/AdvancedSear
 import FormFooter from '../../common/FormFooter/FormFooter';
 
 const {Option} = Select;
+const {Title} = Typography;
 function OrdonnancesList() {
     const [segmentedValue , setSegmentedValue] = useState("instance");
     const {data , dataCopy, setDataCopy , isLoading , error , onRefresh} = useFetch();
@@ -23,8 +24,9 @@ function OrdonnancesList() {
     }
     
     return (
-        <Card title="Liste des ordonnances" extra={<a>Voir plus</a>}>
-            <Flex justify="flex-end" align="center" >
+        <Card >
+            <Flex justify="space-between" align="center" >
+                <Title level={4} > Liste des ordonnances </Title>
                 <Space>
                     {/* <Tooltip title="Recherche avancée" >
                         <Button type='text' shape="circle" icon={<SearchOutlined/>} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;

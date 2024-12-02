@@ -1,11 +1,12 @@
 import React from "react";
 import { Navigate, RouteObject } from "react-router";
 import MySpace from "../../layouts/MySpace/MySpace";
-import Home from "./Home/Home";
-import Analyses from "./Analyses/Analyses";
-import Historique from "./Historique/Historique";
-import DetailsAnalyse from "./DetailsAnalyse/DetailsAnalyse";
-import TraitementAnalyse from "./TraitementAnalyse/TraitementAnalyse";
+import Dashboard from "./Dashboard/Dashboard";
+import RendezVous from "./RendezVous/RendezVous";
+import Agenda from "./Agenda/Agenda";
+import Patients from "./Patients/Patients";
+import Consultations from "./Consultations/Consultations";
+import DossierMedical from "./DossierMedical/DossierMedical";
 
 export const analyseRouter : RouteObject = {
     path : "espace-analyse",
@@ -13,38 +14,41 @@ export const analyseRouter : RouteObject = {
     children : [
         {
             path : "",
-            element : <Navigate to="/espace-analyse/home" />,
+            element : <Navigate to="/espace-analyse/dashboard" />,
         },
         {
-            path : "home",
-            element : <Home />
+            path : "dashboard",
+            element : <Dashboard />
         },
         {
-            path : "analyses",
-            children: [
-                {
-                    index : true,
-                    element : <Analyses />
-                },
-                {
-                    path : "details/:id",
-                    element : <TraitementAnalyse />
-                },
-            ]
+            path : "rendez-vous",
+            element : <RendezVous />
         },
         {
-            path : "historique",
-            children: [
+            path : "agenda",
+            element : <Agenda />
+        },
+        {
+            path : "patients",
+            children : [
                 {
-                    index : true,
                     path : "",
-                    element : <Historique />
+                    element : <Patients />,
                 },
                 {
-                    path : "details/:id",
-                    element : <DetailsAnalyse />
+                    path : "dossier-medical",
+                    children : [
+                        {
+                            path : ":id",
+                            element : <DossierMedical />
+                        },
+                    ]
                 },
             ]
         },
+        {
+            path : "consultations",
+            element : <Consultations />
+        }
     ]
 }

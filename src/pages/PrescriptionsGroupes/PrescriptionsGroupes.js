@@ -48,9 +48,7 @@ function PrescriptionsGroupes() {
     codesPrescriptions.ORD
   );
   const [selectedPatients, setSelectedPatients] = useState([]);
-  const handleChange = (value) => {
-    console.log(`selected ${value}`);
-  };
+
 
   const openModal = () => {
     setOpen(true);
@@ -117,57 +115,7 @@ function PrescriptionsGroupes() {
 
         {prescriptionType === codesPrescriptions.ORD && <GroupOrdonnance />}
         {prescriptionType === codesPrescriptions.ANA && <GroupAnalyse />}
-        {/*{prescriptionType === codesPrescriptions.IMG && <GroupImagerie />} */}
-
-        {/* <br />
-        <Row gutter={[8, 8]}>
-          <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-            <Form.Item
-              label="Patients concernés"
-              name="patients_list"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
-            >
-              <Select
-                mode="multiple"
-                style={{
-                  width: "100%",
-                }}
-                loading={isLoading}
-                placeholder="Sélectionner le ou les patients concernés"
-                //defaultValue={["china"]}
-                onChange={handleChange}
-                options={patientsList.map((item) => {
-                  return {
-                    label: `${item.prenom_patient} ${item.nom_patient}`,
-                    value: item.num_patient,
-                    ...item,
-                  };
-                })}
-                showSearch
-                //filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                optionRender={(option) => (
-                  <Space>
-                    <Image
-                      src={test_img}
-                      width={25}
-                      height={25}
-                      style={{ borderRadius: "50%", objectFit: "cover" }}
-                    />
-
-                    {option.label}
-                  </Space>
-                )}
-                allowClear
-              />
-            </Form.Item>
-          </Col>
-        </Row> */}
-
+        
         <br />
         <Row gutter={[8, 8]} align="middle" >
           
@@ -200,12 +148,18 @@ function PrescriptionsGroupes() {
 
         <Modal
           title="Liste des patients"
+          style={{ top: 20 }}
+          styles={{
+            header : {padding : "12px 24px"},
+            footer : {padding : "12px 24px"},
+            content : {margin : 0 , padding : 0} ,
+            body: { overflow: "auto",minHeight: "50vh", maxHeight : "70vh", padding : "12px 24px"},
+          }}
+          width={1000}
           open={open}
           onCancel={() => {
             setOpen(false);
           }}
-          footer={null}
-          width={1000}
           destroyOnClose
         >
           <Text type='secondary' >
@@ -328,47 +282,8 @@ function PrescriptionsGroupes() {
                 onFilter: (value, record) =>
                   record.address.indexOf(value) === 0,
               },
-              {
-                title: "Bureau",
-                dataIndex: "bureau",
-                key: "bureau",
-                filters: [
-                  {
-                    text: "Bureau des admissions et services clients",
-                    value: "bureau1",
-                  },
-                  {
-                    text: "Bureau de gestion des ressources humaines",
-                    value: "bureau2",
-                  },
-                ],
-                onFilter: (value, record) =>
-                  record.address.indexOf(value) === 0,
-              },
             ]}
           />
-          {/* <br />
-          <Flex align="center" justify="center">
-            <Space>
-              <Button
-                type="primary"
-                onClick={() => {
-                  setOpen(false);
-                }}
-                ghost
-              >
-                Annuler
-              </Button>
-              <Button
-                type="primary"
-                onClick={() => {
-                  save();
-                }}
-              >
-                Ajouter
-              </Button>
-            </Space>
-          </Flex> */}
         </Modal>
 
         <br />

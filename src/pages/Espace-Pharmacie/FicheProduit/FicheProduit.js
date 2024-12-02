@@ -9,8 +9,8 @@ import AddAndEditDropdown from '../../../components/common/AddAndEditDropdown/Ad
 import FormFooter from '../../../components/common/FormFooter/FormFooter';
 import ListProduits from '../../../components/specific/ListProduits/ListProduits';
 import AddFamilleMedoc from '../../../components/specific/AddFamilleMedoc/AddFamillleMedoc';
-import AddConditionnement from '../../../components/AddConditionnement/AddConditionnement';
-import AddFormeGalenique from '../../../components/AddFormeGalenique/AddFormeGalenique';
+import AddConditionnement from '../../../components/specific/AddConditionnement/AddConditionnement';
+import AddFormeGalenique from '../../../components/specific/AddFormeGalenique/AddFormeGalenique';
 import { deletePopup, generateRandomCode } from '../../../utils/helpers';
 import { deleteActions, postActions, putActions } from '../../../actions/actions';
 import BackButton from '../../../components/common/BackButton/BackButton';
@@ -175,7 +175,7 @@ function FicheProduit() {
                 <Space>
                     
                     <Tooltip title="Actualiser" >
-                        <Button type='primary' icon={<OrderedListOutlined/>} onClick={()=>{navigate("/myspace/gestion-fiche-produits")}} >Liste des produits</Button>
+                        <Button type='primary' icon={<OrderedListOutlined/>} onClick={()=>{navigate("/espace-pharmacie/gestion-fiche-produits")}} >Liste des produits</Button>
                     </Tooltip> 
                 </Space>
             </Flex>

@@ -3,7 +3,8 @@ import { Navigate, RouteObject } from "react-router";
 import MySpace from "../../layouts/MySpace/MySpace";
 import Patients from "./Patients/Patients";
 import Dashboard from "./Dashboard/Dashboard";
-import RvList from "./RvList/RvList";
+import RendezVous from "./RendezVous/RendezVous";
+import Facturation from "./Facturation/Facturation";
 
 
 export const accueilRouter : RouteObject = {
@@ -20,7 +21,7 @@ export const accueilRouter : RouteObject = {
         },
         {
             path : "rendez-vous",
-            element : <RvList />
+            element : <RendezVous />
         },
         {
             path : "patients",
@@ -43,6 +44,10 @@ export const accueilRouter : RouteObject = {
                 //     ]
                 // },
             ]
+        },
+        {
+            path : "facturation",
+            element : <Facturation />
         },
         // {
         //     path : "treatments",

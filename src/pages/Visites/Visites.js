@@ -27,7 +27,7 @@ function Visites() {
     }
 
     const onView = (record) => {
-        navigate("/myspace/visites/details", {state : {visite : record }})
+        navigate("/espace-medical/visites/details", {state : {visite : record }})
     }
     const onEdit = (record) => {
         //console.log(record)

@@ -22,7 +22,7 @@ function GestionFicheProduits() {
     const [operationType , setOperationType] = useState("");
     const [currentRecord , setCurrentRecord] = useState(null);
     const onAdd = () => {
-        navigate("/myspace/gestion-fiche-produits/fiche-produit", {state : {
+        navigate("/espace-pharmacie/gestion-fiche-produits/fiche-produit", {state : {
             currentRecord : null
         }})
         // setCurrentRecord(null);
@@ -31,7 +31,7 @@ function GestionFicheProduits() {
     }
     
     const onEdit = (record) => {
-        navigate("/myspace/gestion-fiche-produits/fiche-produit" , {state : {
+        navigate("/espace-pharmacie/gestion-fiche-produits/fiche-produit" , {state : {
             currentRecord : record
         }})
         // setOperationType("update");

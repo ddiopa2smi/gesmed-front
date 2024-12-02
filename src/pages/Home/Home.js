@@ -14,10 +14,10 @@ import { Typewriter } from "react-simple-typewriter";
 import { logoutPopup } from "../../utils/helpers";
 import { postActions } from "../../actions/actions";
 import { endpoints } from "../../constants/endpoints.constants";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, SettingOutlined } from "@ant-design/icons";
 import { codeServices } from "../../constants/app.constants";
+import { ServiceType } from "../../utils/types/types.ts";
 const { Title } = Typography;
-
 
 function Home() {
   const navigate = useNavigate();
@@ -25,92 +25,128 @@ function Home() {
     {
       id: 7,
       label: "Service d'accueil",
-      code : codeServices.ACCUEIL ,
+      code: codeServices.ACCUEIL,
       cover: administration_image,
       onClick: () => {
         navigate("/espace-accueil");
         sessionStorage.setItem("space", "saccueil");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.ACCUEIL)
+        );
       },
     },
     {
       id: 1,
       label: "Service médical",
-      code : codeServices.MEDICAL ,
+      code: codeServices.MEDICAL,
       cover: medicine_image,
       onClick: () => {
-        navigate("/myspace/dashboard");
+        navigate("/espace-medical/dashboard");
         sessionStorage.setItem("space", "smed");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.MEDICAL)
+        );
       },
     },
     {
       id: 2,
       label: "Service pharmacie",
-      code : codeServices.PHARMACIE ,
+      code: codeServices.PHARMACIE,
       cover: pharma_image,
       onClick: () => {
-        navigate("/myspace/dashboard");
+        navigate("/espace-pharmacie/dashboard");
         sessionStorage.setItem("space", "spharma");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.PHARMACIE)
+        );
       },
     },
     {
       id: 3,
-      label: "Service dentiste",
-      code : codeServices.DENTAIRE ,
+      label: "Service dentaire",
+      code: codeServices.DENTAIRE,
       cover: dentist_image,
       onClick: () => {
         navigate("/espace-dentist");
         sessionStorage.setItem("space", "sdentist");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.DENTAIRE)
+        );
       },
     },
     {
       id: 4,
       label: "Service Gynécologie",
-      code : codeServices.GYNECOLOGIE ,
+      code: codeServices.GYNECOLOGIE,
       cover: gynecologie_image,
       onClick: () => {
         navigate("/espace-gynecologie");
         sessionStorage.setItem("space", "sgynecologie");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.GYNECOLOGIE)
+        );
       },
     },
     {
       id: 5,
       label: "Service Analyse",
-      code : codeServices.ANALYSE ,
+      code: codeServices.ANALYSE,
       cover: analyse_image,
       onClick: () => {
         navigate("/espace-analyse");
         sessionStorage.setItem("space", "sanalyse");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.ANALYSE)
+        );
       },
     },
     {
       id: 6,
       label: "Service Radiologie",
-      code : codeServices.RADIOLOGIE ,
+      code: codeServices.RADIOLOGIE,
       cover: radiologie_image,
       onClick: () => {
         navigate("/espace-radiologie");
         sessionStorage.setItem("space", "sradio");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.RADIOLOGIE)
+        );
       },
     },
-    
+
     {
       id: 8,
       label: "Service Hospitalisation",
-      code : codeServices.HOSPITALISATION ,
+      code: codeServices.HOSPITALISATION,
       cover: administration_image,
       onClick: () => {
         navigate("/espace-hospitalisation");
         sessionStorage.setItem("space", "shospitalisation");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.HOSPITALISATION)
+        );
       },
     },
     {
       id: 9,
       label: "Service Infirmerie",
-      code : codeServices.INFIRMERIE ,
+      code: codeServices.INFIRMERIE,
       cover: administration_image,
       onClick: () => {
         navigate("/espace-infirmerie");
         sessionStorage.setItem("space", "sinfirmerie");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.INFIRMERIE)
+        );
       },
     },
   ];
@@ -137,48 +173,71 @@ function Home() {
     });
   };
   return (
-    <Layout style={{minHeight : "100vh"}} >
-      
-      
-      <Flex align="center" justify="space-between" style={{margin: "32px 8em 4px 8em"}} >
-        <Title level={1} style={{textAlign: "center" }}>
-          Bienvenue dans votre service &nbsp; 
+    <Layout style={{ minHeight: "100vh" }}>
+      <Flex
+        align="center"
+        justify="space-between"
+        style={{ margin: "32px 8em 4px 8em" }}
+      >
+        <Title level={1} style={{ textAlign: "center" }}>
+          Bienvenue dans votre service &nbsp;
           <span style={{ color: "var(--app-color)" }}>
             <Typewriter
-              words={["Accueil", "Médical", "Pharmacie", "Dentaire", "Gynécologie", "Analayse" , "Radiologie" , "Hospitalisation", "Infirmerie" ]}
-                loop={5}
-                cursor
-                cursorStyle='_'
-                typeSpeed={70}
-                deleteSpeed={50}
-                delaySpeed={1000}
-                // onLoopDone={handleDone}
-                // onType={handleType}
-              />  
+              words={[
+                "Accueil",
+                "Médical",
+                "Pharmacie",
+                "Dentaire",
+                "Gynécologie",
+                "Analayse",
+                "Radiologie",
+                "Hospitalisation",
+                "Infirmerie",
+              ]}
+              loop={5}
+              cursor
+              cursorStyle="_"
+              typeSpeed={70}
+              deleteSpeed={50}
+              delaySpeed={1000}
+              // onLoopDone={handleDone}
+              // onType={handleType}
+            />
           </span>
         </Title>
-        <Button type="primary" size="large" onClick={logout} icon={<LogoutOutlined/>} >Déconnexion</Button>
+        <Space size="large">
+          <Button
+            type="text"
+            icon={<SettingOutlined style={{ fontSize: 24 }} />}
+            onClick={() => {
+              navigate("/espace-administration/settings");
+              sessionStorage.setItem(
+                "serviceType",
+                JSON.stringify(ServiceType.ADMINISTRATION)
+              );
+            }}
+          />
+          <Button
+            type="primary"
+            size="large"
+            onClick={logout}
+            icon={<LogoutOutlined />}
+          >
+            Déconnexion
+          </Button>
+        </Space>
       </Flex>
       <div className="container">
-        {/* <Space size="large" wrap >
-                    {
-                        homeMenus.map((item)=> (
-                            <HomeCard 
-                                key={item.id}
-                                cover={item.cover}
-                                label={item.label}
-                                onClick={item.onClick}
-                            />
-                        ))
-                    }
-                </Space> */}
         {homeMenus.map((item) => (
           <HomeCard
             key={item.id}
             cover={item.cover}
             label={item.label}
             onClick={item.onClick}
-            canAccess={userConnected.code_serv === item.code || userConnected.role_name ==="Admin"}
+            canAccess={
+              userConnected.code_serv === item.code ||
+              userConnected.role_name === "Admin"
+            }
           />
         ))}
       </div>

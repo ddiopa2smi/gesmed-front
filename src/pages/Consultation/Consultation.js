@@ -1,5 +1,5 @@
 import {Modal ,Card , Row , Col , Form,  Input , InputNumber , Typography , Select , Button, DatePicker, message, Flex, Divider, Space, Dropdown, Alert } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
 import { getActions, putActions } from '../../actions/actions';
@@ -84,6 +84,10 @@ function Consultation() {
     const {data : motifs , isLoading : motifsLoading , onRefresh : motifsRefreshList} = useFetch(endpoints.motifs.LIST);
     const { data : regions , isLoading : regionsLoading , onRefresh : regionsRefreshList} = useFetch(endpoints.regions.LIST);
      
+    const imcMessage = useRef("");
+    useEffect(() => {
+        imcMessage.current = imcAlertMessage(form.getFieldValue("imc"));
+    })
 
     const itemsMotif = [
         {
@@ -280,7 +284,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/ordonnance`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/ordonnance`);
                                 }
                             },
                             {
@@ -293,7 +297,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/analyse`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/analyse`);
                                 }
                             },
                             {
@@ -306,7 +310,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
                                 }
                             }, 
                             {
@@ -319,7 +323,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
                                 }
                             }, 
                             {
@@ -332,7 +336,7 @@ function Consultation() {
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/myspace/patients/dossier/prescriptions/imagerie`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
                                 }
                             },
                         ]}}
@@ -590,7 +594,7 @@ function Consultation() {
                         >
                             <InputNumber min={0} disabled />
                         </Form.Item>
-                        <Alert message={imcAlertMessage(form.getFieldValue("imc"))} />
+                        <Alert message={imcMessage.current} />
                     </Col>
                 </Row>
 

@@ -64,7 +64,7 @@ function DossierMedical() {
   const listPrescription = data?.listPrescription;
 
   const doConsultation = (numRV) => {
-    navigate("/myspace/patients/dossier/consultation", {
+    navigate("/espace-medical/patients/dossier/consultation", {
       state: { numRV: numRV, currentPatient: currentPatient },
     });
 
@@ -73,7 +73,7 @@ function DossierMedical() {
     //     if (response && response.data) {
     //         //sessionStorage.setItem("initConsultation", JSON.stringify(response.data));
 
-    //         navigate("/myspace/patients/dossier/consultation" , {state : {consultationObject : response.data , currentPatient : currentPatient}});
+    //         navigate("/espace-medical/patients/dossier/consultation" , {state : {consultationObject : response.data , currentPatient : currentPatient}});
     //     }
     // })
   };
@@ -85,7 +85,7 @@ function DossierMedical() {
   const onDeleteConsultation = (record) => {};
 
   const onEditPrescription = (record, prescriptionType) => {
-    navigate(`/myspace/patients/dossier/prescriptions/${prescriptionType}`);
+    navigate(`/espace-medical/patients/dossier/prescriptions/${prescriptionType}`);
     sessionStorage.setItem("editPrescription", JSON.stringify(record));
   };
   const onDeletePrescription = (record) => {
@@ -104,7 +104,7 @@ function DossierMedical() {
   };
 
   const handlePrescriptions = (codepres, item) => {
-    navigate("/myspace/patients/dossier/prescriptions", { replace: false });
+    navigate("/espace-medical/patients/dossier/prescriptions", { replace: false });
     sessionStorage.setItem("currentPatient", JSON.stringify(currentPatient));
     console.log(item);
     sessionStorage.setItem(
@@ -244,7 +244,7 @@ function DossierMedical() {
                 ghost
                 onClick={() => {
                   navigate(
-                    "/myspace/patients/dossier/infos-cliniques"
+                    "/espace-medical/patients/dossier/infos-cliniques"
                   ); /*message.info("En cours de développement") */
                 }}
               >

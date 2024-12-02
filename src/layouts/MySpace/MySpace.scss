@@ -21,6 +21,9 @@
   
 .sider-container {
     display: block;
+    position: sticky;
+    top: 0;
+    bottom: 0;
     @media screen and (max-width : 992px) {
         display: none;
     }  
@@ -28,10 +31,10 @@
   
 .header {
     backdrop-filter: blur(10px);
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 50;
+    // position: fixed;
+    // left: 0;
+    // top: 0;
+    // z-index: 50;
     padding: 0;
     height: 56px;
     border-bottom: solid var(--divider-color) 1px;
@@ -74,9 +77,9 @@
 // }
   
 .content {
-    margin-top: 56px;
+    //margin-top: 56px;
     box-sizing: border-box;
-    min-height: 100vh;
+    //min-height: 100vh;
    // margin-left: 250px;
     // margin-left: 20%;
     padding: 24px;

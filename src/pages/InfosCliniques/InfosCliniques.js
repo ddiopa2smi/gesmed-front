@@ -1337,10 +1337,10 @@ function InfosCliniques() {
               title : <a onClick={()=>{navigate("/myspace/home")}} ><HomeOutlined/></a>
             } ,
             {
-              title : <a onClick={()=>{navigate("/myspace/patients")}} >Patients</a>
+              title : <a onClick={()=>{navigate("/espace-medical/patients")}} >Patients</a>
             } ,
             // {
-            //   title : <a onClick={()=>{navigate("/myspace/patients/dossier")}} >Dossier Médical</a>
+            //   title : <a onClick={()=>{navigate("/espace-medical/patients/dossier")}} >Dossier Médical</a>
             // } ,
             {
                 title : <a onClick={()=>{navigate(-1)}} >Dossier Médical</a>

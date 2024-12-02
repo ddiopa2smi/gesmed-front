@@ -28,13 +28,13 @@ function Accounts() {
   );
 
   const onAdd = () => {
-    navigate("/myspace/settings/accounts/account", {
+    navigate("/espace-administration/settings/accounts/account", {
       replace: false,
     });
   };
 
   const onEdit = (record) => {
-    navigate("/myspace/settings/accounts/account", {
+    navigate("/espace-administration/settings/accounts/account", {
       replace: false,
       state: { currentAccount: record },
     });
@@ -47,11 +47,10 @@ function Accounts() {
   return (
     <Card>
         
-        <Flex justify="flex-end" align="center" flex={"auto"} wrap="wrap">
+        <Flex justify="space-between" align="center" flex={"auto"} wrap="wrap">
+            <Title level={4}>Liste du personnel</Title>
             <Space>
-                <Button type="primary" icon={<ReloadOutlined />} onClick={onRefresh} ghost>
-                    Actualiser
-                </Button>
+                <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} />
                 <Can I="create" an="account">
                     <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
                     Nouveau
@@ -61,7 +60,7 @@ function Accounts() {
         </Flex>
 
         <>
-            <Title level={3}>Liste du personnel médical</Title>
+            
             <DataTable
             tableLoading={isLoading}
             dataSource={data}

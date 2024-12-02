@@ -122,6 +122,9 @@ export const endpoints = {
     },
     services_medicaux : {
         LIST : "/api/smed/ServiceMedicaux/list"
+    },
+    departements : {
+        LIST : "/api/smed/Patient/listDept"
     }
     
 }

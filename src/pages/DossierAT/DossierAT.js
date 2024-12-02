@@ -22,7 +22,7 @@ function DossierAT() {
 
 
   const onAdd = () => {
-    //navigate("/myspace/dossier-accident-travail/add")
+    //navigate("/espace-medical/dossier-accident-travail/add")
     setOperationType("add");
     setOpen(true);
   }

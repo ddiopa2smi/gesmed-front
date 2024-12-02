@@ -1,15 +1,13 @@
 import React from "react";
 import { Navigate, RouteObject } from "react-router";
 import MySpace from "../../layouts/MySpace/MySpace";
-import Home from "./Home/Home";
-import Appointments from "./Appointments/Appointments";
 import Patients from "./Patients/Patients";
-import Treatments from "./Treatments/Treatments";
-import Staff from "./Staff/Staff";
-import PatientDetails from "./PatientDetails/PatientDetails";
-import Diagnostic from "./Diagnostic/Diagnostic";
-import Peripherals from "./Peripherals/Peripherals";
-import NewPeripheral from "./NewPeripheral/NewPeripheral";
+import PatientDetails from "./DossierMedical/DossierMedical";
+import Dashboard from "./Dashboard/Dashboard";
+import RendezVous from "./RendezVous/RendezVous";
+import Agenda from "./Agenda/Agenda";
+import Consultations from "./Consultations/Consultations";
+import DossierMedical from "./DossierMedical/DossierMedical";
 
 export const dentistRouter : RouteObject = {
     path : "espace-dentist",
@@ -17,15 +15,15 @@ export const dentistRouter : RouteObject = {
     children : [
         {
             path : "",
-            element : <Navigate to="/espace-dentist/home" />,
+            element : <Navigate to="/espace-dentist/dashboard" />,
         },
         {
-            path : "home",
-            element : <Home />
+            path : "dashboard",
+            element : <Dashboard />
         },
         {
-            path : "appointments",
-            element : <Appointments />
+            path : "rendez-vous",
+            element : <RendezVous />
         },
         {
             path : "patients",
@@ -35,40 +33,23 @@ export const dentistRouter : RouteObject = {
                     element : <Patients />
                 },
                 {
-                    path : "details",
+                    path : "dossier-medical",
                     children : [
                         {
-                            path : "",
-                            element : <PatientDetails /> 
-                        },
-                        {
-                            path : "diagnostic",
-                            element : <Diagnostic /> 
+                            path : ":id",
+                            element : <DossierMedical />
                         },
                     ]
                 },
             ]
         },
         {
-            path : "treatments",
-            element : <Treatments />
+            path : "agenda",
+            element : <Agenda/>
         },
         {
-            path : "peripherals",
-            children : [
-                {
-                    path : "",
-                    element : <Peripherals /> 
-                },
-                {
-                    path : "new-peripheral",
-                    element : <NewPeripheral /> 
-                },
-            ]
-        },
-        {
-            path : "staff",
-            element : <Staff />
+            path : "consultations",
+            element : <Consultations/>
         },
     ]
 }

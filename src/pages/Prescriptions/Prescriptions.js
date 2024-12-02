@@ -198,12 +198,12 @@ function Prescriptions() {
     }
 
     const onAdd = ()=> { 
-        navigate(`/myspace/patients/dossier/prescriptions/${getTitleByType(prescription.codepresc).type1}`);
+        navigate(`/espace-medical/patients/dossier/prescriptions/${getTitleByType(prescription.codepresc).type1}`);
         sessionStorage.removeItem("editPrescription");
     }
 
     const onEdit = (record , prescriptionType) => {
-        navigate(`/myspace/patients/dossier/prescriptions/${prescriptionType}`);
+        navigate(`/espace-medical/patients/dossier/prescriptions/${prescriptionType}`);
         sessionStorage.setItem("editPrescription", JSON.stringify(record));
         //console.log(record)
     }

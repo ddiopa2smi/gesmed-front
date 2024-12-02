@@ -49,6 +49,7 @@ export const printPDF = (url) => {
         onError : (error) => {
                 console.log(error)
         },
+        
         modalMessage : "Impression en cours",
     }) 
 }

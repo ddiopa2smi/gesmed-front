@@ -23,7 +23,7 @@ function EntreesProduits() {
 
             <Flex justify="flex-end" align="center" >
                 <Space>
-                    <Button type='primary' onClick={()=>{navigate("/myspace/entrees-produits/reception-commande")}} icon={<PlusOutlined/>} >Réception commande</Button>
+                    <Button type='primary' onClick={()=>{navigate("/espace-pharmacie/entrees-produits/reception-commande")}} icon={<PlusOutlined/>} >Réception commande</Button>
                     <Button type='primary' icon={<PlusOutlined/>} >Entrées diverses</Button>
                 </Space>
             </Flex>

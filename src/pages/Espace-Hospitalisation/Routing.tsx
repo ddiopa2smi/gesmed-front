@@ -1,10 +1,12 @@
 import React from "react";
 import { Navigate, RouteObject } from "react-router";
 import MySpace from "../../layouts/MySpace/MySpace";
-import Dashboard from "./pages/Dashboard/Dashboard";
-import Hospitalisations from "./pages/Hospitalisations/Hospitalisations";
-import NewHospitalisation from "./pages/New Hospilation/NewHospitalisation";
-import HistoriqueSoins from "./pages/HistoriqueSoins/HistoriqueSoins";
+import Dashboard from "./Dashboard/Dashboard";
+import RendezVous from "./RendezVous/RendezVous";
+import Agenda from "./Agenda/Agenda";
+import Patients from "./Patients/Patients";
+import Consultations from "./Consultations/Consultations";
+import DossierMedical from "./DossierMedical/DossierMedical";
 
 export const hospitalisationRouter : RouteObject = {
     path : "espace-hospitalisation",
@@ -19,21 +21,34 @@ export const hospitalisationRouter : RouteObject = {
             element : <Dashboard />
         },
         {
-            path : "hospitalisations",
+            path : "rendez-vous",
+            element : <RendezVous />
+        },
+        {
+            path : "agenda",
+            element : <Agenda />
+        },
+        {
+            path : "patients",
             children : [
                 {
-                    index : true,
-                    element : <Hospitalisations />
+                    path : "",
+                    element : <Patients />
                 },
                 {
-                    path : "new-hospitalisation",
-                    element : <NewHospitalisation />
-                }
+                    path : "dossier-medical",
+                    children : [
+                        {
+                            path : ":id",
+                            element : <DossierMedical />
+                        },
+                    ]
+                },
             ]
         },
         {
-            path : "historique-soins",
-            element : <HistoriqueSoins />
-        },
+            path : "consultations",
+            element : <Consultations />
+        }
     ]
 }

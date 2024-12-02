@@ -9,7 +9,7 @@ function NotFound() {
           status="404"
           title="404"
           subTitle="Désolé, cette page n'existe pas"
-          extra={<Button type="primary" onClick={()=>{navigate("/myspace/dashboard")}} >Back Home</Button>}
+          extra={<Button type="primary" onClick={()=>{navigate("/home")}} >Back Home</Button>}
       />
     )
 }

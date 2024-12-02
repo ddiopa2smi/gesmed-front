@@ -23,7 +23,7 @@ function SortiesProduits() {
 
             <Flex justify="flex-end" align="center" >
                 <Space>
-                    <Button type='primary' onClick={()=>{navigate("/myspace/sorties-produits/new-mouvement-sortie")}} icon={<PlusOutlined/>} >Nouveau</Button>
+                    <Button type='primary' onClick={()=>{navigate("/espace-pharmacie/sorties-produits/new-mouvement-sortie")}} icon={<PlusOutlined/>} >Nouveau</Button>
                 </Space>
             </Flex>
 
