@@ -165,7 +165,7 @@ function Analyse() {
             layout="vertical"
             onFinish={save}
         >
-            {/* <Tree
+            <Tree
                 checkable
                 //onCheck={onCheck}
                 //checkedKeys={header}
@@ -178,7 +178,7 @@ function Analyse() {
                 })}
                 selectable={false}
                 //height={300}
-            />  */}
+            /> 
 
             <Row gutter={[24,24]} align={"stretch"} >
               <Col xs={24} sm={24} md={6} lg={6} xl={6} >

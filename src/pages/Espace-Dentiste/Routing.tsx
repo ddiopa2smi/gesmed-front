@@ -8,6 +8,7 @@ import RendezVous from "./RendezVous/RendezVous";
 import Agenda from "./Agenda/Agenda";
 import Consultations from "./Consultations/Consultations";
 import DossierMedical from "./DossierMedical/DossierMedical";
+import ConsultationPage from "../ConsultationPage/ConsultationPage";
 
 export const dentistRouter : RouteObject = {
     path : "espace-dentist",
@@ -50,6 +51,10 @@ export const dentistRouter : RouteObject = {
         {
             path : "consultations",
             element : <Consultations/>
+        },
+        {
+            path : "consultation/:numPatient/:numRv",
+            element : <ConsultationPage/>
         },
     ]
 }

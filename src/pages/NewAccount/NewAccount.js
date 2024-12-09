@@ -21,7 +21,7 @@ const NewAccount = () => {
     const usersRoles = data;
     const usersRolesLoading = isLoading;
     const currentAccount = useLocation().state?.currentAccount || null;
-    console.log(currentAccount);
+    
     
     const type = useLocation().state?.type || null;
     const regexCode = '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$';
@@ -263,7 +263,7 @@ const NewAccount = () => {
                 </Row>
                 
                 {
-                    currentAccount === null && 
+                    //currentAccount === null && 
                     <Row gutter={[24,24]}>
                         <Col xs={24} sm={24} md={8} lg={12} xl={12} >
                             <Form.Item
@@ -319,7 +319,7 @@ const NewAccount = () => {
                     </Row> 
                 }
 
-                <Divider  orientation="left">Autres informations</Divider>
+                {/* <Divider  orientation="left">Autres informations</Divider>
 
                 <Row gutter={[24,24]}>
                     <Col xs={24} sm={24} md={8} lg={6} xl={6} >
@@ -382,7 +382,7 @@ const NewAccount = () => {
                             </Upload>
                         </Form.Item>
                     </Col>
-                </Row> 
+                </Row>  */}
 
                 <FormFooter 
                     onCancel={()=>{navigate(-1)}}

@@ -218,6 +218,9 @@ const MySpace = () => {
     if (location.pathname.includes("consultations")) {
       setCurrentSelectedKeys("consultations");
     } 
+    if (location.pathname.includes("consultation")) {
+      setCurrentSelectedKeys("patients");
+    }
     // switch (route) {
     //   case "myspace":
     //     setCurrentSelectedKeys("dashboard");

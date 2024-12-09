@@ -2,7 +2,22 @@ import React from "react";
 import { useNavigate, useParams } from "react-router";
 import useObjectFetch from "../../../utils/hooks/useObjectFetch";
 import { endpoints } from "../../../constants/endpoints.constants";
-import { Button, Card, Col, Collapse, Descriptions, Dropdown, Flex, Row, Space, Tabs, Typography,Tooltip ,message } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Collapse,
+  Descriptions,
+  Dropdown,
+  Flex,
+  Row,
+  Space,
+  Tabs,
+  Typography,
+  Tooltip,
+  message,
+  Input,
+} from "antd";
 import DataTable from "../../common/DataTable/DataTable";
 import BackButton from "../../common/BackButton/BackButton";
 import ReloadButton from "../../common/ReloadButton/ReloadButton";
@@ -10,14 +25,17 @@ import EditButton from "../../common/EditButton/EditButton";
 import PrintButton from "../../common/PrintButton/PrintButton";
 import DeleteButton from "../../common/DeleteButton/DeleteButton";
 import NotSpecified from "../../common/NotSpecified/NotSpecified";
-import { formatDate , deletePopup , printPDF } from "../../../utils/helpers";
+import { formatDate, deletePopup, printPDF } from "../../../utils/helpers";
 import useSearch from "../../../utils/hooks/useSearch";
-import { UnorderedListOutlined } from "@ant-design/icons";
+import { EditOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { deleteActions } from "../../../actions/actions";
 import { codesPrescriptions } from "../../../constants/app.constants";
+import TextArea from "antd/es/input/TextArea";
+import EditObservationPatient from "../EditObservationPatient/EditObservationPatient";
+import { ServiceType } from "../../../utils/types/types.ts";
 
 const { Title } = Typography;
-function DossierPatient({ serviceType}) {
+function DossierPatient({ serviceType }) {
   const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
 
   const { getColumnSearchProps } = useSearch();
@@ -25,6 +43,8 @@ function DossierPatient({ serviceType}) {
 
   const { id } = useParams();
   const numPatient = id;
+
+  const [editable, setEditable] = React.useState(false);
 
   const {
     data,
@@ -39,8 +59,48 @@ function DossierPatient({ serviceType}) {
   const listConsultation = data?.listConsultation;
   const listPrescription = data?.listPrescription;
 
-
   const doConsultation = (numRV) => {
+    switch (serviceType) {
+      case ServiceType.DENTAIRE:
+        navigate(
+          `/espace-dentist/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
+          { state: { patient } },
+          { state: { patient } }
+        );
+        break;
+      case ServiceType.GYNECOLOGIE:
+        navigate(
+          `/espace-gynecologie/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
+          { state: { patient } }
+        );
+        break;
+      case ServiceType.RADIOLOGIE:
+        navigate(
+          `/espace-radiologie/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
+          { state: { patient } }
+        );
+        break;
+      case ServiceType.ANALYSE:
+        navigate(
+          `/espace-analyse/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
+          { state: { patient } }
+        );
+        break;
+      case ServiceType.HOSPITALISATION:
+        navigate(
+          `/espace-hospitalisation/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
+          { state: { patient } }
+        );
+        break;
+      case ServiceType.INFIRMERIE:
+        navigate(
+          `/espace-infirmerie/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
+          { state: { patient } }
+        );
+        break;
+      default:
+        break;
+    }
     // navigate("/espace-medical/patients/dossier/consultation", {
     //   state: { numRV: numRV, currentPatient: currentPatient },
     // });
@@ -94,6 +154,14 @@ function DossierPatient({ serviceType}) {
     // );
   };
 
+  const openAnalyse = (numRV) => {
+    console.log(numRV);
+    
+    // navigate("/espace-medical/patients/dossier/consultation", {
+    //   state: { numRV: numRV, currentPatient: patient },
+    // });
+  };
+
   const collapseItems = [
     {
       key: "1",
@@ -136,9 +204,7 @@ function DossierPatient({ serviceType}) {
     {
       key: "2",
       label: "Observations particulières",
-      children: (
-        <div>{patient?.obs_part ? patient.obs_part : "Pas d'observations"}</div>
-      ),
+      children: <EditObservationPatient observation={patient?.obs_part} />,
     },
   ];
 
@@ -160,19 +226,31 @@ function DossierPatient({ serviceType}) {
         <Col xs={24} sm={24} md={12} lg={12} xl={12} offset={0}>
           <Flex justify="flex-end" align="center" wrap="nowrap">
             <Space>
-              {/* <Button type="link"  onClick={()=>{onRefresh()}} >Actualiser</Button>  */}
               <ReloadButton onRefresh={refreshConsultation} />
-              <Button
-                type="primary"
-                onClick={() => {
-                  /*getConsultationData(listConsultation[0].numrv) */ doConsultation(
-                    listConsultation[0].numrv
-                  );
-                }}
-                disabled={listConsultation.length === 0 ? true : false}
-              >
-                Consultation
-              </Button>
+              {serviceType === ServiceType.ANALYSE ? (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    openAnalyse(
+                      listConsultation[0].numrv
+                    );
+                  }}
+                >
+                  Analyse
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    /*getConsultationData(listConsultation[0].numrv) */ doConsultation(
+                      listConsultation[0].numrv
+                    );
+                  }}
+                  disabled={listConsultation.length === 0 ? true : false}
+                >
+                  Consultation
+                </Button>
+              )}
               <Button
                 type="primary"
                 ghost
@@ -203,9 +281,7 @@ function DossierPatient({ serviceType}) {
               <React.Fragment>
                 <Title level={4}>
                   {" "}
-                  Liste des consultations de {
-                    patient.prenom_patient
-                  }{" "}
+                  Liste des consultations de {patient.prenom_patient}{" "}
                   {patient.nom_patient}{" "}
                 </Title>
                 <br />

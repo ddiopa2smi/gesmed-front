@@ -72,28 +72,39 @@ const RvList = ({ serviceType, today }) => {
 
   const openMedicalFile = (record) => {
     switch (serviceType) {
-      
       case ServiceType.MEDICAL:
-        navigate(`/espace-medical/patients/dossier`)
+        navigate(`/espace-medical/patients/dossier`);
         break;
       case ServiceType.GYNECOLOGIE:
-        navigate(`/espace-gynecologie/patients/dossier-medical/${record.num_patient}`)
+        navigate(
+          `/espace-gynecologie/patients/dossier-medical/${record.num_patient}`
+        );
         break;
       case ServiceType.DENTAIRE:
-        navigate(`/espace-dentist/patients/dossier-medical/${record?.num_patient}`);
-          break;
+        navigate(
+          `/espace-dentist/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
       case ServiceType.ANALYSE:
-        navigate(`/espace-analyse/patients/dossier-medical/${record?.num_patient}`);
-          break;
+        navigate(
+          `/espace-analyse/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
       case ServiceType.RADIOLOGIE:
-        navigate(`/espace-radiologie/patients/dossier-medical/${record?.num_patient}`);
-          break;
+        navigate(
+          `/espace-radiologie/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
       case ServiceType.HOSPITALISATION:
-        navigate(`/espace-hospitalisation/patients/dossier-medical/${record?.num_patient}`);
-          break;
+        navigate(
+          `/espace-hospitalisation/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
       case ServiceType.INFIRMERIE:
-        navigate(`/espace-infirmerie/patients/dossier-medical/${record?.num_patient}`);
-          break;
+        navigate(
+          `/espace-infirmerie/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
       default:
         break;
     }
@@ -102,7 +113,6 @@ const RvList = ({ serviceType, today }) => {
   };
 
   console.log(data);
-  
 
   return (
     <div>
@@ -219,12 +229,17 @@ const RvList = ({ serviceType, today }) => {
             ),
           },
           {
-            title: 'Date RV',
-            dataIndex: 'date_rv',
-            key: 'date_rv',
-            render: (record) => <div className='table-data'>
-                <span style={{textOverflow:"ellipsis"}} > {formatDate(record)} </span>
-            </div>
+            title: "Date RV",
+            dataIndex: "date_rv",
+            key: "date_rv",
+            render: (record) => (
+              <div className="table-data">
+                <span style={{ textOverflow: "ellipsis" }}>
+                  {" "}
+                  {formatDate(record)}{" "}
+                </span>
+              </div>
+            ),
           },
           {
             title: "Service",
@@ -246,11 +261,11 @@ const RvList = ({ serviceType, today }) => {
             ...getColumnSearchProps("medecin_traitant"),
           },
           {
-            fixed: 'right',
+            fixed: "right",
             render: (record) => (
               <Flex align="center">
                 <Space size="middle">
-                  {((serviceType === ServiceType.ACCUEIL) || (serviceType === ServiceType.MEDICAL) )
+                  {/* {((serviceType === ServiceType.ACCUEIL) || (serviceType === ServiceType.MEDICAL) )
                      && (
                     <Tooltip title="Examiner">
                       <RiStethoscopeLine
@@ -261,8 +276,16 @@ const RvList = ({ serviceType, today }) => {
                         }}
                       />
                     </Tooltip>
-                  )}
-
+                  )} */}
+                  <Tooltip title="Examiner">
+                    <RiStethoscopeLine
+                      cursor="pointer"
+                      size={18}
+                      onClick={() => {
+                        handleExamenClinique(record);
+                      }}
+                    />
+                  </Tooltip>
                   {serviceType !== ServiceType.ACCUEIL && (
                     <Tooltip title="Ouvrir dossier">
                       <FolderOpenOutlined

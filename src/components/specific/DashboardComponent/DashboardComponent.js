@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Card,
-  Col,
-  Row,
-  Empty,
-} from "antd";
+import { Card, Col, Row, Empty } from "antd";
 import {
   PushpinOutlined,
   SnippetsOutlined,
@@ -21,6 +16,8 @@ import {
   Legend,
 } from "recharts";
 import RvList from "../RvList/RvList";
+import { ServiceType } from "../../../utils/types/types.ts";
+import AnalysesList from "../AnalysesList/AnalysesList";
 const chartData = [
   {
     name: "Page A",
@@ -66,9 +63,7 @@ const chartData = [
   },
 ];
 
-
-function DashboardComponent({serviceType}) {
-
+function DashboardComponent({ serviceType }) {
   return (
     <div>
       <Row gutter={[24, 24]}>
@@ -153,15 +148,22 @@ function DashboardComponent({serviceType}) {
           </Card>
         </Col>
       </Row>
-      <br/>
-        <Row  gutter={[24,24]}>
-          <Col  xs={24} sm={24} md={24} lg={24} xl={24} >
-            <Card >
-                <RvList serviceType={serviceType} today />
-            </Card>
-          </Col>
-        </Row>
       <br />
+      {serviceType === ServiceType.ANALYSE && (
+        <>
+          <AnalysesList />
+          <br />
+        </>
+      )}
+      <Row gutter={[24, 24]}>
+        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+          <Card>
+            <RvList serviceType={serviceType} today />
+          </Card>
+        </Col>
+      </Row>
+      <br />
+      
       <br />
       <Row gutter={[24, 24]}>
         <Col xs={24} sm={24} md={16} lg={16} xl={16}>

@@ -14,7 +14,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import BackButton from '../../components/common/BackButton/BackButton';
 import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
 import { deletePopup, printPDF } from '../../utils/helpers';
-import { codesPrescriptions } from '../../constants/app.constants';
+import { codeServices, codesPrescriptions } from '../../constants/app.constants';
 import useObjectFetch from '../../utils/hooks/useObjectFetch';
 const {Title , Text} = Typography;
 const { TextArea } = Input;
@@ -81,7 +81,13 @@ function Consultation() {
     const [loading , setLoading] = useState(false);
 
     const { data : pathologies , isLoading : pathologiesLoading , onRefresh : pathologiesRefreshList} = useFetch(endpoints.pathologie.LIST);
-    const {data : motifs , isLoading : motifsLoading , onRefresh : motifsRefreshList} = useFetch(endpoints.motifs.LIST);
+    const {data : motifsList , isLoading : motifsLoading , onRefresh : motifsRefreshList} = useFetch(endpoints.motifs.LIST);
+    const [motifs,  setMotifs] = useState([]);
+    useEffect(() => {
+        if (motifsList) {
+          setMotifs(motifsList.filter((motif) => motif.code_spe === codeServices.MEDICAL));
+        }
+      }, [motifsList])
     const { data : regions , isLoading : regionsLoading , onRefresh : regionsRefreshList} = useFetch(endpoints.regions.LIST);
      
     const imcMessage = useRef("");

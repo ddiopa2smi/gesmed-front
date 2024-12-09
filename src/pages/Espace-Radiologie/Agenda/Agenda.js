@@ -3,9 +3,10 @@ import AgendaComponent from '../../../components/specific/AgendaComponent/Agenda
 import { ServiceType } from '../../../utils/types/types.ts'
 
 function Agenda() {
+  const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
   return (
     <div>
-      <AgendaComponent serviceType={ServiceType.RADIOLOGIE} />
+      <AgendaComponent author={userConnected.login} serviceType={ServiceType.RADIOLOGIE} />
     </div>
   )
 }

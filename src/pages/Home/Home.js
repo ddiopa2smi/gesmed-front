@@ -4,7 +4,8 @@ import React from "react";
 import medicine_image from "./../../assets/medicine_image.svg";
 import pharma_image from "./../../assets/pharma_image.svg";
 import dentist_image from "./../../assets/dentist_image.svg";
-import gynecologie_image from "./../../assets/gynecologie_image.svg";
+import gynecologie_image from "./../../assets/gyneco_image.svg";
+import hospitalisation_image from "./../../assets/hospitalisation_image.svg";
 import radiologie_image from "./../../assets/radiologie_image.svg";
 import analyse_image from "./../../assets/analyse_image.svg";
 import administration_image from "./../../assets/administration_image.svg";
@@ -125,7 +126,7 @@ function Home() {
       id: 8,
       label: "Service Hospitalisation",
       code: codeServices.HOSPITALISATION,
-      cover: administration_image,
+      cover: hospitalisation_image,
       onClick: () => {
         navigate("/espace-hospitalisation");
         sessionStorage.setItem("space", "shospitalisation");
@@ -189,7 +190,7 @@ function Home() {
                 "Pharmacie",
                 "Dentaire",
                 "Gynécologie",
-                "Analayse",
+                "Analyse",
                 "Radiologie",
                 "Hospitalisation",
                 "Infirmerie",
@@ -206,17 +207,20 @@ function Home() {
           </span>
         </Title>
         <Space size="large">
-          <Button
-            type="text"
-            icon={<SettingOutlined style={{ fontSize: 24 }} />}
-            onClick={() => {
-              navigate("/espace-administration/settings");
-              sessionStorage.setItem(
-                "serviceType",
-                JSON.stringify(ServiceType.ADMINISTRATION)
-              );
-            }}
-          />
+          {userConnected.role_name === "Admin" && (
+            <Button
+              type="text"
+              icon={<SettingOutlined style={{ fontSize: 24 }} />}
+              onClick={() => {
+                navigate("/espace-administration/settings");
+                sessionStorage.setItem(
+                  "serviceType",
+                  JSON.stringify(ServiceType.ADMINISTRATION)
+                );
+              }}
+            />
+          )}
+
           <Button
             type="primary"
             size="large"

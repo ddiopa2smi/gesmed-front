@@ -7,6 +7,7 @@ import Agenda from "./Agenda/Agenda";
 import Patients from "./Patients/Patients";
 import Consultations from "./Consultations/Consultations";
 import DossierMedical from "./DossierMedical/DossierMedical";
+import ConsultationPage from "../ConsultationPage/ConsultationPage";
 
 export const hospitalisationRouter : RouteObject = {
     path : "espace-hospitalisation",
@@ -49,6 +50,10 @@ export const hospitalisationRouter : RouteObject = {
         {
             path : "consultations",
             element : <Consultations />
-        }
+        },
+        {
+            path : "consultation/:numPatient/:numRv",
+            element : <ConsultationPage/>
+        },
     ]
 }

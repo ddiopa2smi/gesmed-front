@@ -23,16 +23,44 @@ export interface DayAppointmentInterface {
 }
 
 const { Text } = Typography;
-function DayAppointment({ data , serviceType }: DayAppointmentInterface) {
-    const navigate = useNavigate();
-    
-  const openMedicalFile = (record : any) => {
+function DayAppointment({ data, serviceType }: DayAppointmentInterface) {
+  const navigate = useNavigate();
+  console.log(data);
+
+  const openMedicalFile = (record: any) => {
     switch (serviceType) {
-      case ServiceType.GYNECOLOGIE:
-        navigate(`/espace-gynecologie/patients/dossier/${record.num_patient}`);
-        break;
       case ServiceType.MEDICAL:
         navigate(`/espace-medical/patients/dossier`);
+        break;
+      case ServiceType.DENTAIRE:
+        navigate(
+          `/espace-dentist/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
+      case ServiceType.GYNECOLOGIE:
+        navigate(
+          `/espace-gynecologie/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
+      case ServiceType.ANALYSE:
+        navigate(
+          `/espace-analyse/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
+      case ServiceType.RADIOLOGIE:
+        navigate(
+          `/espace-radiologie/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
+      case ServiceType.HOSPITALISATION:
+        navigate(
+          `/espace-hospitalisation/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
+      case ServiceType.INFIRMERIE:
+        navigate(
+          `/espace-infirmerie/patients/dossier-medical/${record?.num_patient}`
+        );
         break;
       default:
         break;
@@ -65,7 +93,9 @@ function DayAppointment({ data , serviceType }: DayAppointmentInterface) {
         renderItem={(item) => (
           <List.Item
             actions={[
-              <Button type="link" onClick={()=>openMedicalFile(item)} >Dossier médical</Button>,
+              <Button type="link" onClick={() => openMedicalFile(item)}>
+                Dossier médical
+              </Button>,
             ]}
           >
             <Skeleton avatar title={false} loading={item.loading} active>

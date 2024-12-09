@@ -9,6 +9,7 @@ import Dashboard from "./Dashboard/Dashboard";
 import Agenda from "./Agenda/Agenda";
 import RendezVous from "./RendezVous/RendezVous";
 import DossierMedical from "./DossierMedical/DossierMedical";
+import ConsultationPage from "../ConsultationPage/ConsultationPage";
 
 export const gynecologieRouter : RouteObject = {
     path : "espace-gynecologie",
@@ -76,6 +77,10 @@ export const gynecologieRouter : RouteObject = {
                     element : <DetailsConsultation /> 
                 },
             ]
+        },
+        {
+            path : "consultation/:numPatient/:numRv",
+            element : <ConsultationPage/>
         },
     ]
 }

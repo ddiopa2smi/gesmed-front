@@ -1,0 +1,1197 @@
+import {
+  Modal,
+  Card,
+  Row,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Typography,
+  Select,
+  Button,
+  DatePicker,
+  message,
+  Flex,
+  Divider,
+  Space,
+  Dropdown,
+  Alert,
+  Radio,
+} from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import dayjs from "dayjs";
+import { getActions, putActions } from "../../../actions/actions";
+import { endpoints } from "../../../constants/endpoints.constants";
+import AddAndEditDropdown from "../../../components/common/AddAndEditDropdown/AddAndEditDropdown";
+import FormFooter from "../../../components/common/FormFooter/FormFooter";
+import useFetch from "../../../utils/hooks/useFetch";
+import AddPathologie from "../../../components/specific/AddPathologie/AddPathologie";
+import AddMotif from "../../../components/specific/AddMotif/AddMotif";
+import AddRegion from "../../../components/specific/AddRegion/AddRegion";
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import BackButton from "../../../components/common/BackButton/BackButton";
+import ReloadButton from "../../../components/common/ReloadButton/ReloadButton";
+import { deletePopup, printPDF } from "../../../utils/helpers";
+import {
+  codeServices,
+  codesPrescriptions,
+} from "../../../constants/app.constants";
+import useObjectFetch from "../../../utils/hooks/useObjectFetch";
+const { Title, Text } = Typography;
+const { TextArea } = Input;
+const { Option } = Select;
+
+const pathologies = [
+  { code_patho: "SOPK", libelle_patho: "Syndrome des ovaires polykystiques" },
+  { code_patho: "ENDOMETRIOSE", libelle_patho: "Endométriose" },
+  { code_patho: "FIBROMES", libelle_patho: "Fibromes utérins" },
+  { code_patho: "KYSTES_OVARIENS", libelle_patho: "Kystes ovariens" },
+  {
+    code_patho: "DYSMENORRHEE",
+    libelle_patho: "Dysménorrhée (douleurs menstruelles)",
+  },
+  { code_patho: "AMENORRHEE", libelle_patho: "Aménorrhée (absence de règles)" },
+  { code_patho: "MENORRAGIE", libelle_patho: "Ménorragie (règles abondantes)" },
+  { code_patho: "SPM", libelle_patho: "Syndrome prémenstruel (SPM)" },
+  { code_patho: "PROLAPSUS", libelle_patho: "Prolapsus génital" },
+  {
+    code_patho: "INFECTIONS_GENITALES",
+    libelle_patho: "Infections génitales (vaginite, cervicite)",
+  },
+  { code_patho: "CHLAMYDIA", libelle_patho: "Infection à Chlamydia" },
+  { code_patho: "GONORRHEE", libelle_patho: "Gonorrhée" },
+  { code_patho: "HERPES_GENITAL", libelle_patho: "Herpès génital" },
+  { code_patho: "SYPHILIS", libelle_patho: "Syphilis" },
+  { code_patho: "MYCOSE", libelle_patho: "Mycose vaginale" },
+  { code_patho: "TRICHOMONASE", libelle_patho: "Trichomonase" },
+  { code_patho: "VAGINOSE", libelle_patho: "Vaginose bactérienne" },
+  { code_patho: "HPV", libelle_patho: "Papillomavirus humain (HPV)" },
+  { code_patho: "DYSPLASIE", libelle_patho: "Dysplasie cervicale" },
+  { code_patho: "CANCER_COL", libelle_patho: "Cancer du col de l’utérus" },
+  { code_patho: "POLYPES", libelle_patho: "Polypes cervicaux" },
+  { code_patho: "MASTOPATHIE", libelle_patho: "Mastopathie fibrokystique" },
+  { code_patho: "MASTITE", libelle_patho: "Mastite" },
+  { code_patho: "GALACTORRHEE", libelle_patho: "Galactorrhée" },
+  { code_patho: "CANCER_SEIN", libelle_patho: "Cancer du sein" },
+  { code_patho: "GEU", libelle_patho: "Grossesse extra-utérine (GEU)" },
+  {
+    code_patho: "FAUSSES_COUCHES",
+    libelle_patho: "Fausses couches à répétition",
+  },
+  { code_patho: "DIABETE_GESTATIONNEL", libelle_patho: "Diabète gestationnel" },
+  { code_patho: "PREECLAMPSIE", libelle_patho: "Prééclampsie" },
+  { code_patho: "PLACENTA_PREVIA", libelle_patho: "Placenta prævia" },
+  {
+    code_patho: "POST_PARTUM",
+    libelle_patho: "Pathologies du post-partum (infections, dépression)",
+  },
+  { code_patho: "OSTEOPOROSE", libelle_patho: "Ostéoporose" },
+  {
+    code_patho: "ATROPHIE_VULVOVAGINALE",
+    libelle_patho: "Atrophie vulvovaginale",
+  },
+  {
+    code_patho: "TROUBLES_MENOPAUSE",
+    libelle_patho: "Troubles hormonaux post-ménopause",
+  },
+  { code_patho: "VIH_SIDA", libelle_patho: "VIH/SIDA" },
+  { code_patho: "HEPATITES", libelle_patho: "Hépatites virales (B et C)" },
+  {
+    code_patho: "CONDYLOMES",
+    libelle_patho: "Condylomes acuminés (liés au HPV)",
+  },
+  { code_patho: "MIP", libelle_patho: "Maladie inflammatoire pelvienne (MIP)" },
+  {
+    code_patho: "SYNDROME_ASERMAN",
+    libelle_patho: "Syndrome d'Asherman (adhérences utérines)",
+  },
+  { code_patho: "HYPERPLASIE", libelle_patho: "Hyperplasie de l'endomètre" },
+  {
+    code_patho: "MALFORMATIONS",
+    libelle_patho: "Malformations utérines congénitales",
+  },
+];
+
+const regions = [
+  { code_region: "VULVE", libelle_region: "Vulve" },
+  { code_region: "CLITORIS", libelle_region: "Clitoris" },
+  { code_region: "LÈVRES", libelle_region: "Grandes et petites lèvres" },
+  { code_region: "MEAT_URINAIRE", libelle_region: "Méat urinaire" },
+  { code_region: "VAGIN", libelle_region: "Vagin" },
+  { code_region: "COL_UTERUS", libelle_region: "Col de l'utérus (cervix)" },
+  { code_region: "UTERUS", libelle_region: "Utérus (corps et cavité)" },
+  { code_region: "TROMPES", libelle_region: "Trompes de Fallope" },
+  { code_region: "OVAIRES", libelle_region: "Ovaires" },
+  {
+    code_region: "REGION_PELVIENNE",
+    libelle_region: "Région pelvienne (muscles, ligaments, périnée)",
+  },
+  {
+    code_region: "SEINS",
+    libelle_region: "Seins (glandes mammaires et tissus environnants)",
+  },
+  {
+    code_region: "ANTECEDENTS_GENRE",
+    libelle_region:
+      "Antécédents médicaux généraux (pathologies, infections, chirurgies)",
+  },
+  {
+    code_region: "ANOMALIES_MENSTRUELLES",
+    libelle_region: "Anomalies menstruelles",
+  },
+  {
+    code_region: "PATHOLOGIES_HORMONALES",
+    libelle_region: "Pathologies hormonales et métaboliques",
+  },
+];
+
+const getInitCons = (initCons) => {
+  initCons.datecons = dayjs(initCons?.datecons);
+  initCons.date_rv =
+    initCons?.date_rv === null ? dayjs(new Date()) : dayjs(initCons.date_rv);
+  initCons.debut_rm =
+    initCons?.debut_rm === null ? dayjs(new Date()) : dayjs(initCons.debut_rm);
+  initCons.fin_rm =
+    initCons?.fin_rm === null ? dayjs(new Date()) : dayjs(initCons.fin_rm);
+  return initCons;
+};
+
+function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const { state } = useLocation();
+
+  const [isCpnOptionSelected, setIsCpnOptionSelected] = useState(false);
+  const [cpn, setCpn] = useState({
+    first: false,
+    second: false,
+    third: false,
+    fourth: false,
+    fifth: false,
+    sixth: false,
+    seventh: false,
+    eighth: false,
+  });
+  // const currentPatient = state?.currentPatient;
+  // const consultationObject = state?.consultationObject;
+
+  // const initCons = getInitCons(consultationObject);
+  // const [initConsultation , setInitConsultation] = useState(initCons);
+
+  const currentPatient = state?.patient;
+
+  //const {data : consultationData , onRefresh : refreshConsultation , isLoading : consultationDataLoading} = useObjectFetch(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`);
+  //const initCons = consultationData !== null ? getInitCons(consultationData) : null;
+  const [initConsultation, setInitConsultation] = useState(null);
+  const [consultationDataLoading, setConsultationDataLoading] = useState(false);
+  const [refetch, setRefetch] = useState(null);
+
+  const [isImcAlertVisible, setIsImcAlertVisible] = useState(false);
+  const [imcAlert, setImcAlert] = useState("");
+
+  const refreshConsultation = () => {
+    setRefetch(Date.now());
+  };
+  useEffect(() => {
+    setConsultationDataLoading(true);
+    getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`)
+      .then((response) => {
+        if (response?.data) {
+          setInitConsultation(getInitCons(response?.data));
+          form.setFieldsValue(getInitCons(response?.data));
+        }
+      })
+      .finally(() => {
+        setConsultationDataLoading(false);
+      });
+  }, [refetch]);
+
+  const [pathologieSelected, setPathologieSelected] = useState(null);
+  const [motifSelected, setMotifSelected] = useState(null);
+  const [regionSelected, setRegionSelected] = useState("REG0008");
+
+  const [open, setOpen] = useState(false);
+  const [currentSelectableTask, setCurrentSelectableTask] = useState("");
+  const [operationType, setOperationType] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const {
+    data /*: pathologies */,
+    isLoading: pathologiesLoading,
+    onRefresh: pathologiesRefreshList,
+  } = useFetch(endpoints.pathologie.LIST);
+  const {
+    data: motifsList,
+    isLoading: motifsLoading,
+    onRefresh: motifsRefreshList,
+  } = useFetch(endpoints.motifs.LIST);
+  const [motifs, setMotifs] = useState([]);
+  useEffect(() => {
+    if (motifsList) {
+      setMotifs(
+        motifsList.filter(
+          (motif) => motif.code_spe === codeServices.GYNECOLOGIE
+        )
+      );
+    }
+    console.log(motifsList);
+  }, [motifsList]);
+  const {
+    data: reg /*: regions */,
+    isLoading: regionsLoading,
+    onRefresh: regionsRefreshList,
+  } = useFetch(endpoints.regions.LIST);
+
+  const imcMessage = useRef("");
+  useEffect(() => {
+    imcMessage.current = imcAlertMessage(form.getFieldValue("imc"));
+  });
+
+  const itemsMotif = [
+    {
+      key: "0",
+      label: (
+        <span
+          onClick={() => {
+            openModal("add", "MOTIF");
+          }}
+        >
+          Ajouter
+        </span>
+      ),
+    },
+    {
+      label: (
+        <span
+          onClick={() => {
+            openModal("update", "MOTIF");
+          }}
+        >
+          Modifier
+        </span>
+      ),
+      key: "1",
+      disabled: motifSelected === null ? true : false,
+    },
+  ];
+
+  const itemsPathologie = [
+    {
+      label: (
+        <span
+          onClick={() => {
+            openModal("add", "PATHOLOGIE");
+          }}
+        >
+          Ajouter
+        </span>
+      ),
+      key: "0",
+    },
+    {
+      label: (
+        <span
+          onClick={() => {
+            openModal("update", "PATHOLOGIE");
+          }}
+        >
+          Modifier
+        </span>
+      ),
+      key: "1",
+      disabled: pathologieSelected === null ? true : false,
+    },
+  ];
+
+  const itemsRegion = [
+    {
+      label: (
+        <span
+          onClick={() => {
+            openModal("add", "REGION");
+          }}
+        >
+          Ajouter
+        </span>
+      ),
+      key: "0",
+    },
+    {
+      label: (
+        <span
+          onClick={() => {
+            openModal("update", "REGION");
+          }}
+        >
+          Modifier
+        </span>
+      ),
+      key: "1",
+      disabled: regionSelected === null ? true : false,
+    },
+  ];
+
+  const openModal = (operation, selectableTask) => {
+    setOpen(true);
+    setOperationType(operation);
+    setCurrentSelectableTask(selectableTask);
+  };
+
+  const save = () => {
+    setLoading(true);
+    form
+      .validateFields()
+      .then((values) => {
+        values.datecons = new Date(values.datecons).toISOString();
+        values.date_rv = new Date(values.date_rv).toISOString();
+        values.debut_rm = new Date(values.debut_rm).toISOString();
+        values.fin_rm = new Date(values.fin_rm).toISOString();
+        const payload = { ...initConsultation, ...values };
+        putActions(endpoints.consultations.UPDATE, payload)
+          .then((response) => {
+            //console.log(response.data);
+            if (response?.data?.Updated) {
+              message.success("Consultation enrégistreé avec succès");
+              refreshConsultation();
+              // getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${payload.numrv}`)
+              // .then((response)=>{
+              //     const data = getInitCons(response.data);
+              //     setInitConsultation(data);
+              //     form.setFieldsValue(data);
+              //     //sessionStorage.setItem("initConsultation", JSON.stringify(response.data));
+              //     setLoading(false);
+              //     message.success("Consultation enrégistreé avec succès");
+              //     form.resetFields();
+              //     //navigate(-1);
+              // })
+            } else {
+              setLoading(false);
+              message.error(
+                "Oopss...,quelque chose s'est mal passé, veuillez réessayer"
+              );
+            }
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      })
+      .catch((info) => {
+        console.log("Validate Failed:", info);
+      });
+  };
+
+  const validFinalConsultation = () => {
+    deletePopup().then((result) => {
+      if (result.isConfirmed) {
+        console.log("final consult");
+      }
+    });
+  };
+
+  const imcAlertMessage = (imc) => {
+    let result = "";
+    if (imc < 18.5) {
+      result += "Insuffisance pondérale (maigreur)";
+    } else if (imc >= 18.5 && imc < 25) {
+      result += "Corpulence normale";
+    } else if (imc >= 25 && imc < 30) {
+      setIsImcAlertVisible(true);
+      result += "Surpoids";
+    } else if (imc >= 30 && imc < 35) {
+      result += "Obésité modérée";
+    } else if (imc >= 35 && imc < 40) {
+      result += "Obésité sévère";
+    } else if (imc >= 40) {
+      result += "Obésité morbide ou massive";
+    }
+
+    return result;
+  };
+
+  //console.log(initConsultation)
+
+  return (
+    <Card loading={consultationDataLoading}>
+      <Flex justify="flex-start" align="center">
+        <BackButton /> &nbsp;&nbsp;
+        <Button
+          type="primary"
+          size="small"
+          onClick={() => {
+            validFinalConsultation();
+          }}
+          disabled={initConsultation?.medecin === null}
+        >
+          Cloturer la consultation
+        </Button>
+      </Flex>
+      <br />
+      <br />
+      <Flex justify="space-between" align="center">
+        <Title level={4}>
+          Consultation gynécologique {initConsultation?.numcons}{" "}
+        </Title>
+        <Space align="center">
+          <ReloadButton onRefresh={refreshConsultation} />
+
+          <Dropdown
+            disabled={initConsultation?.medecin !== null ? false : true}
+            menu={{
+              items: [
+                {
+                  key: "1",
+                  label: (
+                    <span
+                      onClick={() => {
+                        printPDF(
+                          `/api/Print/smed/Consultation/${initConsultation.numcons}/certificat`
+                        );
+                      }}
+                    >
+                      Certificat Médical
+                    </span>
+                  ),
+                },
+                {
+                  key: "2",
+                  label: (
+                    <span
+                      onClick={() => {
+                        console.log("Bulletin médical");
+                      }}
+                    >
+                      Bulletin de visite
+                    </span>
+                  ),
+                  disabled: true,
+                },
+                {
+                  key: "3",
+                  label: (
+                    <span
+                      onClick={() => {
+                        console.log("Aptitude");
+                      }}
+                    >
+                      Certificat d'aptitude
+                    </span>
+                  ),
+                  disabled: true,
+                },
+              ],
+            }}
+            trigger={["click"]}
+          >
+            <Button type="primary">Imprimer</Button>
+          </Dropdown>
+
+          <Dropdown
+            disabled={initConsultation?.medecin !== null ? false : true}
+            menu={{
+              items: [
+                {
+                  label: <span> Ordonnance </span>,
+                  key: "0",
+                  onClick: () => {
+                    // nettoyer la prescription en mémoire
+                    sessionStorage.removeItem("editPrescription");
+                    sessionStorage.setItem(
+                      "prescription",
+                      JSON.stringify({
+                        codepresc: codesPrescriptions.ORD,
+                        numcons: initConsultation.numcons,
+                        medecin: initConsultation.medecin,
+                      })
+                    );
+                    navigate(
+                      `/espace-medical/patients/dossier/prescriptions/ordonnance`
+                    );
+                  },
+                },
+                {
+                  label: <span> Analyse </span>,
+                  key: "1",
+                  onClick: () => {
+                    sessionStorage.removeItem("editPrescription");
+                    sessionStorage.setItem(
+                      "prescription",
+                      JSON.stringify({
+                        codepresc: codesPrescriptions.ANA,
+                        numcons: initConsultation.numcons,
+                        medecin: initConsultation.medecin,
+                      })
+                    );
+                    navigate(
+                      `/espace-medical/patients/dossier/prescriptions/analyse`
+                    );
+                  },
+                },
+                {
+                  label: <span> Imagerie </span>,
+                  key: "2",
+                  onClick: () => {
+                    sessionStorage.removeItem("editPrescription");
+                    sessionStorage.setItem(
+                      "prescription",
+                      JSON.stringify({
+                        codepresc: codesPrescriptions.IMG,
+                        numcons: initConsultation.numcons,
+                        medecin: initConsultation.medecin,
+                      })
+                    );
+                    navigate(
+                      `/espace-medical/patients/dossier/prescriptions/imagerie`
+                    );
+                  },
+                },
+                {
+                  label: <span> Hospitalisation </span>,
+                  key: "3",
+                  onClick: () => {
+                    sessionStorage.removeItem("editPrescription");
+                    sessionStorage.setItem(
+                      "prescription",
+                      JSON.stringify({
+                        codepresc: codesPrescriptions.IMG,
+                        numcons: initConsultation.numcons,
+                        medecin: initConsultation.medecin,
+                      })
+                    );
+                    navigate(
+                      `/espace-medical/patients/dossier/prescriptions/imagerie`
+                    );
+                  },
+                },
+                {
+                  label: <span> Infirmerie </span>,
+                  key: "4",
+                  onClick: () => {
+                    sessionStorage.removeItem("editPrescription");
+                    sessionStorage.setItem(
+                      "prescription",
+                      JSON.stringify({
+                        codepresc: codesPrescriptions.IMG,
+                        numcons: initConsultation.numcons,
+                        medecin: initConsultation.medecin,
+                      })
+                    );
+                    navigate(
+                      `/espace-medical/patients/dossier/prescriptions/imagerie`
+                    );
+                  },
+                },
+              ],
+            }}
+            trigger={["click"]}
+          >
+            <Button type="primary">Prescrire</Button>
+          </Dropdown>
+        </Space>
+      </Flex>
+
+      <Text level={4}>
+        {" "}
+        Patient : {currentPatient.num_patient} / {currentPatient.prenom_patient}{" "}
+        {currentPatient.nom_patient}{" "}
+      </Text>
+
+      <Form
+        layout="vertical"
+        form={form}
+        name="consultation_form"
+        initialValues={initConsultation}
+        onValuesChange={(changedValues, allValues) => {
+          if (changedValues.code_patho) {
+            const code_p = changedValues.code_patho;
+            pathologies.forEach((element) => {
+              if (element.code_patho === code_p) {
+                setPathologieSelected(element);
+              }
+            });
+          }
+
+          if (changedValues.code_motifcons) {
+            const code_m = changedValues.code_motifcons;
+            motifs.forEach((element) => {
+              if (element.code_motifcons === code_m) {
+                setMotifSelected(element);
+              }
+            });
+            form.setFieldValue("motif_ref", changedValues.code_motifcons);
+          }
+
+          if (changedValues.code_region) {
+            const code_r = changedValues.code_region;
+            regions.forEach((element) => {
+              if (element.code_region === code_r) {
+                setRegionSelected(element);
+              }
+            });
+          }
+
+          if (changedValues.nb_jours_rv) {
+            const newValue = new Date().setDate(
+              new Date(allValues.datecons).getDate() + changedValues.nb_jours_rv
+            );
+            allValues.date_rv = newValue;
+            form.setFieldValue("date_rv", dayjs(newValue));
+          }
+
+          if (changedValues.nb_jours_rm) {
+            const newValue = new Date().setDate(
+              new Date(allValues.debut_rm).getDate() + changedValues.nb_jours_rm
+            );
+            allValues.fin_rm = newValue;
+            form.setFieldValue("fin_rm", dayjs(newValue));
+          }
+
+          if (allValues.code_motifcons === "CONS0041") {
+            setIsCpnOptionSelected(true);
+          } else {
+            setIsCpnOptionSelected(false);
+          }
+
+          if (changedValues.grossesse_semaine) {
+            if (
+              changedValues.grossesse_semaine >= 0 &&
+              changedValues.grossesse_semaine < 12
+            ) {
+              setCpn({
+                first: false,
+                second: true,
+                third: true,
+                fourth: true,
+                fifth: true,
+                sixth: true,
+                seventh: true,
+                eighth: true,
+              });
+              form.setFieldValue("cpn", "cpn1");
+            } else if (
+              changedValues.grossesse_semaine >= 12 &&
+              changedValues.grossesse_semaine < 18
+            ) {
+              setCpn({
+                first: true,
+                second: false,
+                third: true,
+                fourth: true,
+                fifth: true,
+                sixth: true,
+                seventh: true,
+                eighth: true,
+              });
+              form.setFieldValue("cpn", "cpn2");
+            } else if (
+              changedValues.grossesse_semaine >= 18 &&
+              changedValues.grossesse_semaine < 22
+            ) {
+              setCpn({
+                first: true,
+                second: true,
+                third: false,
+                fourth: true,
+                fifth: true,
+                sixth: true,
+                seventh: true,
+                eighth: true,
+              });
+              form.setFieldValue("cpn", "cpn3");
+            } else if (
+              changedValues.grossesse_semaine >= 22 &&
+              changedValues.grossesse_semaine < 28
+            ) {
+              setCpn({
+                first: true,
+                second: true,
+                third: true,
+                fourth: false,
+                fifth: true,
+                sixth: true,
+                seventh: true,
+                eighth: true,
+              });
+              form.setFieldValue("cpn", "cpn4");
+            } else if (
+              changedValues.grossesse_semaine >= 28 &&
+              changedValues.grossesse_semaine < 32
+            ) {
+              setCpn({
+                first: true,
+                second: true,
+                third: true,
+                fourth: true,
+                fifth: false,
+                sixth: true,
+                seventh: true,
+                eighth: true,
+              });
+              form.setFieldValue("cpn", "cpn5");
+            } else if (
+              changedValues.grossesse_semaine >= 32 &&
+              changedValues.grossesse_semaine < 36
+            ) {
+              setCpn({
+                first: true,
+                second: true,
+                third: true,
+                fourth: true,
+                fifth: true,
+                sixth: false,
+                seventh: true,
+                eighth: true,
+              });
+              form.setFieldValue("cpn", "cpn6");
+            } else if (
+              changedValues.grossesse_semaine >= 36 &&
+              changedValues.grossesse_semaine < 38
+            ) {
+              setCpn({
+                first: true,
+                second: true,
+                third: true,
+                fourth: true,
+                fifth: true,
+                sixth: true,
+                seventh: false,
+                eighth: true,
+              });
+              form.setFieldValue("cpn", "cpn7");
+            } else if (
+              changedValues.grossesse_semaine >= 38 &&
+              changedValues.grossesse_semaine <= 40
+            ) {
+              setCpn({
+                first: true,
+                second: true,
+                third: true,
+                fourth: true,
+                fifth: true,
+                sixth: true,
+                seventh: true,
+                eighth: false,
+              });
+              form.setFieldValue("cpn", "cpn8");
+            } else if (changedValues.grossesse_semaine > 40) {
+              setCpn({
+                first: true,
+                second: true,
+                third: true,
+                fourth: true,
+                fifth: true,
+                sixth: true,
+                seventh: true,
+                eighth: true,
+              });
+            }
+          }
+        }}
+        onFinish={save}
+      >
+        <Divider />
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Flex align="center">
+              <Form.Item
+                label="Pathologie"
+                name="code_patho"
+                style={{ width: "90%" }}
+              >
+                <Select
+                  style={{ width: "100%", background: "transparent" }}
+                  showSearch
+                  placeholder="Pathologie"
+                  optionFilterProp="children"
+                  loading={pathologiesLoading}
+                  filterOption={(input, option) =>
+                    option.children[1]
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {pathologies.map((item, key) => (
+                    <Option key={key} value={item.code_patho}>
+                      {" "}
+                      {item.libelle_patho}{" "}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <AddAndEditDropdown items={itemsPathologie} />
+            </Flex>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Flex align="center">
+              <Form.Item
+                label="Motif de consultation"
+                name="code_motifcons"
+                style={{ width: "90%" }}
+              >
+                <Select
+                  showSearch
+                  placeholder="Motif de consultation"
+                  optionFilterProp="children"
+                  loading={motifsLoading}
+                  filterOption={(input, option) =>
+                    option.children[1]
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {motifs.map((item, key) => (
+                    <Option key={key} value={item.code_motifcons}>
+                      {" "}
+                      {item.libelle_motifcons}{" "}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <AddAndEditDropdown items={itemsMotif} />
+            </Flex>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Flex align="center">
+              <Form.Item
+                label="Région concernée"
+                name="code_region"
+                style={{ width: "90%" }}
+              >
+                <Select
+                  style={{ width: "100%", background: "transparent" }}
+                  showSearch
+                  placeholder="Région concernée"
+                  optionFilterProp="children"
+                  loading={regionsLoading}
+                  filterOption={(input, option) =>
+                    option.children[1]
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {regions.map((item, key) => (
+                    <Option key={key} value={item.code_region}>
+                      {" "}
+                      {item.libelle_region}{" "}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <AddAndEditDropdown items={itemsRegion} />
+            </Flex>
+          </Col>
+        </Row>
+
+        {isCpnOptionSelected && (
+          <Row gutter={[24, 24]}>
+            <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+              <Form.Item
+                label="Nombre de semaines de grossesse"
+                name="grossesse_semaine"
+                initialValue={0}
+              >
+                <InputNumber min={0} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={16} lg={16} xl={16}>
+              <Flex align="center">
+                <Form.Item label="CPN" name="cpn">
+                  <Radio.Group>
+                    <Space direction="vertical">
+                      <Radio value={"cpn1"} disabled={cpn.first}>
+                        CPN1 (0 à 12 semaines){" "}
+                      </Radio>
+                      <Radio value={"cpn2"} disabled={cpn.second}>
+                        CPN2 (12 à 18 semaines){" "}
+                      </Radio>
+                      <Radio value={"cpn3"} disabled={cpn.third}>
+                        CPN3 (18 à 22 semaines){" "}
+                      </Radio>
+                      <Radio value={"cpn4"} disabled={cpn.fourth}>
+                        CPN4 (22 à 28 semaines){" "}
+                      </Radio>
+                      <Radio value={"cpn5"} disabled={cpn.fifth}>
+                        CPN5 (28 à 32 semaines){" "}
+                      </Radio>
+                      <Radio value={"cpn6"} disabled={cpn.sixth}>
+                        CPN6 (32 à 36 semaines){" "}
+                      </Radio>
+                      <Radio value={"cpn7"} disabled={cpn.seventh}>
+                        CPN7 (36 à 38 semaines){" "}
+                      </Radio>
+                      <Radio value={"cpn8"} disabled={cpn.eighth}>
+                        CPN8 (38 à 40 semaines){" "}
+                      </Radio>
+                    </Space>
+                  </Radio.Group>
+                </Form.Item>
+              </Flex>
+            </Col>
+          </Row>
+        )}
+
+        <Divider> Séance </Divider>
+
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item label="Résultat interrogation" name="resultat">
+              <TextArea rows={4} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item label="Examen physique" name="examen">
+              <TextArea rows={4} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item label="Diagnostic" name="diagnostic">
+              <TextArea rows={4} />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Divider> Examen clinique </Divider>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item
+              label="TA"
+              name="tension"
+              rules={[
+                {
+                  required: true,
+                  message: "Champ obligatoire",
+                },
+              ]}
+            >
+              <InputNumber min={0} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item
+              label="Température(°C)"
+              name="temp"
+              rules={[
+                {
+                  required: true,
+                  message: "Champ obligatoire",
+                },
+              ]}
+            >
+              <InputNumber min={0} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item
+              label="Pouls"
+              name="pouls"
+              rules={[
+                {
+                  required: true,
+                  message: "Champ obligatoire",
+                },
+              ]}
+            >
+              <InputNumber min={0} />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item
+              label="Poids(kg)"
+              name="poids"
+              rules={[
+                {
+                  required: true,
+                  message: "Champ obligatoire",
+                },
+              ]}
+            >
+              <InputNumber min={0} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item
+              label="Taille(cm)"
+              name="taille"
+              rules={[
+                {
+                  required: true,
+                  message: "Champ obligatoire",
+                },
+              ]}
+            >
+              <InputNumber min={0} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item
+              label={
+                <Text strong>
+                  IMC (kg/m<sup>3</sup>){" "}
+                </Text>
+              }
+              name="imc"
+            >
+              <InputNumber min={0} disabled />
+            </Form.Item>
+            <Alert message={imcMessage.current} />
+          </Col>
+        </Row>
+
+        <br />
+
+        <Divider>Rendez-vous médical</Divider>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item name="nb_jours_rv" label="Nbre de jours">
+              <InputNumber min={0} />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item label="Date cons" name="datecons">
+              <DatePicker disabled format="dddd, DD MMMM YYYY" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item name="date_rv" label="Date RV">
+              <DatePicker disabled format="dddd, DD MMMM YYYY" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Divider>Repos médical</Divider>
+
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item name="nb_jours_rm" label="Nbre de jours">
+              <InputNumber min={0} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item name="debut_rm" label="Date début repos">
+              <DatePicker
+                style={{ color: "green" }}
+                disabled
+                placeholder="Début"
+                format="dddd, DD MMMM YYYY"
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+            <Form.Item name="fin_rm" label="Date fin repos">
+              <DatePicker
+                disabled
+                placeholder="Fin"
+                format="dddd, DD MMMM YYYY"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Divider>Référencement</Divider>
+
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+            <Form.Item name="date_ref" label="Date ">
+              <DatePicker
+                style={{ color: "green" }}
+                placeholder="Début"
+                format="dddd, DD MMMM YYYY"
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+            <Form.Item name="structure_ref" label="Structure médicale">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+            <Form.Item name="motif_ref" label="Motif">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+            <Form.Item name="moyen_transport_ref" label="Moyen de transport">
+              <Select
+                style={{ width: "100%", background: "transparent" }}
+                showSearch
+                placeholder="Pathologie"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                <Option key={"1"} value={"ambulance"}>
+                  {" "}
+                  Ambulance{" "}
+                </Option>
+                <Option key={"2"} value={"personnel"}>
+                  {" "}
+                  Personnel{" "}
+                </Option>
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+        <br />
+
+        <FormFooter
+          onCancel={() => {
+            navigate(-1);
+          }}
+          loading={loading}
+          htmlType={"submit"}
+        />
+      </Form>
+
+      <Modal
+        title={
+          (currentSelectableTask === "PATHOLOGIE" && "Pathologie") ||
+          (currentSelectableTask === "MOTIF" && "Motif") ||
+          (currentSelectableTask === "REGION" && "Région")
+        }
+        open={open}
+        //width={700}
+        onCancel={() => {
+          setOpen(false);
+          setPathologieSelected(null);
+          setMotifSelected(null);
+          setRegionSelected(null);
+        }}
+        footer={null}
+        destroyOnClose
+      >
+        {currentSelectableTask === "PATHOLOGIE" && (
+          <AddPathologie
+            setOpen={setOpen}
+            operationType={operationType}
+            onRefresh={pathologiesRefreshList}
+            currentRecord={pathologieSelected}
+          />
+        )}
+
+        {currentSelectableTask === "MOTIF" && (
+          <AddMotif
+            setOpen={setOpen}
+            operationType={operationType}
+            onRefresh={motifsRefreshList}
+            currentRecord={motifSelected}
+          />
+        )}
+
+        {currentSelectableTask === "REGION" && (
+          <AddRegion
+            setOpen={setOpen}
+            operationType={operationType}
+            onRefresh={regionsRefreshList}
+            currentRecord={regionSelected}
+          />
+        )}
+      </Modal>
+    </Card>
+  );
+}
+
+export default ConsultationGynecologie;

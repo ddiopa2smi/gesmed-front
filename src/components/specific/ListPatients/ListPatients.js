@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import useFetch from "../../../utils/hooks/useFetch";
 import useSearch from "../../../utils/hooks/useSearch";
@@ -41,6 +41,7 @@ function ListPatients({ serviceType }) {
   );
   const { getColumnSearchProps } = useSearch();
   const patientsList = data;
+ 
   const [open, setOpen] = useState(false);
   const [operationType, setOperationType] = useState("");
   const [currentRecord, setCurrentRecord] = useState(null);
@@ -75,11 +76,11 @@ function ListPatients({ serviceType }) {
   const onOpenMedicalFolder = (record) => {
     switch (serviceType) {
       case ServiceType.MEDICAL:
-        navigate(`/espace-medical/dossier-medical/${record?.num_patient}`);
-        // navigate("/espace-medical/patients/dossier", {
-        //   state: { currentPatient: record },
-        //   replace: false,
-        // });
+        //navigate(`/espace-medical/dossier-medical/${record?.num_patient}`);
+        navigate("/espace-medical/patients/dossier", {
+          state: { currentPatient: record },
+          replace: false,
+        });
         break;
       case ServiceType.DENTAIRE:
         navigate(`/espace-dentist/patients/dossier-medical/${record?.num_patient}`);
@@ -148,7 +149,7 @@ function ListPatients({ serviceType }) {
 
       <DataTable
         dataSource={patientsList}
-        dataSourceCopy={dataCopy}
+        dataSourceCopy={serviceType === ServiceType.GYNECOLOGIE ? dataCopy.filter((element) => element.sexe_patient === "FE") : dataCopy}
         setDataSourceCopy={setDataCopy}
         tableLoading={isLoading}
         rowKey={(record) => record.num_patient}
@@ -252,11 +253,11 @@ function ListPatients({ serviceType }) {
               </div>
             ),
           },
-          {
-            title: "Crée par",
-            dataIndex: "created_by",
-            key: "created_by",
-          },
+          // {
+          //   title: "Crée par",
+          //   dataIndex: "created_by",
+          //   key: "created_by",
+          // },
           {
             fixed: "right",
             render: (record) => (

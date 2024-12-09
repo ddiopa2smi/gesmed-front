@@ -56,16 +56,7 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
       onClick: () => {
         navigate("/espace-accueil/patients");
       },
-    },
-    {
-      key: "facturation",
-      icon: <DollarCircleOutlined />,
-      label: "Facturation",
-      title: "Facturation",
-      onClick: () => {
-        navigate("/espace-accueil/facturation");
-      },
-    },
+    }
   ];
 
   const medicalMenu: ItemType<MenuItemType>[] = [
