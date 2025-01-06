@@ -131,8 +131,10 @@ function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, se
                             loading={listTypePatientsLoading}
                         >     
                             {
-                                listTypePatients.map((item , key)=>( 
-                                    <Option key={key}  value={item.code_pat} > {item.type_pat} </Option>
+                                listTypePatients
+                                .filter((item)=> item?.code_patient !== 2 && item?.code_patient !== 3)
+                                .map((item , key)=>( 
+                                    <Option key={key}  value={item.code_patient} > {item.type_patient} </Option>
                                 ))
                             }
                             

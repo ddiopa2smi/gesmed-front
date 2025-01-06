@@ -4,7 +4,7 @@ import { ServiceType } from '../../../utils/types/types.ts'
 
 function Dashboard() {
   return (
-    <DashboardComponent serviceType={ServiceType.ANALYSE} />
+    <DashboardComponent serviceType={ServiceType.ANALYSE_BIO_MEDICAL} />
   )
 }
 

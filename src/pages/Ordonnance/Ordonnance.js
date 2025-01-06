@@ -40,9 +40,10 @@ const Ordonnance = () => {
     const [isModalVisible , setIsModalVisible] = useState(false);
     const [posologieButtonStatus , setPosologieButtonStatus] = useState(true);
     const [quantity , setQuantity] = useState(1);
-    const [canPrint , setCanPrint] = useState(false);
+    const [isPrintDisabled , setIsPrintDisabled] = useState(true);
     const [numCons , setNumCons] = useState(null);
     //const [selectMedicamentsListLoading , setSelectMedicamentsListLoading ] = useState(false);
+
     
     const save = () => {
         form
@@ -67,7 +68,7 @@ const Ordonnance = () => {
                             .then((response)=>{
                                 if (response?.data?.Saved) {
                                     message.success("Nouvelle ordonnance ajoutée avec succès");
-                                    setCanPrint(true)
+                                    setIsPrintDisabled(false);
                                     setNumCons(response?.data?.Saved)
                                 }
                                
@@ -88,8 +89,8 @@ const Ordonnance = () => {
                 default:
                     break;
             }
-            //form.resetFields();  
-            //navigate(-1);  
+            form.resetFields();  
+            navigate(-1);  
         })
         .catch((info) => {
             console.log('Validate Failed:', info);
@@ -110,22 +111,13 @@ const Ordonnance = () => {
     const selectMedicamentsListLoading = medicamentsFetched.isLoading;
     
     useEffect(()=>{
-        if (editPrescription?.listActes?.length !== 0) {
-            setCanPrint(true)
+        if (editPrescription === null) {
+            setIsPrintDisabled(true)
+        }else if (editPrescription?.listActes?.length !== 0){
+            setIsPrintDisabled(false)
         }
-        
-        //getListMedicaments();
+    },[editPrescription])
 
-        // if (prescription.medecin !== userConnected.username) {
-        //     navigate(-1);
-        // }
-        
-        // return () => {
-        //     sessionStorage.removeItem('editPrescription')
-        // }
-        
-    },[])
-    
 
     return(
         <Card>
@@ -136,12 +128,9 @@ const Ordonnance = () => {
             
             <Flex align='center' justify='space-between' >
                 <Title level={4} >Prescription ordonnance du patient N° {currentPatient.num_patient} / {currentPatient.prenom_patient} {currentPatient.nom_patient} </Title>  
-
-                {/* <PrintButton onPrint={null}  /> */}
-                <Button type="primary" onClick={()=>{printPDF(`/api/Print/smed/Prescription/${numCons}/ordonnance`)}} disabled={!canPrint} > Imprimer </Button>
+                <Button type="primary" onClick={()=>{printPDF(`/api/Print/smed/Prescription/${numCons}/ordonnance`)}} disabled={isPrintDisabled} > Imprimer </Button>
             </Flex>
 
-            
             <br/>
 
             <Form
@@ -158,16 +147,14 @@ const Ordonnance = () => {
                             }
                         }); 
                     }
-
                     if (changedValues.qte_presc) {
                         setQuantity(changedValues.qte_presc)
                     }
-                    
                 }}
             >
             
                 <Row gutter={[24,24]} align={"middle"} >
-                    <Col xs={24} sm={24} md={4} lg={4} xl={4} >
+                    <Col xs={24} sm={24} md={5} lg={5} xl={5} >
                         <Form.Item 
                             label="Date Ordonnance"
                             name="datepresc" 
@@ -183,7 +170,7 @@ const Ordonnance = () => {
                         </Form.Item>
                     </Col>
                     
-                    <Col xs={24} sm={24} md={8} lg={8} xl={8} >
+                    <Col xs={24} sm={24} md={7} lg={7} xl={7} >
                         <Form.Item 
                             label="Médicament"
                             name="medicament" 

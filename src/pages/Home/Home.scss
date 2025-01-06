@@ -1,8 +1,19 @@
+.homeWrapper{
+    background-image: url("./../../assets/home-bg.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+}
 
+.homeContainer {
+    width: 100%;
+    min-height: 100vh;
+    background-color: rgba(0, 0, 0, 0.2);
+}
 .container{
     width: 100%;
     padding: 2em 8em;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 10px;
 }

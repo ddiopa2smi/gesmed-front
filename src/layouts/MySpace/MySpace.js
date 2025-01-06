@@ -58,6 +58,7 @@ import {
   Tag,
   Space,
   Affix,
+  Popover,
 } from "antd";
 //import { setLightMode , setDarkMode } from './../../reducers/theme.reducers';
 import { TbMoonStars } from "react-icons/tb";
@@ -75,6 +76,7 @@ import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
 import useMenu from "../../utils/hooks/useMenu.tsx";
 import { ServiceType } from "../../utils/types/types.ts";
 import { Footer } from "antd/es/layout/layout";
+import { images } from "../../constants/app.constants.js";
 const { Header, Sider, Content } = Layout;
 const { Countdown } = Statistic;
 const { Text, Title } = Typography;
@@ -102,7 +104,6 @@ const MySpace = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [open, setOpen] = useState(false);
-  const [openDrawer, setOpenDrawer] = useState(false);
   //const [isDark , setisDark] = useState(useSelector((state)=>state.themeRdx.isDark));
   const [currentSelectedKeys, setCurrentSelectedKeys] = useState(null);
   //const [deadline , setDeadline] = useState(Date.now() + 1000 * 60 * 30); // 30min
@@ -164,14 +165,14 @@ const MySpace = () => {
         border: "none",
         fontSize: 14,
         width: "100%",
-        padding : "0px 12px",
+        padding: "0px 12px",
         background: "transparent",
       }}
       items={[
         {
           key: "grp",
           label: (
-            <Text strong>
+            <Text style={{ color: "var(--app-color)", fontSize: 16  }} strong>
               {serviceType === ServiceType.ADMINISTRATION
                 ? "ADMINISTRATION"
                 : `SERVICE ${serviceType}`}
@@ -199,27 +200,91 @@ const MySpace = () => {
     console.log(location.pathname.includes("dossier-medical"));
     if (location.pathname.includes("myspace")) {
       setCurrentSelectedKeys("dashboard");
-    }  
+    }
     if (location.pathname.includes("dashboard")) {
       setCurrentSelectedKeys("dashboard");
-    } 
+    }
     if (location.pathname.includes("rendez-vous")) {
       setCurrentSelectedKeys("rendez-vous");
-    } 
-    if (location.pathname.includes("agenda")) {
-      setCurrentSelectedKeys("agenda");
-    } 
+    }
+    if (location.pathname.includes("mon-agenda")) {
+      setCurrentSelectedKeys("mon-agenda");
+    }
     if (location.pathname.includes("dossier-medical")) {
       setCurrentSelectedKeys("patients");
-    } 
+    }
     if (location.pathname.includes("patients")) {
+      setCurrentSelectedKeys("patients");
+    }
+
+    if (location.pathname.includes("consultation")) {
       setCurrentSelectedKeys("patients");
     }
     if (location.pathname.includes("consultations")) {
       setCurrentSelectedKeys("consultations");
-    } 
-    if (location.pathname.includes("consultation")) {
+    }
+    if (location.pathname.includes("prescriptions-groupes")) {
+      setCurrentSelectedKeys("prescriptions-groupes");
+    }
+    if (location.pathname.includes("infos-cliniques")) {
       setCurrentSelectedKeys("patients");
+    }
+    if (location.pathname.includes("ordonnance")) {
+      setCurrentSelectedKeys("patients");
+    }
+    if (location.pathname.includes("analyse")) {
+      setCurrentSelectedKeys("patients");
+    }
+    if (location.pathname.includes("imagerie")) {
+      setCurrentSelectedKeys("patients");
+    }
+    if (location.pathname.includes("infirmerie")) {
+      setCurrentSelectedKeys("patients");
+    }
+    if (location.pathname.includes("consultations")) {
+      setCurrentSelectedKeys("consultations");
+    }
+    if (location.pathname.includes("visites")) {
+      setCurrentSelectedKeys("visites");
+    }
+    if (location.pathname.includes("dossier-accident-travail")) {
+      setCurrentSelectedKeys("dossier-accident-travail");
+    }
+    if (location.pathname.includes("gestion-fiche-produits")) {
+      setCurrentSelectedKeys("gestion-fiche-produits");
+    }
+    if (location.pathname.includes("fiche-produit")) {
+      setCurrentSelectedKeys("gestion-fiche-produits");
+    }
+    if (location.pathname.includes("commandes-produits")) {
+      setCurrentSelectedKeys("commandes-produits");
+    }
+    if (location.pathname.includes("new-commande-produit")) {
+      setCurrentSelectedKeys("commandes-produits");
+    }
+    if (location.pathname.includes("entrees-produits")) {
+      setCurrentSelectedKeys("entrees-produits");
+    }
+    if (location.pathname.includes("reception-commande")) {
+      setCurrentSelectedKeys("entrees-produits");
+    }
+    if (location.pathname.includes("sorties_produits")) {
+      setCurrentSelectedKeys("sorties_produits");
+    }
+    if (location.pathname.includes("mouvements-sorties")) {
+      setCurrentSelectedKeys("mouvements-sorties");
+    }
+    if (location.pathname.includes("situation-stocks")) {
+      setCurrentSelectedKeys("situation-stocks");
+    }
+    if (location.pathname.includes("new-mouvement-sortie")) {
+      setCurrentSelectedKeys("sorties_produits");
+    }
+    if (location.pathname.includes("saisie-inventaire")) {
+      setCurrentSelectedKeys("saisie-inventaire");
+    }
+    if (location.pathname.includes("fournisseurs")) {
+      setCurrentSelectedKeys("fournisseurs");
     }
     // switch (route) {
     //   case "myspace":
@@ -331,7 +396,6 @@ const MySpace = () => {
     //     setCurrentSelectedKeys(route);
     //     break;
     // }
-
 
     const pathname = location.pathname;
     //console.log(location);
@@ -454,7 +518,8 @@ const MySpace = () => {
             //width={screens.xxl ? 300 : "20%"}
           >
             <Flex justify="center" align="center" style={{ height: "56px" }}>
-              <Text strong>GESMED</Text>
+              {/* <Text strong>GESMED</Text> */}
+              <img src={images.logoWithoutBg}  height={56} style={{objectFit:"cover"}} />
             </Flex>
             {menu}
           </Sider>
@@ -535,20 +600,23 @@ const MySpace = () => {
                         onClick={() => handleDarkMode()}
                       />
                     </Tooltip>
-                  )}{" "}
-                  &nbsp;&nbsp;&nbsp;
-                  <Tooltip placement="bottomRight" title={<>Notifications</>}>
-                    <Badge count={5}>
-                      <Button
-                        type="text"
-                        icon={<BellOutlined style={{ fontSize: 24 }} />}
-                        onClick={() => {
-                          setOpenDrawer(true);
-                        }}
-                      />
-                    </Badge>
-                  </Tooltip>
-                  &nbsp;&nbsp;&nbsp;
+                  )}
+
+                  <Popover
+                    content={<>Aucune notification </>}
+                    title="Notifications"
+                    trigger="click"
+                    placement="bottom"
+                  >
+                    <Tooltip placement="bottomRight" title={<>Notifications</>}>
+                      <Badge count={0}>
+                        <Button
+                          type="text"
+                          icon={<BellOutlined style={{ fontSize: 24 }} />}
+                        />
+                      </Badge>
+                    </Tooltip>
+                  </Popover>
                   <Dropdown
                     menu={{
                       items: profilMenu,
@@ -574,7 +642,6 @@ const MySpace = () => {
                       </Text>
                     </Button>
                   </Dropdown>
-                  &nbsp;
                 </div>
               </div>
             </Header>
@@ -619,18 +686,19 @@ const MySpace = () => {
             style={{
               textAlign: "center",
               position: "sticky",
-              alignItems:"center",
-              bottom : 0,
+              alignItems: "center",
+              bottom: 0,
               zIndex: 5,
-              padding : 8,
+              padding: 8,
               backgroundColor: isDark
                 ? "rgba(78, 78, 78, 0.3)"
                 : "rgba(255,255,255, 0.7)",
-              backdropFilter : "blur(10px)",
+              backdropFilter: "blur(10px)",
             }}
           >
             <Text>
-              Gesmed ©{new Date().getFullYear()} réalisé par <a
+              Gesmed ©{new Date().getFullYear()} réalisé par{" "}
+              <a
                 style={{ color: "var(--app-color)" }}
                 href="https://a2smi.tech/"
                 target="_blank"
@@ -638,21 +706,8 @@ const MySpace = () => {
               >
                 A2SMI
               </a>
-              
             </Text>
           </Footer>
-
-          <Drawer
-            title="Mes notifications"
-            placement="right"
-            onClose={() => {
-              setOpenDrawer(false);
-            }}
-            open={openDrawer}
-          >
-            {/* <Text>Aucune notification</Text> */}
-            <Text>Vous avez une radiologie en attente</Text>
-          </Drawer>
         </Layout>
       </Layout>
     </div>

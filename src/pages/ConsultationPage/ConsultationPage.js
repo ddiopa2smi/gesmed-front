@@ -17,22 +17,22 @@ function ConsultationPage() {
 
   switch (serviceType) {
     case ServiceType.MEDICAL:
-      renderConsultation = <ConsultationMedical />;
+      renderConsultation = <ConsultationMedical numRV={numRv} numPatient={numPatient} />;
       break;
     case ServiceType.DENTAIRE:
-      renderConsultation = <ConsultationDentaire />;
+      renderConsultation = <ConsultationDentaire numRV={numRv} numPatient={numPatient} />;
       break;
     case ServiceType.GYNECOLOGIE:
-      renderConsultation = <ConsultationGynecologie />;
+      renderConsultation = <ConsultationGynecologie numRV={numRv} numPatient={numPatient} />;
       break;
     case ServiceType.INFIRMERIE:
-      renderConsultation = <ConsultationInfirmerie />;
+      renderConsultation = <ConsultationInfirmerie numRV={numRv} numPatient={numPatient} />;
       break;
     case ServiceType.HOSPITALISATION:
-      renderConsultation = <ConsultationHospitalisation />;
+      renderConsultation = <ConsultationHospitalisation numRV={numRv} numPatient={numPatient} />;
       break;
     case ServiceType.RADIOLOGIE:
-      renderConsultation = <ConsultationRadiologie />;
+      renderConsultation = <ConsultationRadiologie numRV={numRv} numPatient={numPatient} />;
       break;
     default:
       break;

@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -16,15 +21,21 @@ import useFetch from "../../utils/hooks/useFetch";
 import { endpoints } from "../../constants/endpoints.constants";
 import { Can } from "../../utils/contexts/AbilityContext";
 import BackButton from "../../components/common/BackButton/BackButton";
+import useSearch from "../../utils/hooks/useSearch";
 
 const { Title } = Typography;
 
 function Accounts() {
   const navigate = useNavigate();
+  const { getColumnSearchProps } = useSearch();
   const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
   const [open, setOpen] = useState(false);
-  const { data, dataCopy, setDataCopy, isLoading , onRefresh } = useFetch(
+  const { data, dataCopy, setDataCopy, isLoading, onRefresh } = useFetch(
     endpoints.users.LIST
+  );
+
+  const { data: services_medicaux } = useFetch(
+    endpoints.services_medicaux.LIST
   );
 
   const onAdd = () => {
@@ -46,113 +57,124 @@ function Accounts() {
 
   return (
     <Card>
-        
-        <Flex justify="space-between" align="center" flex={"auto"} wrap="wrap">
-            <Title level={4}>Liste du personnel</Title>
-            <Space>
-                <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} />
-                <Can I="create" an="account">
-                    <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-                    Nouveau
-                    </Button>
-                </Can>
-            </Space>
-        </Flex>
+      <Flex justify="space-between" align="center" flex={"auto"} wrap="wrap" style={{marginBottom: 24}}>
+        <Title level={4} >Liste du personnel</Title>
+        <Space>
+          <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} />
+          <Can I="create" an="account">
+            <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+              Nouveau
+            </Button>
+          </Can>
+        </Space>
+      </Flex>
 
-        <>
+      <>
+        <DataTable
+          tableLoading={isLoading}
+          dataSource={data}
+          dataSourceCopy={dataCopy.filter(
+            (element) =>
+              element?.login !== userConnected.login && element?.perim === "MED"
+          )}
+          setDataSourceCopy={setDataCopy}
+          columns={[
+            {
+              title: "Login",
+              dataIndex: "login",
+              key: "login",
+              ...getColumnSearchProps("login"),
+            },
+            {
+              title: "Nom complet",
+              dataIndex: "username",
+              key: "username",
+              ...getColumnSearchProps("username"),
+              sorter: (a, b) =>
+                a.username.charCodeAt(0) - b.username.charCodeAt(0),
+            },
             
-            <DataTable
-            tableLoading={isLoading}
-            dataSource={data}
-            dataSourceCopy={dataCopy.filter(
-                (element) => element?.login !== userConnected.login && element?.perim === "MED"
-            )}
-            setDataSourceCopy={setDataCopy}
-            columns={[
-                {
-                title: "Login",
-                dataIndex: "login",
-                key: "login",
-                },
-                {
-                title: "Nom complet",
-                dataIndex: "username",
-                key: "username",
-                sorter: (a, b) =>
-                    a.username.charCodeAt(0) - b.username.charCodeAt(0),
-                },
-                {
-                title: "Email",
-                dataIndex: "emailaddress",
-                key: "emailaddress",
-                },
-                {
-                title: "Etat",
-                dataIndex: "etat",
-                key: "etat",
-                render: (record) => (
-                    <div className="table-data">
-                    {record === true ? (
-                        <Tag color="green">Actif</Tag>
-                    ) : (
-                        <Tag color="red">Non actif</Tag>
-                    )}
-                    </div>
-                ),
-                },
-                {
-                title: "Profil",
-                dataIndex: "role_name",
-                key: "role_name",
-                },
-                {
-                title: "Service",
-                dataIndex: "lib_service",
-                key: "lib_service",
-                },
-                {
-                render: (record) => (
-                    <Flex align="center">
-                    <Space size="middle">
-                        <Can I="update" an="account">
-                        <Tooltip title="Editer">
-                            <Button
-                            type="link"
-                            icon={<EditOutlined />}
-                            onClick={() => {
-                                onEdit(record);
-                            }}
-                            />
-                        </Tooltip>
-                        </Can>
-                        <Can I="delete" an="account">
-                        <Tooltip title="Supprimer">
-                            <Button
-                            type="link"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => {
-                                onDelete(record);
-                            }}
-                            />
-                        </Tooltip>
-                        </Can>
-                    </Space>
-                    </Flex>
-                ),
-                },
-            ]}
-            />
-        </>
+            {
+              title: "Email",
+              dataIndex: "emailaddress",
+              key: "emailaddress",
+              ...getColumnSearchProps("emailaddress"),
+            },
+            {
+              title: "Etat",
+              dataIndex: "etat",
+              key: "etat",
+              render: (record) => (
+                <div className="table-data">
+                  {record === true ? (
+                    <Tag color="green">Actif</Tag>
+                  ) : (
+                    <Tag color="red">Non actif</Tag>
+                  )}
+                </div>
+              ),
+            },
+            {
+              title: "Profil",
+              dataIndex: "role_name",
+              key: "role_name",
+            },
+            {
+              title: "Service",
+              dataIndex: "lib_service",
+              key: "lib_service",
+              filters: services_medicaux.map((item) => {
+                return {
+                  text: item?.lib_service,
+                  value: item?.lib_service,
+                };
+              }),
+              onFilter: (value, record) =>
+                record.lib_service.indexOf(value) === 0,
+            },
+            {
+              render: (record) => (
+                <Flex align="center">
+                  <Space size="middle">
+                    <Can I="update" an="account">
+                      <Tooltip title="Editer">
+                        <Button
+                          type="link"
+                          icon={<EditOutlined />}
+                          onClick={() => {
+                            onEdit(record);
+                          }}
+                        />
+                      </Tooltip>
+                    </Can>
+                    <Can I="delete" an="account">
+                      <Tooltip title="Supprimer">
+                        <Button
+                          type="link"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => {
+                            onDelete(record);
+                          }}
+                        />
+                      </Tooltip>
+                    </Can>
+                  </Space>
+                </Flex>
+              ),
+            },
+          ]}
+        />
+      </>
 
-        <Modal
-            open={open}
-            onCancel={() => {
-            setOpen(false);
-            }}
-            footer={null}
-            destroyOnClose
-        ></Modal>
+      <Modal
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+        }}
+        footer={null}
+        destroyOnClose
+      ></Modal>
     </Card>
   );
 }

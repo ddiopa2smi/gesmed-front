@@ -26,6 +26,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
   const [benefLuiMeme, setBenefLuiMeme] = useState(null);
   const { data: listTypePatients, isLoading: listTypePatientsLoading } =
     useFetch(endpoints.patients.LIST_TYPE);
+    
   const { data : listDepartements } = useFetch(endpoints.departements.LIST);
 
   const save = () => {
@@ -42,8 +43,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             console.log(values);
             postActions(endpoints.patients.ADD, values)
               .then((response) => {
-                //setFormLoading(false);
-
                 if (response.data.Added) {
                   message.success("Nouveau patient ajouté avec succès");
 
@@ -54,16 +53,8 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                   message.warning("Patient déja ajouté");
                 }
               })
-              .catch(() => {
-                message.error(
-                  "Une erreur est survenue lors de l'ajout du Patient"
-                );
-              })
+              
               .finally(() => {
-                // setFormLoading(false)
-                // setOpen(false);
-                // form.resetFields();
-                // onRefresh();
                 setFormLoading(false);
               });
 
@@ -76,12 +67,15 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
               ? currentRecord.num_patient
               : null;
             putActions(endpoints.patients.UPDATE, values).then((response) => {
-              setFormLoading(false);
+              
               message.success("Opération éffectuée avec succès");
               setOpen(false);
               form.resetFields();
               onRefresh();
-            });
+            })
+            .finally(()=>{
+              setFormLoading(false);
+            })
             setOpen(false);
             break;
           default:
@@ -90,7 +84,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
-      });
+      })
   };
 
   const handleMatricule = (e) => {
@@ -126,6 +120,20 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
     };
     searchPatientByMatricule(matriculeToSearch);
   }, [matriculeToSearch]);
+
+  useEffect(() => {
+    if (currentRecord !== null) {
+      form.setFieldsValue(currentRecord);
+      
+      if (currentRecord.code_patient === 2 || currentRecord.code_patient === 3 ) {
+        form.setFieldValue("code_patient" , 1);
+      }
+      form.setFieldValue("datenaiss_patient", dayjs(new Date(currentRecord.datenaiss_patient)))
+      
+    }
+  }, [currentRecord])
+  
+  
 
   return (
     <Form
@@ -188,7 +196,9 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
               }}
               loading={listTypePatientsLoading}
             >
-              {listTypePatients.map(
+              {listTypePatients
+              .filter((item)=> item?.code_patient !== 2 && item?.code_patient !== 3)
+              .map(
                 (
                   item,
                   key //item.code_pat !== 1 &&
@@ -205,7 +215,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
         {
           // Must fixed the search of patients when enter the matricule later
           //Fixed
-          typePatient === TypePatient.PERMANENT && (
+          (typePatient === TypePatient.PERMANENT || typePatient === TypePatient.SAISONNIER) && (
             <>
               <Col xs={24} sm={4} md={4} lg={4} xl={4}>
                 <Form.Item
@@ -470,7 +480,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                 message: "Sélection obligatoire",
               },
             ]}
-            initialValue={currentRecord?.sexe_patient || "MA"}
+            //initialValue={currentRecord?.sexe_patient || "MA"}
           >
             <Select
               style={{ width: "100%", background: "transparent" }}
@@ -566,10 +576,10 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                 message: "Champ obligatoire",
               },
             ]}
-            initialValue={
-              currentRecord !== null &&
-              dayjs(new Date(currentRecord?.datenaiss_patient))
-            }
+            // initialValue={
+            //   currentRecord !== null &&
+            //   dayjs(new Date(currentRecord?.datenaiss_patient))
+            // }
           >
             <DatePicker placeholder="choisir la date" format="DD/MM/YYYY" />
           </Form.Item>

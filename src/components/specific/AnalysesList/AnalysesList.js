@@ -1,146 +1,198 @@
-import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Modal, Row, Segmented, Select, Space, Tooltip, Typography } from 'antd'
-import React, { useState } from 'react'
-import DataTable from '../../common/DataTable/DataTable';
-import useFetch from '../../../utils/hooks/useFetch';
-import useSearch from '../../../utils/hooks/useSearch';
-import ReloadButton from '../../common/ReloadButton/ReloadButton';
-import AdvancedSearchButton from '../../common/AdvancedSearchButton/AdvancedSearchButton';
-import FormFooter from '../../common/FormFooter/FormFooter';
+import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  Col,
+  Flex,
+  Modal,
+  Row,
+  Segmented,
+  Select,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+import React, { useState } from "react";
+import DataTable from "../../common/DataTable/DataTable";
+import useFetch from "../../../utils/hooks/useFetch";
+import useSearch from "../../../utils/hooks/useSearch";
+import ReloadButton from "../../common/ReloadButton/ReloadButton";
+import AdvancedSearchButton from "../../common/AdvancedSearchButton/AdvancedSearchButton";
+import FormFooter from "../../common/FormFooter/FormFooter";
+import { endpoints } from "../../../constants/endpoints.constants";
+import DetailsPrescription from "../DetailsPrescription/DetailsPrescription";
+import { ServiceType } from "../../../utils/types/types.ts";
+import { formatDateTime } from "../../../utils/helpers.js";
 
-const {Option} = Select;
-const {Title} = Typography;
+const { Option } = Select;
+const { Title, Text } = Typography;
 function AnalysesList() {
-    const [segmentedValue , setSegmentedValue] = useState("instance");
-    const {data , dataCopy, setDataCopy , isLoading , error , onRefresh} = useFetch();
-    const {getColumnSearchProps} = useSearch()
-    const [open , setOpen] = useState(false);
-    const [operationType , setOperationType] = useState("");
-    const [currentRecord , setCurrentRecord] = useState(null);
+  const [segmentedValue, setSegmentedValue] = useState("Non");
+  const { data, dataCopy, setDataCopy, isLoading, error, onRefresh } = useFetch(
+    endpoints.prescriptions.LIST
+  );
+  const { getColumnSearchProps } = useSearch();
+  const [open, setOpen] = useState(false);
+  const [operationType, setOperationType] = useState("");
+  const [currentRecord, setCurrentRecord] = useState(null);
 
-    const onDisplayAdvancedSearch = () => {
-        setOperationType("ads");
-        setOpen(true);
-    }
-    
-    return (
-        <Card >
-            <Flex justify="space-between" align="center" >
-                <Title level={4} > Liste des analyses </Title>
-                <Space>
-                    {/* <Tooltip title="Recherche avancée" >
-                        <Button type='text' shape="circle" icon={<SearchOutlined/>} onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
-                    </Tooltip>  */}
-                    <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp;
-                    <ReloadButton onRefresh={onRefresh} /> &nbsp;&nbsp;
-                    <Segmented 
-                        defaultValue={segmentedValue}
-                        options={[
-                            {
-                                value : "instance",
-                                label : "En attente"
-                            },
-                            {
-                                value : "servis",
-                                label : "Cloturées"
-                            }
-                        ]}
-                        
-                        onChange={(value)=>{
-                            setSegmentedValue(value)
-                        }}
-                    
+  const onDisplayAdvancedSearch = () => {
+    setOperationType("ads");
+    setOpen(true);
+  };
+
+  return (
+    <Card>
+      <Flex justify="space-between" align="center">
+        <Title level={4}> Liste des analyses </Title>
+        <Space>
+          <AdvancedSearchButton onClick={onDisplayAdvancedSearch} />{" "}
+          &nbsp;&nbsp;
+          <ReloadButton onRefresh={onRefresh} /> &nbsp;&nbsp;
+          <Segmented
+            defaultValue={segmentedValue}
+            options={[
+              {
+                value: "Non",
+                label: "En attente",
+              },
+              {
+                value: "Oui",
+                label: "Cloturées",
+              },
+            ]}
+            onChange={(value) => {
+              setSegmentedValue(value);
+            }}
+          />
+        </Space>
+      </Flex>
+
+      <br />
+
+      <DataTable
+        dataSource={data.filter((element) => element.code === "ANA")}
+        dataSourceCopy={
+          segmentedValue === "Non"
+            ? dataCopy.filter(
+                (element) => element.code === "ANA" && element.isdone === "Non"
+              )
+            : dataCopy.filter(
+                (element) => element.code === "ANA" && element.isdone === "Oui"
+              )
+        }
+        setDataSourceCopy={setDataCopy}
+        columns={[
+          {
+            title: "N° ",
+            dataIndex: "numpresc",
+            key: "numpresc",
+            ...getColumnSearchProps("numpresc"),
+          },
+          {
+            title: "Date prescription",
+            dataIndex: "datepresc",
+            key: "datepresc",
+            render: (record) => (
+              <div className="table-data">{formatDateTime(record)}</div>
+            ),
+          },
+          {
+            title: "N°",
+            dataIndex: "num_patient",
+            key: "num_patient",
+            ...getColumnSearchProps("num_patient"),
+          },
+          {
+            title: "Patient",
+            dataIndex: "patient",
+            key: "patient",
+            ...getColumnSearchProps("patient"),
+          },
+
+          {
+            title: "Prescripteur",
+            dataIndex: "username",
+            key: "username",
+            ...getColumnSearchProps("username"),
+          },
+          {
+            title: "Date effet",
+            dataIndex: "date_effet",
+            key: "date_effet",
+            ...getColumnSearchProps("date_effet"),
+            render: (record) => <Text> {formatDateTime(record)} </Text>,
+          },
+          {
+            title: "Effectué par",
+            dataIndex: "effectue_par",
+            key: "effectue_par",
+            ...getColumnSearchProps("effectue_par"),
+          },
+          {
+            title: "Statut",
+            dataIndex: "isdone",
+            key: "isdone",
+            ...getColumnSearchProps("isdone"),
+            render: (record) => (
+              <Tag color={record === "Oui" ? "green" : "red"}>
+                {record === "Oui" ? "Cloturée" : "En attente"}
+              </Tag>
+            ),
+          },
+          {
+            render: (record) => (
+              <Flex align="center">
+                <Space size="middle">
+                  {record.isdone === "Non" && (
+                    <Button
+                      type="text"
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        setCurrentRecord(record);
+                        setOpen(true);
+                      }}
                     />
+                  )}
                 </Space>
-            </Flex>
+              </Flex>
+            ),
+          },
+        ]}
+      />
 
-            <br/>
-
-            <DataTable 
-                dataSource={data}
-                dataSourceCopy = {segmentedValue === "instance" ? dataCopy.filter((element)=> element.effectue === false) : dataCopy.filter((element)=> element.effectue === true)}
-                setDataSourceCopy={setDataCopy}
-                columns={[
-                    {
-                        title: 'N° ',
-                        dataIndex: 'num_ana',
-                        key: 'num_ana',
-                        ...getColumnSearchProps('num_ana')
-                    },
-                    {
-                        title: 'Analyse',
-                        dataIndex: 'analyse',
-                        key: 'analyse',
-                        ...getColumnSearchProps('analyse')
-                    },
-                    {
-                        title: 'Motif',
-                        dataIndex: 'motif',
-                        key: 'motif',
-                        ...getColumnSearchProps('motif')
-                    },
-                ]}
-            />
-
-            <Modal 
-                // styles={{
-                //     header : {
-                //         background : "red"
-                //     }
-                // }}
-                title={  
-                    (operationType === "ads" && "Recherche avancée") || 
-                    (operationType === "exp" && "Exporter le document")  
-                } 
-                open={open} 
-                onCancel={()=>{
-                    setOpen(false);
-                    setCurrentRecord(null);
-                }}
-                footer={null}
-                destroyOnClose={operationType=== "ads"? false : true}
-            >
-                {/* Gérer la recherche avancée ici */}
-                <Select
-                    style={{width:'100%',background:"transparent"}}
-                    showSearch
-                    placeholder="Période"
-                    optionFilterProp="children" 
-                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                    //onChange={(value)=>{setTypePatient(value);}}
-                    //loading={null}
-                >     
-                    <Option key={"1"}  value={"today"} > Aujourd'hui </Option>
-                    <Option key={"2"}  value={"week"} > Dans la semaine </Option>
-                    <Option key={"3"}  value={"trimestre"} > Dans 3 mois </Option>
-                    <Option key={"4"}  value={"semestre"} > Dans 6 mois </Option>
-                    <Option key={"5"}  value={"annual"} > Cette année </Option>
-                </Select>
-                <br/>
-                <br/>
-                <FormFooter />
-                {/* {
-                    (operationType === "ads") && 
-                    <PatientsAdvancedSearch 
-                        dataSource={patientsList}
-                        dataSourceCopy={dataCopy}
-                        setDataSourceCopy={setDataCopy}
-                        setOpen={setOpen}
-                    />
-                }
-
-                {
-                    (operationType === "exp") && 
-                    <ExportFile 
-                        title="Liste des patients"
-                        data={dataCopy}
-                        setOpen={setOpen}
-                    />
-                } */}
-                
-            </Modal>
-        </Card>
-    )
+      <Modal
+        style={{ top: 20 }}
+        styles={{
+          header: { padding: "12px 24px" },
+          footer: { padding: "12px 24px" },
+          content: { margin: 0, padding: 0 },
+          body: {
+            overflow: "auto",
+            minHeight: "50vh",
+            maxHeight: "80vh",
+            padding: "12px 24px",
+          },
+        }}
+        width={1000}
+        title={`Analyse N° ${currentRecord?.numpresc}`}
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          setCurrentRecord(null);
+        }}
+        footer={null}
+      >
+        <DetailsPrescription
+          prescriptionItem={currentRecord}
+          serviceType={ServiceType.ANALYSE}
+          setOpen={setOpen}
+          onRefresh={onRefresh}
+        />
+      </Modal>
+    </Card>
+  );
 }
 
-export default AnalysesList
+export default AnalysesList;

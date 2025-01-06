@@ -8,6 +8,16 @@ export const formatDate = (record) => {
     return (record === null || record === "") ? "" : new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(record));
 }
 
+export const formatDateTime = (record) => {
+    if (record === null || record === "" || record === undefined || record === "0001-01-01T00:00:00") {
+        return "";
+    }
+    const date = new Date(record);
+    const formattedDate = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+    const formattedTime = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(date);
+    return `${formattedDate} - ${formattedTime}`;
+};
+
 export const deletePopup =() => {
     return Swal.fire({
         title: 'Êtes-vous sûr ?',
@@ -211,5 +221,46 @@ export const generateRandomCode = () => {
     let randomUniqueChaine = uuidv4();
     let result = randomUniqueChaine.toUpperCase().replaceAll("-","");
     return `PH${result}`;
+}
+
+export const getImcMessage = (imc) => {
+    let result = "";
+    if (imc<18.5) {
+        result += "Insuffisance pondérale (maigreur)"
+    }
+    else if (imc>= 18.5 && imc< 25) {
+        result += "Corpulence normale";
+    }
+    else if (imc>= 25 && imc< 30) {
+        result += "Surpoids";
+    }
+    else if (imc>= 30 && imc< 35) {
+        result += "Obésité modérée";
+    }
+    else if (imc>= 35 && imc< 40) {
+        result += "Obésité sévère";
+    }
+    else if (imc >= 40) {
+        result += "Obésité morbide ou massive";
+    } 
+
+    return result;
+}
+
+
+export const serviceNoAccess =() => {
+    return Swal.fire({
+        title: 'Alerte système',
+        text: "Votre profil ne vous permet pas d'accéder à ce service, veuillez contacter l'administrateur du système. Merci!",
+        icon: 'warning',
+        iconColor : 'var(--app-color)' ,
+        //showCancelButton: true,
+        //cancelButtonColor: '#d33',
+        //cancelButtonText:'Non',
+        //confirmButtonColor: 'var(--app-color)',
+        //confirmButtonText: 'Oui' ,
+        //background: colorBgElevated ,
+        //color: colorTextBase ,
+    })
 }
   

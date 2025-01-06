@@ -34,10 +34,10 @@ function App() {
                 itemSelectedBg : PRIMARY_COLOR ,
                 itemSelectedColor : '#ffff'
               },
-              Menu : {
-                itemSelectedBg : isDark ? PRIMARY_COLOR  : "hsl(145, 63%, 95%)",
-                itemSelectedColor : isDark ? "#fff"  : PRIMARY_COLOR  ,
-              }
+              // Menu : {
+              //   itemSelectedBg : isDark ? PRIMARY_COLOR  : "#ffdb2d", // "hsl(145, 63%, 95%)",
+              //   itemSelectedColor : isDark ? "#fff"  : PRIMARY_COLOR  ,
+              // }
             }
         }}
       >

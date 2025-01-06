@@ -16,8 +16,17 @@ import { logoutPopup } from "../../utils/helpers";
 import { postActions } from "../../actions/actions";
 import { endpoints } from "../../constants/endpoints.constants";
 import { LogoutOutlined, SettingOutlined } from "@ant-design/icons";
-import { codeServices } from "../../constants/app.constants";
+import { codeServices, images } from "../../constants/app.constants";
 import { ServiceType } from "../../utils/types/types.ts";
+import { FaHome, FaTooth, FaUserNurse } from "react-icons/fa";
+import { MdLocalHospital } from "react-icons/md";
+import { MdAdminPanelSettings } from "react-icons/md";
+import { MdLocalPharmacy } from "react-icons/md";
+import { FaTruckMedical } from "react-icons/fa6";
+import { FaVirus } from "react-icons/fa";
+import { TbGenderAndrogyne } from "react-icons/tb";
+import { IoMdQrScanner } from "react-icons/io";
+
 const { Title } = Typography;
 
 function Home() {
@@ -36,6 +45,7 @@ function Home() {
           JSON.stringify(ServiceType.ACCUEIL)
         );
       },
+      icon : <FaHome size={24} />
     },
     {
       id: 1,
@@ -50,6 +60,7 @@ function Home() {
           JSON.stringify(ServiceType.MEDICAL)
         );
       },
+      icon : <MdLocalHospital size={24} />
     },
     {
       id: 2,
@@ -64,6 +75,7 @@ function Home() {
           JSON.stringify(ServiceType.PHARMACIE)
         );
       },
+      icon : <MdLocalPharmacy size={24} />
     },
     {
       id: 3,
@@ -78,6 +90,7 @@ function Home() {
           JSON.stringify(ServiceType.DENTAIRE)
         );
       },
+      icon : <FaTooth size={24} />
     },
     {
       id: 4,
@@ -92,11 +105,12 @@ function Home() {
           JSON.stringify(ServiceType.GYNECOLOGIE)
         );
       },
+      icon : <TbGenderAndrogyne size={24} />
     },
     {
       id: 5,
       label: "Service Analyse",
-      code: codeServices.ANALYSE,
+      code: codeServices.BIO_MEDICAL, //codeServices.ANALYSE,
       cover: analyse_image,
       onClick: () => {
         navigate("/espace-analyse");
@@ -106,6 +120,7 @@ function Home() {
           JSON.stringify(ServiceType.ANALYSE)
         );
       },
+      icon : <FaVirus size={24} />
     },
     {
       id: 6,
@@ -120,6 +135,7 @@ function Home() {
           JSON.stringify(ServiceType.RADIOLOGIE)
         );
       },
+      icon : <IoMdQrScanner size={24} />
     },
 
     {
@@ -135,6 +151,8 @@ function Home() {
           JSON.stringify(ServiceType.HOSPITALISATION)
         );
       },
+      icon : <FaTruckMedical size={24} />
+
     },
     {
       id: 9,
@@ -149,6 +167,23 @@ function Home() {
           JSON.stringify(ServiceType.INFIRMERIE)
         );
       },
+      icon: <FaUserNurse size={24} />
+    },
+    {
+      id: 10,
+      label: "Administration",
+      code: codeServices.ADMINISTRATION,
+      cover: administration_image,
+      onClick: () => {
+        navigate("/espace-administration/settings");
+        sessionStorage.setItem("space", "sadmin");
+        sessionStorage.setItem(
+          "serviceType",
+          JSON.stringify(ServiceType.ADMINISTRATION)
+        );
+      },
+      icon:<MdAdminPanelSettings size={24} />
+
     },
   ];
   const {
@@ -174,76 +209,91 @@ function Home() {
     });
   };
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Flex
-        align="center"
-        justify="space-between"
-        style={{ margin: "32px 8em 4px 8em" }}
-      >
-        <Title level={1} style={{ textAlign: "center" }}>
-          Bienvenue dans votre service &nbsp;
-          <span style={{ color: "var(--app-color)" }}>
-            <Typewriter
-              words={[
-                "Accueil",
-                "Médical",
-                "Pharmacie",
-                "Dentaire",
-                "Gynécologie",
-                "Analyse",
-                "Radiologie",
-                "Hospitalisation",
-                "Infirmerie",
-              ]}
-              loop={5}
-              cursor
-              cursorStyle="_"
-              typeSpeed={70}
-              deleteSpeed={50}
-              delaySpeed={1000}
-              // onLoopDone={handleDone}
-              // onType={handleType}
-            />
-          </span>
-        </Title>
-        <Space size="large">
-          {userConnected.role_name === "Admin" && (
-            <Button
-              type="text"
-              icon={<SettingOutlined style={{ fontSize: 24 }} />}
-              onClick={() => {
-                navigate("/espace-administration/settings");
-                sessionStorage.setItem(
-                  "serviceType",
-                  JSON.stringify(ServiceType.ADMINISTRATION)
-                );
-              }}
-            />
-          )}
-
-          <Button
-            type="primary"
-            size="large"
-            onClick={logout}
-            icon={<LogoutOutlined />}
-          >
-            Déconnexion
-          </Button>
-        </Space>
-      </Flex>
-      <div className="container">
-        {homeMenus.map((item) => (
-          <HomeCard
-            key={item.id}
-            cover={item.cover}
-            label={item.label}
-            onClick={item.onClick}
-            canAccess={
-              userConnected.code_serv === item.code ||
-              userConnected.role_name === "Admin"
-            }
+    <Layout style={{ minHeight: "100vh" }} className="homeWrapper">
+      <div className="homeContainer" >
+        <Flex
+          align="center"
+          justify="space-between"
+          style={{ margin: "32px 8em 4px 8em" }}
+          className="home"
+        >
+          <img 
+            src={images.logoWithoutBg}
+            width={200}
+            height={100}
+            style={{
+              objectFit :"cover",
+              borderRadius:4
+            }}
           />
-        ))}
+          <Title level={1} style={{ textAlign: "center" }}>
+            Bienvenue dans votre espace santé
+            {/* &nbsp;
+            <span style={{ color: "var(--app-color)" }}>
+              <Typewriter
+                words={[
+                  "Accueil",
+                  "Médical",
+                  "Pharmacie",
+                  "Dentaire",
+                  "Gynécologie",
+                  "Analyse",
+                  "Radiologie",
+                  "Hospitalisation",
+                  "Infirmerie",
+                ]}
+                loop={5}
+                cursor
+                cursorStyle="_"
+                typeSpeed={70}
+                deleteSpeed={50}
+                delaySpeed={1000}
+                // onLoopDone={handleDone}
+                // onType={handleType}
+              />
+            </span> */}
+          </Title>
+          <Space size="large">
+            {userConnected.role_name === "Admin" && (
+              <Button
+                type="text"
+                icon={<SettingOutlined style={{ fontSize: 24 }} />}
+                onClick={() => {
+                  navigate("/espace-administration/settings");
+                  sessionStorage.setItem(
+                    "serviceType",
+                    JSON.stringify(ServiceType.ADMINISTRATION)
+                  );
+                }}
+              />
+            )}
+
+            <Button
+              type="primary"
+              style={{background:"var(--second-color)", color:"black"}}
+              size="large"
+              onClick={logout}
+              icon={<LogoutOutlined />}
+            >
+              Déconnexion
+            </Button>
+          </Space>
+        </Flex>
+        <div className="container">
+          {homeMenus.map((item) => (
+            <HomeCard
+              key={item.id}
+              //cover={item.cover}
+              icon={item.icon}
+              label={item.label}
+              onClick={item.onClick}
+              canAccess={
+                userConnected.code_serv === item.code ||
+                userConnected.role_name === "Admin"
+              }
+            />
+          ))}
+        </div>
       </div>
     </Layout>
   );

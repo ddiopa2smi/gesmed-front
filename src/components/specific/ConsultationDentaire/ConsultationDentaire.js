@@ -62,6 +62,7 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
             if (response?.data) {
                 setInitConsultation(getInitCons(response?.data))
                 form.setFieldsValue(getInitCons(response?.data))
+                form.setFieldValue("code_region", "Bouche");
             }
         })
         .finally(()=>{
@@ -79,7 +80,14 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
     const [operationType , setOperationType] = useState(null);
     const [loading , setLoading] = useState(false);
 
-    const { data : pathologies , isLoading : pathologiesLoading , onRefresh : pathologiesRefreshList} = useFetch(endpoints.pathologie.LIST);
+    const { data : pathologiesList , isLoading : pathologiesLoading , onRefresh : pathologiesRefreshList} = useFetch(endpoints.pathologie.LIST);
+    const [pathologies,  setPathologies] = useState([]);
+    useEffect(() => {
+      if (pathologiesList) {
+        setPathologies(pathologiesList.filter((pathologie) => pathologie.code_spe === codeServices.DENTAIRE));
+      }
+    }, [pathologiesList])
+
     const {data : motifsList , isLoading : motifsLoading , onRefresh : motifsRefreshList} = useFetch(endpoints.motifs.LIST);
     const [motifs,  setMotifs] = useState([]);
     useEffect(() => {
@@ -88,8 +96,14 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
       }
     }, [motifsList])
     
-    const { data : regions , isLoading : regionsLoading , onRefresh : regionsRefreshList} = useFetch(endpoints.regions.LIST);
-     
+    const { data : regionsList , isLoading : regionsLoading , onRefresh : regionsRefreshList} = useFetch(endpoints.regions.LIST);
+    const [regions,  setRegions] = useState([]);
+    useEffect(() => {
+      if (regionsList) {
+        setRegions(regionsList.filter((region) => region.code_spe === codeServices.DENTAIRE));
+      }
+    }, [regionsList])
+
     const imcMessage = useRef("");
     useEffect(() => {
         imcMessage.current = imcAlertMessage(form.getFieldValue("imc"));
@@ -214,7 +228,6 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
 
         return result;
     }
-
     
     
     
@@ -471,7 +484,8 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
                                 name="code_region" 
                                 style={{width:"90%"}}
                             >
-                                <Select
+                                <Input />
+                                {/* <Select
                                     style={{width:'100%',background:"transparent"}}
                                     showSearch
                                     placeholder="Région concernée"
@@ -484,7 +498,7 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
                                             <Option key={key}  value={item.code_region} > {item.libelle_region} </Option>
                                         ))
                                     }
-                                </Select>
+                                </Select> */}
                             </Form.Item>
                             <AddAndEditDropdown items={itemsRegion} />
                         </Flex>

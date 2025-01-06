@@ -13,7 +13,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { formatDate } from "../../../utils/helpers";
+import { formatDate, formatDateTime } from "../../../utils/helpers";
 import { useNavigate } from "react-router";
 import { ServiceType } from "../../../utils/types/types.ts";
 
@@ -25,7 +25,6 @@ export interface DayAppointmentInterface {
 const { Text } = Typography;
 function DayAppointment({ data, serviceType }: DayAppointmentInterface) {
   const navigate = useNavigate();
-  console.log(data);
 
   const openMedicalFile = (record: any) => {
     switch (serviceType) {
@@ -43,6 +42,11 @@ function DayAppointment({ data, serviceType }: DayAppointmentInterface) {
         );
         break;
       case ServiceType.ANALYSE:
+        navigate(
+          `/espace-analyse/patients/dossier-medical/${record?.num_patient}`
+        );
+        break;
+      case ServiceType.ANALYSE_BIO_MEDICAL:
         navigate(
           `/espace-analyse/patients/dossier-medical/${record?.num_patient}`
         );
@@ -73,7 +77,7 @@ function DayAppointment({ data, serviceType }: DayAppointmentInterface) {
       <Flex align="center" justify="space-between">
         <Space>
           <CalendarOutlined />
-          <Text> {data?.length ? data?.length : 0} rendez-vous </Text>
+          <Text> {data?.length ? data?.length : 0} rendez-vous au total pour cette journée. </Text>
         </Space>
         {/* <Space>
           <Text>
@@ -93,8 +97,8 @@ function DayAppointment({ data, serviceType }: DayAppointmentInterface) {
         renderItem={(item) => (
           <List.Item
             actions={[
-              <Button type="link" onClick={() => openMedicalFile(item)}>
-                Dossier médical
+              <Button type="primary" ghost onClick={() => openMedicalFile(item)}>
+                Ouvrir Dossier
               </Button>,
             ]}
           >
@@ -109,13 +113,11 @@ function DayAppointment({ data, serviceType }: DayAppointmentInterface) {
                 title={
                   <Text>{`${item?.prenom_patient} ${item?.nom_patient}`}</Text>
                 }
-                description={`Rendez-vous prévu à ${formatDate(
+                description={`Rendez-vous prévu le ${formatDateTime(
                   new Date(item?.date_rv)
                 )}`}
               />
-              <div>
-                <Tag color="cyan">En attente</Tag>
-              </div>
+              
             </Skeleton>
           </List.Item>
         )}

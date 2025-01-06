@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   Card,
   Col,
@@ -28,6 +29,7 @@ import { useNavigate } from "react-router";
 import DataTable from "../../components/common/DataTable/DataTable";
 import useSearch from "../../utils/hooks/useSearch";
 import { useEffect } from "react";
+import { UserOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -48,7 +50,7 @@ function PrescriptionsGroupes() {
     codesPrescriptions.ORD
   );
   const [selectedPatients, setSelectedPatients] = useState([]);
-
+  const { data : listDepartements } = useFetch(endpoints.departements.LIST);
 
   const openModal = () => {
     setOpen(true);
@@ -157,6 +159,9 @@ function PrescriptionsGroupes() {
           }}
           width={1000}
           open={open}
+          onOk={()=>{
+            setOpen(false)
+          }}
           onCancel={() => {
             setOpen(false);
           }}
@@ -182,12 +187,13 @@ function PrescriptionsGroupes() {
                 dataIndex: "image_patient",
                 render: (record) => (
                   <Flex justify="center" align="center" className="table-data">
-                    <Image
+                    {/* <Image
                       src={test_img}
                       width={35}
                       height={35}
                       style={{ borderRadius: "50%", objectFit: "cover" }}
-                    />
+                    /> */}
+                    <Avatar icon={<UserOutlined />} />
                   </Flex>
                 ),
               },
@@ -211,77 +217,74 @@ function PrescriptionsGroupes() {
                 key: "prenom_patient",
                 ...getColumnSearchProps("prenom_patient"),
               },
-              {
-                title: "Direction",
-                dataIndex: "direction",
-                key: "direction",
-                filters: [
-                  {
-                    text: "Direction générale",
-                    value: "direction1",
-                  },
-                  {
-                    text: "Direction interne",
-                    value: "direction2",
-                  },
-                ],
-                onFilter: (value, record) =>
-                  record.address.indexOf(value) === 0,
-              },
+              // {
+              //   title: "Direction",
+              //   dataIndex: "direction",
+              //   key: "direction",
+              //   filters: [
+              //     {
+              //       text: "Direction générale",
+              //       value: "direction1",
+              //     },
+              //     {
+              //       text: "Direction interne",
+              //       value: "direction2",
+              //     },
+              //   ],
+              //   onFilter: (value, record) =>
+              //     record.address.indexOf(value) === 0,
+              // },
               {
                 title: "Département",
-                dataIndex: "departement",
-                key: "departement",
-                filters: [
-                  {
-                    text: "Département de la chirurgie",
-                    value: "departement1",
-                  },
-                  {
-                    text: "Département des soins infirmiers",
-                    value: "departement2",
-                  },
-                  {
-                    text: "Département Informatique et systèmes d'informations",
-                    value: "departement3",
-                  },
-                ],
-                onFilter: (value, record) =>
-                  record.address.indexOf(value) === 0,
+                dataIndex: "lib_dept",
+                key: "lib_dept",
+                filters: listDepartements.map((item)=> {
+                  return {
+                    text: item?.lib_dept,
+                    value: item?.code_dept
+                  }
+                }),
+                onFilter: (value, record) => {
+                  if (record) {
+                    return record?.lib_dept.indexOf(value) === 0;
+                  }
+                  return false; 
+                }
+                 
               },
-              {
-                title: "Service",
-                dataIndex: "service",
-                key: "service",
-                filters: [
-                  {
-                    text: "Service des urgences",
-                    value: "service1",
-                  },
-                  {
-                    text: "Service de la radiologie",
-                    value: "service2",
-                  },
-                  {
-                    text: "Service Analyse",
-                    value: "service3",
-                  },
-                  {
-                    text: "Service dentiste",
-                    value: "service4",
-                  },
-                  {
-                    text: "Service hospitalisation",
-                    value: "service5",
-                  },
-                  {
-                    text: "Pharmacie",
-                    value: "service6",
-                  },
-                ],
-                onFilter: (value, record) =>
-                  record.address.indexOf(value) === 0,
-              },
+              // {
+              //   title: "Service",
+              //   dataIndex: "service",
+              //   key: "service",
+              //   filters: [
+              //     {
+              //       text: "Service des urgences",
+              //       value: "service1",
+              //     },
+              //     {
+              //       text: "Service de la radiologie",
+              //       value: "service2",
+              //     },
+              //     {
+              //       text: "Service Analyse",
+              //       value: "service3",
+              //     },
+              //     {
+              //       text: "Service dentiste",
+              //       value: "service4",
+              //     },
+              //     {
+              //       text: "Service hospitalisation",
+              //       value: "service5",
+              //     },
+              //     {
+              //       text: "Pharmacie",
+              //       value: "service6",
+              //     },
+              //   ],
+              //   onFilter: (value, record) =>
+              //     record.address.indexOf(value) === 0,
+              // },
             ]}
           />
         </Modal>

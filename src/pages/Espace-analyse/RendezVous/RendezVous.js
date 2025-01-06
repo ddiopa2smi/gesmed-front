@@ -4,7 +4,7 @@ import { ServiceType } from '../../../utils/types/types.ts'
 
 function RendezVous() {
   return (
-    <RvList serviceType={ServiceType.ANALYSE} />
+    <RvList serviceType={ServiceType.ANALYSE_BIO_MEDICAL} />
   )
 }
 

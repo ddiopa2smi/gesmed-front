@@ -1,9 +1,11 @@
-export const PRIMARY_COLOR = "#2ecc71";
+export const PRIMARY_COLOR = "#3abce9";
+
 
 export const codesPrescriptions = {
     ORD : "06" ,
     ANA : "01",
-    IMG : "02"
+    IMG : "02",
+    INF : "03"
 }
 
 
@@ -13,6 +15,8 @@ export const images = {
     profil : require("./../assets/profil.jpg"),
     consultant : require("./../assets/consultant.png"),
     radiologie : require("./../assets/radiologie.jpg"),
+    logo : require("./../assets/logo_ipm.png"),
+    logoWithoutBg : require("./../assets/logo_ipm-removebg-preview.png"),
 }
 
 export const codeServices = {

@@ -18,6 +18,7 @@ const NewAccount = () => {
     const [formLoading , setFormLoading] = useState(false);
     const {data , isLoading  , error}= useFetch(endpoints.users.ROLES_LIST);
     const {data : servicesMedicaux , isLoading : servicesMedicauxLoading}= useFetch(endpoints.services_medicaux.LIST);
+    
     const usersRoles = data;
     const usersRolesLoading = isLoading;
     const currentAccount = useLocation().state?.currentAccount || null;

@@ -49,11 +49,12 @@ import { infirmerieRouter } from "./pages/Espace-Infirmerie/Routing.tsx";
 import { administrationRouter } from "./pages/EspaceAdministration/Routing.tsx";
 import MedicalDashboard from "./pages/MedicalDashboard/MedicalDashboard.js";
 import PharmacyDashboard from "./pages/PharmacyDashboard/PharmacyDashboard.js";
+import Infirmerie from "./pages/Infirmerie/Infirmerie.js"
 export const router = createBrowserRouter(
     [
         {
             path : "/",
-            element : <Navigate to={"/home"} />
+            element : <Navigate to={"/login"} />
         },
         {
             path : "/login",
@@ -130,6 +131,10 @@ export const router = createBrowserRouter(
                                             path : "imagerie",
                                             element : <Imagerie />
                                         },
+                                        {
+                                            path : "infirmerie",
+                                            element : <Infirmerie />
+                                        },
                                     ]
                                 },
                             ]
@@ -138,6 +143,9 @@ export const router = createBrowserRouter(
                 },
                 {
                     path : "dossier-medical:id",
+                    handle: {
+                        breadcrumb: ({ id }) => `Dossier patient ${id}`,
+                    },
                     children : [
                         {
                             path : "" ,
@@ -169,6 +177,10 @@ export const router = createBrowserRouter(
                                 {
                                     path : "imagerie",
                                     element : <Imagerie />
+                                },
+                                {
+                                    path : "infirmerie",
+                                    element : <Infirmerie />
                                 },
                             ]
                         },

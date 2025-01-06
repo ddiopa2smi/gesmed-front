@@ -3,6 +3,8 @@ export const endpoints = {
         ADD : "/api/smed/Patient/addRV",
         TODAY_LIST : "/api/smed/Patient/Today/list",
         LIST : "/api/smed/Patient/RendezVous/list",
+        UPDATE : "/api/smed/Patient/updateRV",
+        DELETE : "/api/smed/Patient/deleteRV",
     },
     dossierMedical: {
         DOSSIER : "/api/smed/DossierMedical/getDos" ,
@@ -27,9 +29,13 @@ export const endpoints = {
     } ,
     prescriptions : {
         ADD : "/api/smed/Prescription/add",
-        UPDATE : "",
+        UPDATE : "/api/smed/Prescription/updatePresc",
         DELETE : "/api/smed/Prescription/delete",
-        GET_DETAILS : "/api/smed/Prescription/getDetails"
+        GET_DETAILS : "/api/smed/Prescription/getDetails",
+        LIST : "/api/smed/Prescription/getAllPrescriptions"
+    } ,
+    prescriptionsActes : {
+        LIST : "/api/smed/DonneesBases/ActesInf/List"
     } ,
     patients : {
         LIST: "/api/smed/Patient/list",

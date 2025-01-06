@@ -32,7 +32,7 @@ import AddRegion from "../../../components/specific/AddRegion/AddRegion";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import BackButton from "../../../components/common/BackButton/BackButton";
 import ReloadButton from "../../../components/common/ReloadButton/ReloadButton";
-import { deletePopup, printPDF } from "../../../utils/helpers";
+import { deletePopup, getImcMessage, printPDF } from "../../../utils/helpers";
 import {
   codeServices,
   codesPrescriptions,
@@ -42,76 +42,6 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-const pathologies = [
-  { code_patho: "SOPK", libelle_patho: "Syndrome des ovaires polykystiques" },
-  { code_patho: "ENDOMETRIOSE", libelle_patho: "Endométriose" },
-  { code_patho: "FIBROMES", libelle_patho: "Fibromes utérins" },
-  { code_patho: "KYSTES_OVARIENS", libelle_patho: "Kystes ovariens" },
-  {
-    code_patho: "DYSMENORRHEE",
-    libelle_patho: "Dysménorrhée (douleurs menstruelles)",
-  },
-  { code_patho: "AMENORRHEE", libelle_patho: "Aménorrhée (absence de règles)" },
-  { code_patho: "MENORRAGIE", libelle_patho: "Ménorragie (règles abondantes)" },
-  { code_patho: "SPM", libelle_patho: "Syndrome prémenstruel (SPM)" },
-  { code_patho: "PROLAPSUS", libelle_patho: "Prolapsus génital" },
-  {
-    code_patho: "INFECTIONS_GENITALES",
-    libelle_patho: "Infections génitales (vaginite, cervicite)",
-  },
-  { code_patho: "CHLAMYDIA", libelle_patho: "Infection à Chlamydia" },
-  { code_patho: "GONORRHEE", libelle_patho: "Gonorrhée" },
-  { code_patho: "HERPES_GENITAL", libelle_patho: "Herpès génital" },
-  { code_patho: "SYPHILIS", libelle_patho: "Syphilis" },
-  { code_patho: "MYCOSE", libelle_patho: "Mycose vaginale" },
-  { code_patho: "TRICHOMONASE", libelle_patho: "Trichomonase" },
-  { code_patho: "VAGINOSE", libelle_patho: "Vaginose bactérienne" },
-  { code_patho: "HPV", libelle_patho: "Papillomavirus humain (HPV)" },
-  { code_patho: "DYSPLASIE", libelle_patho: "Dysplasie cervicale" },
-  { code_patho: "CANCER_COL", libelle_patho: "Cancer du col de l’utérus" },
-  { code_patho: "POLYPES", libelle_patho: "Polypes cervicaux" },
-  { code_patho: "MASTOPATHIE", libelle_patho: "Mastopathie fibrokystique" },
-  { code_patho: "MASTITE", libelle_patho: "Mastite" },
-  { code_patho: "GALACTORRHEE", libelle_patho: "Galactorrhée" },
-  { code_patho: "CANCER_SEIN", libelle_patho: "Cancer du sein" },
-  { code_patho: "GEU", libelle_patho: "Grossesse extra-utérine (GEU)" },
-  {
-    code_patho: "FAUSSES_COUCHES",
-    libelle_patho: "Fausses couches à répétition",
-  },
-  { code_patho: "DIABETE_GESTATIONNEL", libelle_patho: "Diabète gestationnel" },
-  { code_patho: "PREECLAMPSIE", libelle_patho: "Prééclampsie" },
-  { code_patho: "PLACENTA_PREVIA", libelle_patho: "Placenta prævia" },
-  {
-    code_patho: "POST_PARTUM",
-    libelle_patho: "Pathologies du post-partum (infections, dépression)",
-  },
-  { code_patho: "OSTEOPOROSE", libelle_patho: "Ostéoporose" },
-  {
-    code_patho: "ATROPHIE_VULVOVAGINALE",
-    libelle_patho: "Atrophie vulvovaginale",
-  },
-  {
-    code_patho: "TROUBLES_MENOPAUSE",
-    libelle_patho: "Troubles hormonaux post-ménopause",
-  },
-  { code_patho: "VIH_SIDA", libelle_patho: "VIH/SIDA" },
-  { code_patho: "HEPATITES", libelle_patho: "Hépatites virales (B et C)" },
-  {
-    code_patho: "CONDYLOMES",
-    libelle_patho: "Condylomes acuminés (liés au HPV)",
-  },
-  { code_patho: "MIP", libelle_patho: "Maladie inflammatoire pelvienne (MIP)" },
-  {
-    code_patho: "SYNDROME_ASERMAN",
-    libelle_patho: "Syndrome d'Asherman (adhérences utérines)",
-  },
-  { code_patho: "HYPERPLASIE", libelle_patho: "Hyperplasie de l'endomètre" },
-  {
-    code_patho: "MALFORMATIONS",
-    libelle_patho: "Malformations utérines congénitales",
-  },
-];
 
 const regions = [
   { code_region: "VULVE", libelle_region: "Vulve" },
@@ -193,6 +123,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
   const refreshConsultation = () => {
     setRefetch(Date.now());
   };
+
   useEffect(() => {
     setConsultationDataLoading(true);
     getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`)
@@ -217,16 +148,27 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
   const [loading, setLoading] = useState(false);
 
   const {
-    data /*: pathologies */,
+    data : pathologiesList,
     isLoading: pathologiesLoading,
     onRefresh: pathologiesRefreshList,
   } = useFetch(endpoints.pathologie.LIST);
+  
   const {
     data: motifsList,
     isLoading: motifsLoading,
     onRefresh: motifsRefreshList,
   } = useFetch(endpoints.motifs.LIST);
+  
+  const {
+    data: regionsList,
+    isLoading: regionsLoading,
+    onRefresh: regionsRefreshList,
+  } = useFetch(endpoints.regions.LIST);
+  
+  const [pathologies, setPathologies] = useState([]);
   const [motifs, setMotifs] = useState([]);
+  const [regions, setRegions] = useState([]);
+  
   useEffect(() => {
     if (motifsList) {
       setMotifs(
@@ -235,18 +177,23 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
         )
       );
     }
-    console.log(motifsList);
-  }, [motifsList]);
-  const {
-    data: reg /*: regions */,
-    isLoading: regionsLoading,
-    onRefresh: regionsRefreshList,
-  } = useFetch(endpoints.regions.LIST);
+    if (pathologiesList) {
+      setPathologies(
+        pathologiesList.filter(
+          (pat) => pat.code_spe === codeServices.GYNECOLOGIE
+        )
+      );
+    }
+    if (regionsList) {
+      setRegions(regionsList.filter((reg) => reg.code_spe === codeServices.GYNECOLOGIE));
+    }
+  }, [motifsList,pathologiesList, regionsList]);
+  
 
-  const imcMessage = useRef("");
+  const [imc, setImc] = useState("");
   useEffect(() => {
-    imcMessage.current = imcAlertMessage(form.getFieldValue("imc"));
-  });
+    setImc(getImcMessage(form.getFieldValue("imc")));
+  },[form]);
 
   const itemsMotif = [
     {
@@ -389,25 +336,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
     });
   };
 
-  const imcAlertMessage = (imc) => {
-    let result = "";
-    if (imc < 18.5) {
-      result += "Insuffisance pondérale (maigreur)";
-    } else if (imc >= 18.5 && imc < 25) {
-      result += "Corpulence normale";
-    } else if (imc >= 25 && imc < 30) {
-      setIsImcAlertVisible(true);
-      result += "Surpoids";
-    } else if (imc >= 30 && imc < 35) {
-      result += "Obésité modérée";
-    } else if (imc >= 35 && imc < 40) {
-      result += "Obésité sévère";
-    } else if (imc >= 40) {
-      result += "Obésité morbide ou massive";
-    }
-
-    return result;
-  };
+  
 
   //console.log(initConsultation)
 
@@ -650,6 +579,20 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
             setIsCpnOptionSelected(true);
           } else {
             setIsCpnOptionSelected(false);
+          }
+
+          if (
+            allValues.taille &&
+            allValues.taille !== 0 &&
+            allValues.poids &&
+            allValues.poids !== 0
+          ) {
+            const newValue =
+              allValues.poids /
+              ((allValues.taille / 100) * (allValues.taille / 100));
+            allValues.imc = newValue;
+            form.setFieldValue("imc", allValues.imc);
+            setImc(getImcMessage(newValue));
           }
 
           if (changedValues.grossesse_semaine) {
@@ -957,7 +900,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
               name="tension"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Champ obligatoire",
                 },
               ]}
@@ -971,7 +914,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
               name="temp"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Champ obligatoire",
                 },
               ]}
@@ -985,7 +928,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
               name="pouls"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Champ obligatoire",
                 },
               ]}
@@ -1001,7 +944,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
               name="poids"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Champ obligatoire",
                 },
               ]}
@@ -1015,7 +958,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
               name="taille"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Champ obligatoire",
                 },
               ]}
@@ -1034,7 +977,7 @@ function ConsultationGynecologie({ numPatient, numRV, serviceType }) {
             >
               <InputNumber min={0} disabled />
             </Form.Item>
-            <Alert message={imcMessage.current} />
+            <Alert message={imc} />
           </Col>
         </Row>
 

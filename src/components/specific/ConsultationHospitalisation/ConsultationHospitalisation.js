@@ -407,6 +407,8 @@ function ConsultationHospitalisation({numPatient , numRV , serviceType}) {
                         form.setFieldValue("fin_rm",dayjs(newValue));
                     }
 
+                    
+
                 }}
 
                 onFinish={save}

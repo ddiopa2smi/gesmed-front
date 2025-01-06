@@ -9,8 +9,7 @@ const { Title } = Typography;
 
 function AgendaComponent({ author, serviceType }) {
   const [open, setOpen] = useState(false);
-  console.log(author);
-  
+
   const { data, isLoading, onRefresh } = useFetch(endpoints.rendezVous.LIST);
   const [listRv, setListRv] = useState([]);
   const [selectedDateList, setSelectedDateList] = useState([]);
@@ -21,8 +20,7 @@ function AgendaComponent({ author, serviceType }) {
           item?.service_medical === serviceType && item?.id_medecin === author
       )
     );
-    console.log(listRv);
-    
+ 
   }, [data]);
 
   return (

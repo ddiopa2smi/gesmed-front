@@ -18,6 +18,7 @@ import {
 import RvList from "../RvList/RvList";
 import { ServiceType } from "../../../utils/types/types.ts";
 import AnalysesList from "../AnalysesList/AnalysesList";
+import RadiologiesList from "../RadiologiesList/RadiologiesList.js";
 const chartData = [
   {
     name: "Page A",
@@ -149,22 +150,24 @@ function DashboardComponent({ serviceType }) {
         </Col>
       </Row>
       <br />
-      {serviceType === ServiceType.ANALYSE && (
+      {serviceType === ServiceType.ANALYSE_BIO_MEDICAL  ? (
         <>
           <AnalysesList />
           <br />
         </>
-      )}
-      <Row gutter={[24, 24]}>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-          <Card>
-            <RvList serviceType={serviceType} today />
-          </Card>
-        </Col>
-      </Row>
-      <br />
+      ) : serviceType === ServiceType.RADIOLOGIE ? (
+        <>
+          <RadiologiesList />
+          <br />
+        </>
+      ) : (
+        <>
+        <RvList serviceType={serviceType} today />
+        <br />
+      </>
+      ) }
       
-      <br />
+      
       <Row gutter={[24, 24]}>
         <Col xs={24} sm={24} md={16} lg={16} xl={16}>
           <Card title="Visualisation des graphes">

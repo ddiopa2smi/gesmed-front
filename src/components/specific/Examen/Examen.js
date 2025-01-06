@@ -118,7 +118,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
             onValuesChange={(changedValues , allValues)=> {
                 if ((allValues.taille && allValues.taille !== 0) && (allValues.poids && allValues.poids !== 0)) {
                     const newValue=(allValues.poids/((allValues.taille/100)*(allValues.taille/100)));
-                    allValues.imc = newValue;
+                    allValues.imc = newValue.toFixed(2);
                     form.setFieldValue("imc",allValues.imc);
                     imcAlertMessage(allValues.imc);
                 } 
@@ -158,7 +158,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="tension" 
                                 rules={[
                                     {
-                                        required: true,
+                                        required: false,
                                         message: 'Champ obligatoire',
                                     }
                                 ]}
@@ -173,7 +173,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="pouls" 
                                 rules={[
                                     {
-                                    required: true,
+                                    required: false,
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
@@ -188,7 +188,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="temp" 
                                 rules={[
                                     {
-                                    required: true,
+                                    required: false,
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
@@ -205,7 +205,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="taille" 
                                 rules={[
                                     {
-                                    required: true,
+                                    required: false,
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
@@ -220,7 +220,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="poids" 
                                 rules={[
                                     {
-                                    required: true,
+                                    required: false,
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
@@ -235,7 +235,7 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="imc" 
                                 rules={[
                                     {
-                                    required: true,
+                                    required: false,
                                     message: 'Champ obligatoire',
                                     },
                                 ]}

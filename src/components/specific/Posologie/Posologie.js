@@ -100,10 +100,10 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                             optionFilterProp="children" 
                             filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                         >     
-                            <Option key={"comprimes"}  value={"comprimes"} > Comprimés </Option>
-                            <Option key={"cuilliere"}  value={"cuilliere"} > Cuillièrées </Option>
+                            <Option key={"comprimes"}  value={"comprimés"} > Comprimés </Option>
+                            <Option key={"cuilliere"}  value={"cuillièrées"} > Cuillièrées </Option>
                             <Option key={"ovules"}  value={"ovules"} > Ovules </Option>
-                            <Option key={"application"}  value={"application"} > Applications </Option>
+                            <Option key={"application"}  value={"applications"} > Applications </Option>
                             <Option key={"ampoules"}  value={"ampoules"} > Ampoules </Option>
                             <Option key={"sachets"}  value={"sachets"} > Sachets </Option>
                             <Option key={"injections"}  value={"injections"} > Injections </Option>

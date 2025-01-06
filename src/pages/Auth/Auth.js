@@ -1,15 +1,25 @@
-import { Button, Form, Input, Card, Carousel, theme, message, Typography } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Card,
+  Carousel,
+  theme,
+  message,
+  Typography,
+} from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import './Auth.scss'
+import "./Auth.scss";
 import axios from "axios";
 import { API_URL } from "../../constants/environment.constants";
-import image1 from "./../../assets/auth-img-1.jpg"
-import image2 from "./../../assets/auth-img-2.jpg"
+import image1 from "./../../assets/auth-img-1.jpg";
+import image2 from "./../../assets/auth-img-2.jpg";
 import Title from "antd/es/typography/Title";
 import { Link } from "react-router-dom";
 import { auth } from "../../actions/actions";
+import { images } from "../../constants/app.constants";
 
 const { Text } = Typography;
 
@@ -25,32 +35,30 @@ function Auth() {
     form
       .validateFields()
       .then((values) => {
-        setLoading(true)
+        setLoading(true);
         auth(values)
-        .then((response) => {
-          if (response?.data && response?.data?.username !== null) {
-            sessionStorage.setItem(
-              "userConnected",
-              JSON.stringify(response.data)
-            );
-            form.resetFields();
-            navigate("/home", { replace: true });
-            message.success("Bienvenue dans votre espace de gestion");
-            
-            
-          } else {
-            message.error("Login et/ou mot de passe incorrect(s)");
-          }
-        })
-        .finally(()=>{
-          setLoading(false);
-        })
+          .then((response) => {
+            if (response?.data && response?.data?.username !== null) {
+              sessionStorage.setItem(
+                "userConnected",
+                JSON.stringify(response.data)
+              );
+              form.resetFields();
+              navigate("/home", { replace: true });
+              message.success("Bienvenue dans votre espace de gestion");
+            } else {
+              message.error("Login et/ou mot de passe incorrect(s)");
+            }
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
         message.error(info.message);
         message.error("Veuillez svp renseigner toutes les informations");
-      })
+      });
   };
 
   return (
@@ -126,20 +134,31 @@ function Auth() {
           <img src={image2} alt="image2" className="carousel-img" />
         </div>
       </Carousel>
-      <div className="authWrapper" >
-        
-        <Card className="AuthContainer" bordered={false} style={{boxShadow : "none"}} >
-          <Title level={2} >
+      <div className="authWrapper">
+        <Card
+          className="AuthContainer"
+          bordered={false}
+          style={{ boxShadow: "none" }}
+        >
+          {/* <Title level={2} >
             Bienvenue sur votre espace de gestion 
-          </Title>
-          <br/>
+          </Title> */}
+          <center>
+            <img
+              src={images.logoWithoutBg}
+              width={200}
+              height={100}
+              style={{
+                objectFit: "cover",
+                borderRadius: 4,
+              }}
+            />
+          </center>
+          <br />
 
-          <div style={{margin:0}}>
-            <Title level={4} >
-              Veuillez vous authentifier pour continuer
-            </Title>
-            <br/>
-            <br/>
+          <div style={{ margin: 0 }}>
+            <Title level={4} style={{textAlign :"center"}} >Veuillez vous authentifier pour continuer</Title>
+            <br />
             <Form
               form={form}
               layout="vertical"
@@ -147,7 +166,7 @@ function Auth() {
               onFinish={login}
             >
               <Form.Item
-                label="Identifiant"
+                label="Login"
                 name="login"
                 rules={[
                   {
@@ -158,7 +177,7 @@ function Auth() {
               >
                 <Input
                   prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Identifiant"
+                  placeholder="Entrer votre login"
                   size="large"
                 />
               </Form.Item>
@@ -174,15 +193,17 @@ function Auth() {
               >
                 <Input.Password
                   prefix={<LockOutlined className="site-form-item-icon" />}
-                  placeholder="Mot de passe"
+                  placeholder="Entrer votre mot de passe"
                   size="large"
                 />
               </Form.Item>
 
-              <Link style={{textAlign:"end",color:"var(--app-color)"}}>Mot de passe oublié</Link>
+              <Link style={{ textAlign: "end", color: "var(--app-color)" }}>
+                Mot de passe oublié
+              </Link>
 
-              <br/>
-              <br/>
+              <br />
+              <br />
 
               <Button
                 loading={loading}
@@ -190,7 +211,7 @@ function Auth() {
                 htmlType="submit"
                 className="login-form-button"
                 size="large"
-                style={{width:"100%"}}
+                style={{ width: "100%" }}
               >
                 Se connecter
               </Button>
@@ -198,7 +219,6 @@ function Auth() {
           </div>
         </Card>
       </div>
-     
     </div>
   );
 }

@@ -319,30 +319,30 @@ function Consultation() {
                                     navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
                                 }
                             }, 
-                            {
-                                label: <span> Hospitalisation </span>,
-                                key: '3',
-                                onClick : ()=>{
-                                    sessionStorage.removeItem("editPrescription");
-                                    sessionStorage.setItem("prescription",JSON.stringify({  
-                                        codepresc : codesPrescriptions.IMG,
-                                        numcons : initConsultation.numcons ,
-                                        medecin : initConsultation.medecin
-                                    }));
-                                    navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
-                                }
-                            }, 
+                            // {
+                            //     label: <span> Hospitalisation </span>,
+                            //     key: '3',
+                            //     onClick : ()=>{
+                            //         sessionStorage.removeItem("editPrescription");
+                            //         sessionStorage.setItem("prescription",JSON.stringify({  
+                            //             codepresc : codesPrescriptions.IMG,
+                            //             numcons : initConsultation.numcons ,
+                            //             medecin : initConsultation.medecin
+                            //         }));
+                            //         navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
+                            //     }
+                            // }, 
                             {
                                 label: <span> Infirmerie </span>,
                                 key: '4',
                                 onClick : ()=>{
                                     sessionStorage.removeItem("editPrescription");
                                     sessionStorage.setItem("prescription",JSON.stringify({  
-                                        codepresc : codesPrescriptions.IMG,
+                                        codepresc : codesPrescriptions.INF,
                                         numcons : initConsultation.numcons ,
                                         medecin : initConsultation.medecin
                                     }));
-                                    navigate(`/espace-medical/patients/dossier/prescriptions/imagerie`);
+                                    navigate(`/espace-medical/patients/dossier/prescriptions/infirmerie`);
                                 }
                             },
                         ]}}

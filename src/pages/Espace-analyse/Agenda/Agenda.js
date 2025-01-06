@@ -5,7 +5,7 @@ import { ServiceType } from '../../../utils/types/types.ts'
 function Agenda() {
   const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
   return (
-    <AgendaComponent author={userConnected.login} serviceType={ServiceType.ANALYSE} />
+    <AgendaComponent author={userConnected.login} serviceType={ServiceType.ANALYSE_BIO_MEDICAL} />
   )
 }
 
