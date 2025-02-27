@@ -145,11 +145,13 @@ function Auth() {
           </Title> */}
           <center>
             <img
-              src={images.logoWithoutBg}
+              //src={images.logoWithoutBg}
+              src={images.logo1}
               width={200}
               height={100}
               style={{
-                objectFit: "cover",
+                //objectFit: "cover",
+                objectFit: "contain",
                 borderRadius: 4,
               }}
             />

@@ -16,6 +16,7 @@ export const images = {
     consultant : require("./../assets/consultant.png"),
     radiologie : require("./../assets/radiologie.jpg"),
     logo : require("./../assets/logo_ipm.png"),
+    logo1 : require("./../assets/logo1.png"),
     logoWithoutBg : require("./../assets/logo_ipm-removebg-preview.png"),
 }
 

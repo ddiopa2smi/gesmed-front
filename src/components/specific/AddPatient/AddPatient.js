@@ -79,7 +79,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             setOpen(false);
             break;
           default:
-            break;
+              break;
         }
       })
       .catch((info) => {

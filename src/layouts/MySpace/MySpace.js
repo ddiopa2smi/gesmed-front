@@ -77,6 +77,7 @@ import useMenu from "../../utils/hooks/useMenu.tsx";
 import { ServiceType } from "../../utils/types/types.ts";
 import { Footer } from "antd/es/layout/layout";
 import { images } from "../../constants/app.constants.js";
+import { Breadcrumbs } from "../../components/common/Breadcrumbs/Breadcrumbs.js";
 const { Header, Sider, Content } = Layout;
 const { Countdown } = Statistic;
 const { Text, Title } = Typography;
@@ -197,208 +198,7 @@ const MySpace = () => {
   }, []);
 
   useEffect(() => {
-    console.log(location.pathname.includes("dossier-medical"));
-    if (location.pathname.includes("myspace")) {
-      setCurrentSelectedKeys("dashboard");
-    }
-    if (location.pathname.includes("dashboard")) {
-      setCurrentSelectedKeys("dashboard");
-    }
-    if (location.pathname.includes("rendez-vous")) {
-      setCurrentSelectedKeys("rendez-vous");
-    }
-    if (location.pathname.includes("mon-agenda")) {
-      setCurrentSelectedKeys("mon-agenda");
-    }
-    if (location.pathname.includes("dossier-medical")) {
-      setCurrentSelectedKeys("patients");
-    }
-    if (location.pathname.includes("patients")) {
-      setCurrentSelectedKeys("patients");
-    }
-
-    if (location.pathname.includes("consultation")) {
-      setCurrentSelectedKeys("patients");
-    }
-    if (location.pathname.includes("consultations")) {
-      setCurrentSelectedKeys("consultations");
-    }
-    if (location.pathname.includes("prescriptions-groupes")) {
-      setCurrentSelectedKeys("prescriptions-groupes");
-    }
-    if (location.pathname.includes("infos-cliniques")) {
-      setCurrentSelectedKeys("patients");
-    }
-    if (location.pathname.includes("ordonnance")) {
-      setCurrentSelectedKeys("patients");
-    }
-    if (location.pathname.includes("analyse")) {
-      setCurrentSelectedKeys("patients");
-    }
-    if (location.pathname.includes("imagerie")) {
-      setCurrentSelectedKeys("patients");
-    }
-    if (location.pathname.includes("infirmerie")) {
-      setCurrentSelectedKeys("patients");
-    }
-    if (location.pathname.includes("consultations")) {
-      setCurrentSelectedKeys("consultations");
-    }
-    if (location.pathname.includes("visites")) {
-      setCurrentSelectedKeys("visites");
-    }
-    if (location.pathname.includes("dossier-accident-travail")) {
-      setCurrentSelectedKeys("dossier-accident-travail");
-    }
-    if (location.pathname.includes("gestion-fiche-produits")) {
-      setCurrentSelectedKeys("gestion-fiche-produits");
-    }
-    if (location.pathname.includes("fiche-produit")) {
-      setCurrentSelectedKeys("gestion-fiche-produits");
-    }
-    if (location.pathname.includes("commandes-produits")) {
-      setCurrentSelectedKeys("commandes-produits");
-    }
-    if (location.pathname.includes("new-commande-produit")) {
-      setCurrentSelectedKeys("commandes-produits");
-    }
-    if (location.pathname.includes("entrees-produits")) {
-      setCurrentSelectedKeys("entrees-produits");
-    }
-    if (location.pathname.includes("reception-commande")) {
-      setCurrentSelectedKeys("entrees-produits");
-    }
-    if (location.pathname.includes("sorties_produits")) {
-      setCurrentSelectedKeys("sorties_produits");
-    }
-    if (location.pathname.includes("mouvements-sorties")) {
-      setCurrentSelectedKeys("mouvements-sorties");
-    }
-    if (location.pathname.includes("situation-stocks")) {
-      setCurrentSelectedKeys("situation-stocks");
-    }
-    if (location.pathname.includes("new-mouvement-sortie")) {
-      setCurrentSelectedKeys("sorties_produits");
-    }
-    if (location.pathname.includes("saisie-inventaire")) {
-      setCurrentSelectedKeys("saisie-inventaire");
-    }
-    if (location.pathname.includes("fournisseurs")) {
-      setCurrentSelectedKeys("fournisseurs");
-    }
-    // switch (route) {
-    //   case "myspace":
-    //     setCurrentSelectedKeys("dashboard");
-    //     break;
-    //   case "dashboard":
-    //     setCurrentSelectedKeys("dashboard");
-    //     break;
-    //   case "new-rv":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "mon-agenda":
-    //     setCurrentSelectedKeys("mon-agenda");
-    //     break;
-    //   case "dossier":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "consultation":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "prescriptions":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "infos-cliniques":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "ordonnance":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "analyse":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "imagerie":
-    //     setCurrentSelectedKeys("patients");
-    //     break;
-    //   case "consultations":
-    //     setCurrentSelectedKeys("consultations");
-    //     break;
-    //   case "details-consultation":
-    //     setCurrentSelectedKeys("consultations");
-    //     break;
-    //   case "visites":
-    //     setCurrentSelectedKeys("visites");
-    //     break;
-    //   case "dossier-accident-travail":
-    //     setCurrentSelectedKeys("dossier-accident-travail");
-    //     break;
-    //   case "gestion-fiche-produits":
-    //     setCurrentSelectedKeys("gestion-fiche-produits");
-    //     break;
-    //   case "fiche-produit":
-    //     setCurrentSelectedKeys("gestion-fiche-produits");
-    //     break;
-    //   case "commandes-produits":
-    //     setCurrentSelectedKeys("commandes-produits");
-    //     break;
-    //   case "new-commande-produit":
-    //     setCurrentSelectedKeys("commandes-produits");
-    //     break;
-    //   case "entrees-produits":
-    //     setCurrentSelectedKeys("entrees-produits");
-    //     break;
-    //   case "reception-commande":
-    //     setCurrentSelectedKeys("entrees-produits");
-    //     break;
-    //   case "sorties_produits":
-    //     setCurrentSelectedKeys("sorties_produits");
-    //     break;
-    //   // case "mouvements-sorties":
-    //   //     setCurrentSelectedKeys("mouvements-sorties");
-    //   //     break;
-    //   case "situation-stocks":
-    //     setCurrentSelectedKeys("situation-stocks");
-    //     break;
-    //   case "new-mouvement-sortie":
-    //     setCurrentSelectedKeys("sorties_produits");
-    //     break;
-    //   case "saisie-inventaire":
-    //     setCurrentSelectedKeys("saisie-inventaire");
-    //     break;
-    //   case "fournisseurs":
-    //     setCurrentSelectedKeys("fournisseurs");
-    //     break;
-    //   case "settings":
-    //     setCurrentSelectedKeys("settings");
-    //     break;
-    //   case "users":
-    //     setCurrentSelectedKeys("users");
-    //     break;
-    //   case "accounts":
-    //     setCurrentSelectedKeys("accounts");
-    //     break;
-    //   case "account":
-    //     setCurrentSelectedKeys("accounts");
-    //     break;
-    //   case "privileges":
-    //     setCurrentSelectedKeys("privileges");
-    //     break;
-    //   case "privilege":
-    //     setCurrentSelectedKeys("privileges");
-    //     break;
-    //   case "profil":
-    //     setCurrentSelectedKeys("profil");
-    //     break;
-    //   case "gestion-mot-de-passe":
-    //     setCurrentSelectedKeys("gestion-mot-de-passe");
-    //     break;
-    //   default:
-    //     setCurrentSelectedKeys(route);
-    //     break;
-    // }
-
     const pathname = location.pathname;
-    //console.log(location);
     const splitPathname = pathname.split("/");
     const breadCItems = [
       {
@@ -441,6 +241,14 @@ const MySpace = () => {
       setCurrentSelectedKeys(null);
     };
   }, [route, location]);
+
+  useEffect(() => {
+    sideBarMenu.forEach((element) => {
+      if (location.pathname.includes(element?.key)) {
+        setCurrentSelectedKeys(element?.key);
+      }
+    });
+  }, [location , sideBarMenu]);
 
   // const [value, setValue] = useState('');
   // const [options, setOptions] = useState([]);
@@ -663,6 +471,7 @@ const MySpace = () => {
             // }}
           >
             <Breadcrumb items={breadCrumbItems} />
+            {/* <Breadcrumbs /> */}
             <br />
             <Outlet />
             {/* <div className="footer">

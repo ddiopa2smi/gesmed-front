@@ -31,7 +31,7 @@ import AddAnalyse from "../../components/specific/AddAnalyse/AddAnalyse";
 import BackButton from "../../components/common/BackButton/BackButton";
 
 const { Title, Text } = Typography;
-
+  
 const options = [
   {
     label: "Registre d'accueil",

@@ -1,9 +1,9 @@
 import { Table } from 'antd';
 import React, { useState } from 'react'
-
+import "./DataTable.scss"
 
 function DataTable({
-
+    title,
     dataSource,
     dataSourceCopy,
     tableLoading,
@@ -13,7 +13,8 @@ function DataTable({
     pagination,
     components,
     selectedRowKeys = [],
-    setSelectedRowKeys
+    setSelectedRowKeys,
+    rowClassName 
 }) {
 
     const [tableCount , setTableCount] = useState(null);
@@ -58,6 +59,7 @@ function DataTable({
     };
     return (
         <Table 
+            title={()=> title}
             onChange={(pagination, filters, sorter, extra)=>{
                 setTableCount(extra.currentDataSource.length);
                 //setFilteredInfo(filters);
@@ -72,6 +74,7 @@ function DataTable({
             scroll={{
               x : "max-content"
             }}
+            rowClassName={rowClassName}
             components={components}
             pagination={pagination}
             footer={()=> selectedRowKeys?.length !== 0 ? `${selectedRowKeys?.length}/${dataSourceCopy.length} ligne(s) sélectionné(es)` :  `${dataSourceCopy?.length} lignes au total`}

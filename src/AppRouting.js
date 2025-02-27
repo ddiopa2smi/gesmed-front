@@ -73,6 +73,9 @@ export const router = createBrowserRouter(
             //path : "myspace",
             //element : <MySpace />  ,
             element : <ProtectedRoute component={<MySpace />} />  ,
+            handle: {
+                breadcrumb: "Espace Médical",
+            },
             children : [
                 {
                     path : "",
@@ -81,14 +84,23 @@ export const router = createBrowserRouter(
                 {
                     path : "dashboard",
                     element : <MedicalDashboard />,
+                    handle: {
+                        breadcrumb: "Tableau de bord",
+                    },
                 },
                 {
                     path : "rendez-vous",
-                    element : <RendezVous />
+                    element : <RendezVous /> ,
+                    handle: {
+                        breadcrumb: "Rendez-vous",
+                    },
                 },
                 {
                     path : "mon-agenda",
-                    element : <AgendaMedecin />
+                    element : <AgendaMedecin />,
+                    handle: {
+                        breadcrumb: "Mon agenda",
+                    },
                 },
                 {
                     path : "patients",

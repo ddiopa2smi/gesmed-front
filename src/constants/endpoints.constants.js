@@ -125,6 +125,37 @@ export const endpoints = {
     fiche_produit : {
         ADD : "/api/Produit/add",
         LIST : "/api/Produit/list",
+        UPDATE : "/api/Produit/update",
+        DELETE_MULTIPLE : "/api/Produit/delete",
+    },
+    commande_produit : {
+        ADD : "/api/CommandeProduit/add",
+        LIST : "/api/CommandeProduit/list",
+        UPDATE : "/api/CommandeProduit/update",
+        UPDATE_DATE_ENVOI : "/api/CommandeProduit/updateDateEnvoi",
+        DELETE_MULTIPLE : "/api/CommandeProduit/delete",
+        GET_DETAILS : "/api/CommandeProduit/getDetails"
+    },
+    entrees_produits : {
+        ADD : "/api/CommandeProduit/Recep/add",
+        LIST : "/api/CommandeProduit/Recep/list",
+        UPDATE : "/api/CommandeProduit/Recep/update",
+        DELETE_MULTIPLE : "/api/CommandeProduit/Recep/delete",
+        GET_DETAILS : "/api/CommandeProduit/Recep/getDetails"
+    },
+    sorties_produits : {
+        ADD : "/api/CommandeProduit/Recep/add",
+        LIST : "/api/CommandeProduit/Recep/list",
+        UPDATE : "/api/CommandeProduit/Recep/update",
+        DELETE_MULTIPLE : "/api/CommandeProduit/Recep/delete",
+        GET_DETAILS : "/api/CommandeProduit/Recep/getDetails"
+    },
+    saisie_inventaire : {
+        ADD : "/api/Inventory/add",
+        LIST : "/api/Inventory/list",
+        UPDATE : "/api/Inventory/update",
+        DELETE_MULTIPLE : "/api/Inventory/delete",
+        GET_DETAILS : "/api/Inventory/getDetails"
     },
     services_medicaux : {
         LIST : "/api/smed/ServiceMedicaux/list"

@@ -171,7 +171,7 @@ function Home() {
     },
     {
       id: 10,
-      label: "Administration",
+      label: "Administration",  
       code: codeServices.ADMINISTRATION,
       cover: administration_image,
       onClick: () => {

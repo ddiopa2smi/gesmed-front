@@ -149,8 +149,8 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
     {
       key: "gestion-fiche-produits",
       icon: <FileOutlined />,
-      label: "Gestion fiche produits",
-      title: "Gestion fiche produits",
+      label: "Liste des produits",
+      title: "Liste des produits",
       onClick: () => {
         navigate("/espace-pharmacie/gestion-fiche-produits");
       },
@@ -183,15 +183,6 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
       },
     },
     {
-      key: "situation-stocks",
-      icon: <StockOutlined />,
-      label: "Situation des stocks",
-      title: "Situation des stocks",
-      onClick: () => {
-        navigate("/espace-pharmacie/situation-stocks");
-      },
-    },
-    {
       key: "saisie-inventaire",
       icon: <EditOutlined />,
       label: "Saisie Inventaire",
@@ -200,6 +191,16 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-pharmacie/saisie-inventaire");
       },
     },
+    {
+      key: "situation-stocks",
+      icon: <StockOutlined />,
+      label: "Situation des stocks",
+      title: "Situation des stocks",
+      onClick: () => {
+        navigate("/espace-pharmacie/situation-stocks");
+      },
+    },
+    
     {
       key: "fournisseurs",
       icon: <CarOutlined />,

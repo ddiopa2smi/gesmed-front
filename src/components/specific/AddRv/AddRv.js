@@ -112,7 +112,6 @@ function AddRv({ setOpen, onRefresh, currentRecord, operationType }) {
     }
   }, [operationType]);
 
-  console.log(currentRecord);
 
   return (
     <Form

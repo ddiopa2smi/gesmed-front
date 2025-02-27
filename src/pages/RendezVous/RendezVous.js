@@ -63,9 +63,7 @@ function RendezVous() {
 
 
     return (
-        <Card>
-            <RvList serviceType={ServiceType.MEDICAL} />
-        </Card>
+        <RvList serviceType={ServiceType.MEDICAL} />
     )
 }
 

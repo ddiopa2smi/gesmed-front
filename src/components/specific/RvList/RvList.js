@@ -350,12 +350,24 @@ const RvList = ({ serviceType, today }) => {
       />
 
       <Modal
+        style={{ top: 20 }}
+        styles={{
+          header: { padding: "12px 24px", },
+          footer: { padding: "12px 24px" },
+          content: { margin: 0, padding: 0 },
+          body: {
+            overflow: "auto",
+            minHeight: "50vh",
+            maxHeight: "80vh",
+            padding: "12px 24px",
+          },
+        }}
+        width={1000}
         title={
           operationType === "update"
             ? "Modifier le rendez-vous"
             : "Examen clinique"
         }
-        width={1000}
         open={open}
         onCancel={() => {
           setOpen(false);

@@ -8,7 +8,7 @@ function HomeCard({ cover, icon , label, onClick, canAccess }) {
   return (
     <Card
       className="home-card"
-      onClick={() => {
+      onClick={() => { 
         if (canAccess) {
           onClick();
         } else {

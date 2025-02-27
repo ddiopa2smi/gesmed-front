@@ -7,10 +7,12 @@ import {
   Descriptions,
   Dropdown,
   Flex,
+  Modal,
   Row,
   Space,
   Table,
   Tabs,
+  Tag,
   Tooltip,
   Typography,
   message,
@@ -19,6 +21,7 @@ import { useLocation, useNavigate } from "react-router";
 import {
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PrinterOutlined,
   ReloadOutlined,
   UnorderedListOutlined,
@@ -38,6 +41,8 @@ import EditButton from "../../components/common/EditButton/EditButton";
 import PrintButton from "../../components/common/PrintButton/PrintButton";
 import DeleteButton from "../../components/common/DeleteButton/DeleteButton";
 import MoreButton from "../../components/common/MoreButton/MoreButton";
+import DetailsPrescription from "../../components/specific/DetailsPrescription/DetailsPrescription";
+import { ServiceType } from "../../utils/types/types.ts";
 
 const { Title } = Typography;
 
@@ -63,6 +68,9 @@ function DossierMedical() {
   const listConsultation = data?.listConsultation;
   const listPrescription = data?.listPrescription;
 
+  const [open, setOpen] = useState(false);
+  const [currentRecord, setCurrentRecord] = useState(null);
+
   const doConsultation = (numRV) => {
     navigate("/espace-medical/patients/dossier/consultation", {
       state: { numRV: numRV, currentPatient: currentPatient },
@@ -85,7 +93,9 @@ function DossierMedical() {
   const onDeleteConsultation = (record) => {};
 
   const onEditPrescription = (record, prescriptionType) => {
-    navigate(`/espace-medical/patients/dossier/prescriptions/${prescriptionType}`);
+    navigate(
+      `/espace-medical/patients/dossier/prescriptions/${prescriptionType}`
+    );
     sessionStorage.setItem("editPrescription", JSON.stringify(record));
   };
   const onDeletePrescription = (record) => {
@@ -104,7 +114,9 @@ function DossierMedical() {
   };
 
   const handlePrescriptions = (codepres, item) => {
-    navigate("/espace-medical/patients/dossier/prescriptions", { replace: false });
+    navigate("/espace-medical/patients/dossier/prescriptions", {
+      replace: false,
+    });
     sessionStorage.setItem("currentPatient", JSON.stringify(currentPatient));
     console.log(item);
     sessionStorage.setItem(
@@ -440,7 +452,7 @@ function DossierMedical() {
                                         key: "5",
                                         label: (
                                           <span
-                                            onClick={() => 
+                                            onClick={() =>
                                               console.log("Aptitude")
                                             }
                                           >
@@ -612,10 +624,33 @@ function DossierMedical() {
                       //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
                     },
                     {
+                      title: "Statut",
+                      render: (record) => {
+                        console.log(record);
+                        return record?.isdone === "Non" ? (
+                          <Tag color="gold">En attente</Tag>
+                        ) : (
+                          <Tag color="green">Traité</Tag>
+                        );
+                      },
+                    },
+                    {
                       width: "auto",
                       render: (record) => (
                         <Flex justify="center" align="center">
                           <Space>
+                            {record?.isdone !== "Non" && (
+                              <Tooltip title="Visionner">
+                                <Button
+                                  type="text"
+                                  icon={<EyeOutlined />}
+                                  onClick={() => {
+                                    setOpen(true);
+                                    setCurrentRecord(record);
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
                             {record?.medecin !== null && (
                               <PrintButton
                                 onPrint={() => {
@@ -722,6 +757,38 @@ function DossierMedical() {
           },
         ]}
       />
+
+      <Modal
+        style={{ top: 20 }}
+        styles={{
+          header: { padding: "12px 24px" },
+          footer: { padding: "12px 24px" },
+          content: { margin: 0, padding: 0 },
+          body: {
+            overflow: "auto",
+            minHeight: "50vh",
+            maxHeight: "80vh",
+            padding: "12px 24px",
+          },
+        }}
+        width={1000}
+        title={`Analyse N° ${currentRecord?.numpresc}`}
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          setCurrentRecord(null);
+        }}
+        footer={null}
+        destroyOnClose
+      >
+        <DetailsPrescription
+          prescriptionItem={currentRecord}
+          setPrescriptionItem={setCurrentRecord}
+          serviceType={ServiceType.ANALYSE}
+          setOpen={setOpen}
+          //onRefresh={onRefresh}
+        />
+      </Modal>
     </Card>
   );
 }

@@ -1,4 +1,9 @@
-import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  PrinterOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -145,7 +150,7 @@ function AnalysesList() {
             render: (record) => (
               <Flex align="center">
                 <Space size="middle">
-                  {record.isdone === "Non" && (
+                  <Tooltip title="Détails">
                     <Button
                       type="text"
                       icon={<EyeOutlined />}
@@ -154,6 +159,18 @@ function AnalysesList() {
                         setOpen(true);
                       }}
                     />
+                  </Tooltip>
+
+                  {record?.isdone !== "Non" && (
+                    <Tooltip title="Imprimer">
+                      <Button
+                        type="text"
+                        icon={<PrinterOutlined />}
+                        onClick={() => {
+                          console.log(record);
+                        }}
+                      />
+                    </Tooltip>
                   )}
                 </Space>
               </Flex>
@@ -183,9 +200,11 @@ function AnalysesList() {
           setCurrentRecord(null);
         }}
         footer={null}
+        destroyOnClose
       >
         <DetailsPrescription
           prescriptionItem={currentRecord}
+          setPrescriptionItem={setCurrentRecord}
           serviceType={ServiceType.ANALYSE}
           setOpen={setOpen}
           onRefresh={onRefresh}

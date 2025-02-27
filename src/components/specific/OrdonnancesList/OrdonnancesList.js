@@ -29,6 +29,61 @@ function OrdonnancesList() {
         setOpen(true);
     }
     
+    const columns = [
+        {
+            title: 'N°',
+            dataIndex: 'numpresc',
+            key: 'numpresc',
+            ...getColumnSearchProps('numpresc')
+        },
+        {
+            title: 'Date prescription',
+            dataIndex: 'datepresc',
+            key: 'datepresc',
+            render : (record)=>(<div className="table-data">{formatDateTime(record)}</div>)
+        },
+        {
+            title: 'N° patient',
+            dataIndex: 'num_patient',
+            key: 'num_patient',
+            ...getColumnSearchProps('num_patient')
+        },
+        {
+            title: 'Patient',
+            dataIndex: 'patient',
+            key: 'patient',
+            ...getColumnSearchProps('patient')
+        },
+        {
+            title: 'Prescripteur',
+            dataIndex: 'username',
+            key: 'username',
+            ...getColumnSearchProps('username')
+        },
+        {
+            title: 'Statut',
+            dataIndex: 'isdone',
+            key: 'isdone',
+            ...getColumnSearchProps('isdone'),
+            render : (record)=>(
+                <Tag color={record === "Oui" ? "green" : "red"}>{record === "Oui" ? "Servie" : "En instance"}</Tag>
+            )
+        },
+        {
+            render :  (record)=>(
+                <Flex align='center' >
+                    <Space size="middle" >
+                        {
+                            record.isdone === "Non" && (
+                                <Button type='text' icon={<EyeOutlined/>} onClick={()=>{setCurrentRecord(record); setOpen(true);}}  />
+                            )
+                        }
+                        
+                    </Space>
+                </Flex>
+            )
+        }
+    ];
     return (
         <Card >
             <Flex justify="space-between" align="center" >
@@ -64,74 +119,24 @@ function OrdonnancesList() {
                 dataSource={data.filter((element)=> element.code === "ORD")}
                 dataSourceCopy = {segmentedValue === "Non" ? dataCopy.filter((element)=> element.code === "ORD" && element.isdone === "Non" ) : dataCopy.filter((element)=> element.code === "ORD" && element.isdone === "Oui")}
                 setDataSourceCopy={setDataCopy}
-                columns={[
-                    {
-                        title: 'N°',
-                        dataIndex: 'numpresc',
-                        key: 'numpresc',
-                        ...getColumnSearchProps('numpresc')
-                    },
-                    {
-                        title: 'Date prescription',
-                        dataIndex: 'datepresc',
-                        key: 'datepresc',
-                        render : (record)=>(<div className="table-data">{formatDateTime(record)}</div>)
-                    },
-                    {
-                        title: 'N° patient',
-                        dataIndex: 'num_patient',
-                        key: 'num_patient',
-                        ...getColumnSearchProps('num_patient')
-                    },
-                    {
-                        title: 'Patient',
-                        dataIndex: 'patient',
-                        key: 'patient',
-                        ...getColumnSearchProps('patient')
-                    },
-                    {
-                        title: 'Prescripteur',
-                        dataIndex: 'username',
-                        key: 'username',
-                        ...getColumnSearchProps('username')
-                    },
-                    {
-                        title: 'Date effet',
-                        dataIndex: 'date_effet',
-                        key: 'date_effet',
-                        ...getColumnSearchProps('date_effet'),
-                        render : (record)=>(<div className="table-data">{formatDateTime(record)}</div>)
-                    },
-                    {
-                        title: 'Effectué par',
-                        dataIndex: 'effectue_par',
-                        key: 'effectue_par',
-                        ...getColumnSearchProps('effectue_par')
-                    },
-                    {
-                        title: 'Statut',
-                        dataIndex: 'isdone',
-                        key: 'isdone',
-                        ...getColumnSearchProps('isdone'),
-                        render : (record)=>(
-                            <Tag color={record === "Oui" ? "green" : "red"}>{record === "Oui" ? "Servie" : "En instance"}</Tag>
-                        )
-                    },
-                    {
-                        render :  (record)=>(
-                            <Flex align='center' >
-                                <Space size="middle" >
-                                    {
-                                        record.isdone === "Non" && (
-                                            <Button type='text' icon={<EyeOutlined/>} onClick={()=>{setCurrentRecord(record); setOpen(true);}}  />
-                                        )
-                                    }
-                                    
-                                </Space>
-                            </Flex>
-                        )
-                    }
-                ]}
+                columns={segmentedValue === "Oui" ?
+                    [
+                        ...columns,
+                        {
+                            title: 'Date effet',
+                            dataIndex: 'date_effet',
+                            key: 'date_effet',
+                            ...getColumnSearchProps('date_effet'),
+                            render : (record)=>(<div className="table-data">{formatDateTime(record)}</div>)
+                        },
+                        {
+                            title: 'Effectué par',
+                            dataIndex: 'effectue_par',
+                            key: 'effectue_par',
+                            ...getColumnSearchProps('effectue_par')
+                        },
+                    ] : columns
+                }
             />
 
             <Modal 

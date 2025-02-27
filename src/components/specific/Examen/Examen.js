@@ -113,7 +113,16 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
         <Form
             form={form}
             layout="vertical" 
-            initialValues={defaultExamPayload}
+            initialValues={
+                {
+                    ...defaultExamPayload , 
+                    poids : 1 , 
+                    taille : 1,
+                    tension : 1,
+                    pouls : 1,
+                    temp : 1
+                }
+            }
             onFinish={saveExamen}
             onValuesChange={(changedValues , allValues)=> {
                 if ((allValues.taille && allValues.taille !== 0) && (allValues.poids && allValues.poids !== 0)) {
@@ -162,7 +171,6 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                         message: 'Champ obligatoire',
                                     }
                                 ]}
-                                initialValue={1}
                             >
                                 <InputNumber min={1} type='number' style={{width : "100%"}} />
                             </Form.Item>
@@ -177,7 +185,6 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
-                                initialValue={1}
                             >
                                 <InputNumber min={1} type='number'  style={{width : "100%"}} />
                             </Form.Item>
@@ -192,7 +199,6 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
-                                initialValue={1}
                             >
                                 <InputNumber min={1} type='number' style={{width : "100%"}} />
                             </Form.Item>
@@ -209,7 +215,6 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
-                                initialValue={1}
                             >
                                 <InputNumber min={1} type='number' style={{width : "100%"}} />
                             </Form.Item>
@@ -224,7 +229,6 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                     message: 'Champ obligatoire',
                                     },
                                 ]}
-                                initialValue={1}
                             >
                                 <InputNumber min={1} type='number'  style={{width : "100%"}} />
                             </Form.Item>
@@ -235,8 +239,8 @@ function Examen({ setOpen , currentRecord , defaultExamPayload , onRefresh}) {
                                 name="imc" 
                                 rules={[
                                     {
-                                    required: false,
-                                    message: 'Champ obligatoire',
+                                        required: false,
+                                        message: 'Champ obligatoire',
                                     },
                                 ]}
                             >

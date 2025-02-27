@@ -1,101 +1,376 @@
-import { DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined } from '@ant-design/icons';
-import { Breadcrumb, Button, Card, Flex, Space, Tooltip, Typography } from 'antd'
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router';
-import DataTable from '../../components/common/DataTable/DataTable';
-import { Link } from 'react-router-dom';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  HomeOutlined,
+  MoreOutlined,
+  PlusOutlined,
+  PrinterOutlined,
+  SendOutlined,
+} from "@ant-design/icons";
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  Divider,
+  Dropdown,
+  Flex,
+  message,
+  Modal,
+  Segmented,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
+import DataTable from "../../components/common/DataTable/DataTable";
+import { Link } from "react-router-dom";
+import { postActions } from "../../actions/actions";
+import { endpoints } from "../../constants/endpoints.constants";
+import ReloadButton from "../../components/common/ReloadButton/ReloadButton";
+import {
+  deletePopup,
+  formatAmount,
+  formatDate,
+  formatDateTime,
+  insertObjectIntoDataTable,
+  insertObjectIntoDataTableAfterIndex,
+} from "../../utils/helpers";
+import useFetch from "../../utils/hooks/useFetch";
+import EditButton from "../../components/common/EditButton/EditButton";
+import CommandeProduitDetails from "../../components/specific/CommandeProduitDetails/CommandeProduitDetails";
+import SendCommande from "../../components/specific/SendCommande/SendCommande";
 
-const {Title} = Typography;
-    
+const { Title } = Typography;
+
 function CommandesProduits() {
-    const navigate = useNavigate();
-    const [bonsCommandesList , setBonsCommandesList ] = useState([]);
-    const [bonsCommandesListCopy , setBonsCommandesListCopy ] = useState([]);
+  const navigate = useNavigate();
+  const [segmentedValue, setSegmentedValue] = useState("pending");
+  const [operationType, setOperationType] = useState("");
+  const {
+    data: bonsCommandesList,
+    dataCopy: bonsCommandesListCopy,
+    setDataCopy: setBonsCommandesListCopy,
+    onRefresh,
+  } = useFetch(endpoints.commande_produit.LIST);
 
-    const onAdd = () => {
-        navigate("/espace-pharmacie/commandes-produits/new-commande-produit")
-    }
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [currentRecord, setCurrentRecord] = useState(null);
+  const [open, setOpen] = useState(false);
+  const onAdd = () => {
+    navigate("/espace-pharmacie/commandes-produits/new-commande-produit", {
+      state: {
+        currentRecord: null,
+      },
+    });
+  };
 
-    return (
-        <Card>
-            <Title level={3} >Liste des bons de commandes produits</Title>
+  const onEdit = (record) => {
+    navigate("/espace-pharmacie/commandes-produits/new-commande-produit", {
+      state: {
+        currentRecord: record,
+      },
+    });
+  };
 
-            <Flex justify="flex-end" align="center" >
-                <Space>
-                    <Button type='primary' onClick={onAdd} icon={<PlusOutlined/>} >Nouveau</Button>
-                </Space>
-            </Flex>
+  const onViewDetails = (record) => {
+    setOperationType("view");
+    setOpen(true);
+    setCurrentRecord(record);
+  };
 
-            <br/>
+  const onMultipleDelete = (records) => {
+    deletePopup().then((result) => {
+      if (result.isConfirmed) {
+        postActions(endpoints.commande_produit.DELETE_MULTIPLE, records).then(
+          (response) => {
+            message.success(response?.data);
+            setSelectedRows([]);
+            onRefresh();
+          }
+        );
+      }
+    });
+  };
 
-            <DataTable 
-                dataSource={[]}
-                dataSourceCopy={[]}
-                setDataSourceCopy={null}
-                columns={[
-                    {
-                        title: 'Numéro',
-                        dataIndex: 'numero',
-                        key: 'numero',
-                        render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {record} </span>
-                        </div> ,
+  const onPrint = (record) => {};
+
+  const send = (record) => {
+    setOperationType("send");
+    setOpen(true);
+    setCurrentRecord(record);
+  };
+
+  const columns = [
+    {
+      title: "Numéro",
+      dataIndex: "num_bc",
+      key: "num_bc",
+      render: (record) => (
+        <div className="table-data">
+          <span style={{ textOverflow: "ellipsis" }}> {record} </span>
+        </div>
+      ),
+    },
+    {
+      title: "Date commande",
+      dataIndex: "date_bc",
+      key: "date_bc",
+      render: (record) => (
+        <div className="table-data">
+          <span style={{ textOverflow: "ellipsis" }}>
+            {" "}
+            {formatDate(record)}{" "}
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Date de livraison souhaitée",
+      dataIndex: "date_liv_souhaitee",
+      key: "date_liv_souhaitee",
+      render: (record) => (
+        <div className="table-data">
+          <span style={{ textOverflow: "ellipsis" }}>
+            {" "}
+            {formatDate(record)}{" "}
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Fournisseur",
+      dataIndex: "fourn_raisoc",
+      key: "fourn_raisoc",
+      render: (record) => (
+        <div className="table-data">
+          <span style={{ textOverflow: "ellipsis" }}>{record}</span>
+        </div>
+      ),
+      sorter: (a, b) => a.qte.charCodeAt(0) - b.qte.charCodeAt(0),
+    },
+    {
+      title: "Montant",
+      dataIndex: "montant_bc",
+      key: "montant_bc",
+      render: (record) => (
+        <div className="table-data" style={{ textAlign: "right" }}>
+          {formatAmount(record)}
+        </div>
+      ),
+    },
+    {
+      title: "Etat",
+      dataIndex: "etat",
+      key: "etat",
+      render: (record) => (
+        <div className="table-data">
+          {record === "pending" ? (
+            <Tag color="cyan"> En attente </Tag>
+          ) : record === "send" ? (
+            <Tag color="yellow">Envoyée</Tag>
+          ) : record === "cancel" ? (
+            <Tag color="red">Annulée</Tag>
+          ) : (
+            <Tag color="green">Recue</Tag>
+          )}
+        </div>
+      ),
+    },
+    {
+      render: (record) => (
+        <Flex align="center">
+          <Space size="middle">
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    label: "Voir détails",
+                    icon : <EyeOutlined />,
+                    key: "1",
+                    onClick: () => {
+                      onViewDetails(record);
                     },
-                    {
-                        title: 'Désignation',
-                        dataIndex: 'designation',
-                        key: 'designation',
-                        render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {record} </span>
-                        </div> ,
-                        sorter: (a, b) => a.designation.charCodeAt(0) - b.designation.charCodeAt(0),
+                  },
+                  {
+                    label: "Editer",
+                    key: "2",
+                    icon : <EditOutlined />,
+                    onClick: () => {
+                      onEdit(record);
                     },
-                    {
-                        title: 'Quantité',
-                        dataIndex: 'qte',
-                        key: 'qte',
-                        render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {record} </span>
-                        </div> ,
-                        sorter: (a, b) => a.qte.charCodeAt(0) - b.qte.charCodeAt(0),
+                  },
+                  {
+                    label: "Imprimer",
+                    key: "3",
+                    icon : <PrinterOutlined />,
+                    onClick: () => {
+                      onPrint(record);
                     },
-                    {
-                        title: 'P.U (HT)',
-                        dataIndex: 'pu',
-                        key: 'pu',
-                        render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {record} </span>
-                        </div> ,
-                        sorter: (a, b) => a.pu.charCodeAt(0) - b.pu.charCodeAt(0),
+                  },
+                  {
+                    label: "Envoyer",
+                    key: "4",
+                    icon : <SendOutlined />,
+                    onClick: () => {
+                      send(record);
                     },
-                    {
-                        title: 'Total (HT)',
-                        dataIndex: 'total',
-                        key: 'total',
-                        render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {record} </span>
-                        </div> ,
-                        sorter: (a, b) => a.total.charCodeAt(0) - b.total.charCodeAt(0),
-                    },
-                    {
-                        render :  (record)=>(
-                            <Flex align='center' >
-                                <Space size="middle" >
-                                    <Tooltip title="Editer">
-                                        <Button shape='circle' danger icon={<EditOutlined/>} />
-                                    </Tooltip>
-                                    <Tooltip title="Supprimer">
-                                        <Button shape='circle' danger icon={<DeleteOutlined/>} />
-                                    </Tooltip>
-                                </Space>
-                            </Flex>
-                        )
-                    }
-                ]}
-            />
+                  },
+                ],
+              }}
+              trigger={["click"]}
+            >
+              <Button type="text" icon={<MoreOutlined />} />
+            </Dropdown>
+          </Space>
+        </Flex>
+      ),
+    },
+  ];
 
-        </Card>
-    )
+  return (
+    <Card>
+      <Title level={3}>Liste des bons de commandes produits</Title>
+      <Divider />
+      <Flex justify="space-between" align="center">
+        <Segmented
+          defaultValue={segmentedValue}
+          
+          options={[
+            {
+              value: "pending",
+              label: "En attente",
+            },
+            {
+              value: "send",
+              label: "Envoyées",
+            },
+            {
+              value: "cancel",
+              label: "Annulées",
+            },
+            {
+              value: "done",
+              label: "Réceptionnées",
+            },
+          ]}
+          onChange={(value) => {
+            setSegmentedValue(value);
+          }}
+        />
+        <Space>
+          <ReloadButton onRefresh={onRefresh} />
+          <Button
+            type="primary"
+            danger
+            onClick={() => onMultipleDelete(selectedRows)}
+            disabled={selectedRows.length === 0}
+          >
+            Supprimer
+          </Button>
+          <Button type="primary" onClick={onAdd} icon={<PlusOutlined />}>
+            Nouveau
+          </Button>
+        </Space>
+      </Flex>
+
+      <br />
+
+      <DataTable
+        dataSource={bonsCommandesList || []}
+        dataSourceCopy={
+          bonsCommandesListCopy.filter(
+            (record) => record.etat === segmentedValue
+          ) || []
+        }
+        setDataSourceCopy={setBonsCommandesListCopy}
+        rowSelected
+        selectedRowKeys={selectedRows}
+        setSelectedRowKeys={setSelectedRows}
+        rowKey={(record) => record.num_bc}
+        columns={
+          segmentedValue !== "pending"
+            ? insertObjectIntoDataTableAfterIndex(
+                columns,
+                {
+                  title: "Envoyé le",
+                  dataIndex: "date_envoi",
+                  key: "date_envoi",
+                  render: (record) => (
+                    <div className="table-data">
+                      <span style={{ textOverflow: "ellipsis" }}>
+                        {formatDateTime(record)}
+                      </span>
+                    </div>
+                  ),
+                },
+                "date_bc"
+              )
+            : // [
+              //   {
+              //     title: "Envoyé le",
+              //     dataIndex: "date_envoi",
+              //     key: "date_envoi",
+              //     render: (record) => (
+              //       <div className="table-data">
+              //         <span style={{ textOverflow: "ellipsis" }}>
+              //           {formatDateTime(record)}
+              //         </span>
+              //       </div>
+              //     ),
+              //   },
+              //     ...columns,
+
+              //   ]
+              columns
+        }
+      />
+
+      <Modal
+        style={{ top: 20 }}
+        styles={{
+          header: { padding: "12px 24px" },
+          footer: { padding: "12px 24px" },
+          content: { margin: 0, padding: 0 },
+          body: {
+            overflow: "auto",
+            //minHeight: "50vh",
+            maxHeight: "80vh",
+            padding: "12px 24px",
+          },
+        }}
+        width={1000}
+        title={
+          operationType === "send"
+            ? "Envoyer commande"
+            : operationType === "view"
+            ? "Détails commande produit"
+            : ""
+        }
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          setOperationType("");
+        }}
+        footer={null}
+      >
+        {operationType === "send" ? (
+          <SendCommande
+            setOpen={setOpen}
+            currentRecord={currentRecord}
+            onRefresh={onRefresh}
+          />
+        ) : operationType === "view" ? (
+          <CommandeProduitDetails
+            setOpen={setOpen}
+            currentRecord={currentRecord}
+          />
+        ) : null}
+      </Modal>
+    </Card>
+  );
 }
 
-export default CommandesProduits
+export default CommandesProduits;
