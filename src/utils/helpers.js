@@ -51,6 +51,19 @@ export const deletePopup = () => {
   });
 };
 
+export const validPopup = () => {
+  return Swal.fire({
+    title: "Êtes-vous sûr de continuer ?",
+    icon: "question",
+    iconColor: "var(--app-color)",
+    showCancelButton: true,
+    cancelButtonColor: "#d33",
+    cancelButtonText: "Non",
+    confirmButtonColor: "var(--app-color)",
+    confirmButtonText: "Oui"
+  });
+};
+
 export const logoutPopup = () => {
   return Swal.fire({
     title: "Êtes-vous sûr de vouloir vous déconnecter ?",

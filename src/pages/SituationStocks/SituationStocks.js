@@ -1,91 +1,95 @@
-import { DeleteOutlined, EditOutlined, ExportOutlined, HomeOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
-import { Breadcrumb, Button, Card, Flex, Space, Tooltip, Typography } from 'antd'
-import React from 'react'
-//import { useNavigate } from 'react-router';
-import DataTable from '../../components/common/DataTable/DataTable';
-import { formatDate } from '../../utils/helpers';
+import {
+  ExportOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  Flex,
+  Space,
+  Tooltip,
+  Typography,
+} from "antd";
+import React, { useState } from "react";
+import DataTable from "../../components/common/DataTable/DataTable";
+import useFetch from "../../utils/hooks/useFetch";
+import { endpoints } from "../../constants/endpoints.constants";
+import useSearch from "../../utils/hooks/useSearch";
+import SearchBar from "../../components/common/SearchBar/SearchBar";
 
+const { Title } = Typography;
 
-
-const {Title} = Typography;
-    
 function SituationStocks() {
-    // const navigate = useNavigate();
-    
+  const {
+    data: stocksList,
+    dataCopy: stocksListCopy,
+    setDataCopy: setStocksListCopy,
+    isLoading,
+    onRefresh,
+  } = useFetch(endpoints.situation_stock.LIST);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const { getColumnSearchProps } = useSearch();
 
-    // const onAdd = () => {
-        
-    // }
+  return (
+    <Card>
+      <Title level={3}>Situation des stocks</Title>
 
-    return (
-        <Card>
-            <Title level={3} >Situation des stocks</Title>
+      <br />
 
-            <Flex justify="flex-end" align="center" >
-                <Space>
-                    <Tooltip title="Actualiser" >
-                        <Button type='text' shape="circle" icon={<ReloadOutlined/>} onClick={()=>{console.log("refresh here")}} /> &nbsp;&nbsp;
-                    </Tooltip> 
-                    <Button type='primary' icon={<ExportOutlined/>} >Exporter</Button>
-                    <Button type='primary' icon={<PlusOutlined/>} >Ajouter</Button>
-                </Space>
-            </Flex>
+      <Flex justify="space-between" align="center">
+        <SearchBar
+          data={stocksList}
+          setDataCopy={setStocksListCopy}
+          listKeys={["code_produit", "libelle_produit", "qte_stock_th"]}
+        />
+        <Space>
+          <Tooltip title="Actualiser">
+            <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} />
+          </Tooltip>
+          <Button type="primary" icon={<ExportOutlined />}>
+            Exporter
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />}>
+            Ajouter
+          </Button>
+        </Space>
+      </Flex>
 
-            <br/>
+      <br />
 
-            <DataTable 
-                dataSource={[]}
-                dataSourceCopy={[]}
-                setDataSourceCopy={null}
-                columns={[
-                    {
-                        title: 'Code',
-                        dataIndex: 'code_stock',
-                        key: 'code_stock',
-                    },
-                    {
-                        title: 'Désignation',
-                        dataIndex: 'designation',
-                        key: 'designation',
-                    },
-                    {
-                        title: 'Condition',
-                        dataIndex: 'condition',
-                        key: 'condition',
-                    },
-                    {
-                        title: 'Stock théorique',
-                        dataIndex: 'stock_theorique',
-                        key: 'stock_theorique',
-                    },
-                    {
-                        title: 'Date de péremption',
-                        dataIndex: 'date_peremption',
-                        key: 'date_peremption',
-                        render: (record) => <div className='table-data'>
-                            <span style={{textOverflow:"ellipsis"}} > {formatDate(record)} </span>
-                        </div>,
-                    },
-                    {
-                        render :  (record)=>(
-                            <Flex align='center' >
-                                <Space size="middle" >
-                                    <Tooltip title="Editer">
-                                        <Button type='link' icon={<EditOutlined/>} />
-                                    </Tooltip>
-                                    <Tooltip title="Supprimer">
-                                        <Button type='link' danger icon={<DeleteOutlined/>} />
-                                    </Tooltip>
-                                </Space>
-                            </Flex>
-                        )
-                    }
-                ]}
-            />
-
-        </Card>
-    )
+      <DataTable
+        tableLoading={isLoading}
+        dataSource={stocksList || []}
+        dataSourceCopy={stocksListCopy || []}
+        setDataSourceCopy={setStocksListCopy}
+        rowKey={(record) => record.code_produit}
+        rowSelected
+        selectedRowKeys={selectedRows}
+        setSelectedRowKeys={setSelectedRows}
+        columns={[
+          {
+            title: "Code",
+            dataIndex: "code_produit",
+            key: "code_produit",
+            ...getColumnSearchProps("code_produit"),
+          },
+          {
+            title: "Désignation",
+            dataIndex: "libelle_produit",
+            key: "libelle_produit",
+            ...getColumnSearchProps("libelle_produit"),
+          },
+          {
+            title: "Stock théorique",
+            dataIndex: "qte_stock_th",
+            key: "qte_stock_th",
+            ...getColumnSearchProps("qte_stock_th"),
+          }
+        ]}
+      />
+    </Card>
+  );
 }
-
-export default SituationStocks
+    
+export default SituationStocks;

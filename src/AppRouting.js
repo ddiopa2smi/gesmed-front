@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from "react-router-dom";
+import { Navigate, createBrowserRouter, createHashRouter } from "react-router-dom";
 import MySpace from "./layouts/MySpace/MySpace";
 import Auth from "./pages/Auth/Auth";
 import NotFound from "./pages/NotFound/NotFound";
@@ -50,7 +50,8 @@ import { administrationRouter } from "./pages/EspaceAdministration/Routing.tsx";
 import MedicalDashboard from "./pages/MedicalDashboard/MedicalDashboard.js";
 import PharmacyDashboard from "./pages/PharmacyDashboard/PharmacyDashboard.js";
 import Infirmerie from "./pages/Infirmerie/Infirmerie.js"
-export const router = createBrowserRouter(
+//export const router = createBrowserRouter(
+export const router = createHashRouter(
     [
         {
             path : "/",

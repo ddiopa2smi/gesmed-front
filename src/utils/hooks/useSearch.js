@@ -10,7 +10,7 @@ function useSearch() {
     const searchInput = useRef(null);
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
-        setSearchText(selectedKeys[0]);
+        setSearchText(selectedKeys[0]); 
         setSearchedColumn(dataIndex);
     };
     const handleReset = (clearFilters) => {

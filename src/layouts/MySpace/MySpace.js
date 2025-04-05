@@ -327,7 +327,7 @@ const MySpace = () => {
           >
             <Flex justify="center" align="center" style={{ height: "56px" }}>
               {/* <Text strong>GESMED</Text> */}
-              <img src={images.logoWithoutBg}  height={56} style={{objectFit:"cover"}} />
+              <img src={images.logoWithoutBg}  height={collapsed ? 38 : 56} style={{objectFit:"cover"}} />
             </Flex>
             {menu}
           </Sider>

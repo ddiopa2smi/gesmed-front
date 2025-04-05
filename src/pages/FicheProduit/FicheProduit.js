@@ -1,6 +1,5 @@
-import { HomeOutlined, OrderedListOutlined } from "@ant-design/icons";
+import {  OrderedListOutlined } from "@ant-design/icons";
 import {
-  Breadcrumb,
   Button,
   Card,
   Col,
@@ -19,17 +18,16 @@ import {
   message,
 } from "antd";
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useFetch from "../../utils/hooks/useFetch";
 import { endpoints } from "../../constants/endpoints.constants";
 import { codesPrescriptions } from "../../constants/app.constants";
 import AddAndEditDropdown from "../../components/common/AddAndEditDropdown/AddAndEditDropdown";
 import FormFooter from "../../components/common/FormFooter/FormFooter";
-import ListProduits from "../../components/specific/ListProduits/ListProduits";
 import AddFamilleMedoc from "../../components/specific/AddFamilleMedoc/AddFamillleMedoc";
 import AddConditionnement from "../../components/specific/AddConditionnement/AddConditionnement";
 import AddFormeGalenique from "../../components/specific/AddFormeGalenique/AddFormeGalenique";
-import { deletePopup, generateRandomCode } from "../../utils/helpers";
+import { deletePopup } from "../../utils/helpers";
 import { deleteActions, postActions, putActions } from "../../actions/actions";
 import BackButton from "../../components/common/BackButton/BackButton";
 
@@ -46,7 +44,6 @@ function FicheProduit() {
     isLoading,
     error,
   } = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
-  //console.log(listMedicaments)
   const {
     data: familleMedocsList,
     isLoading: familleMedocsListLoading,

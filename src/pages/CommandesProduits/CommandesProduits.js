@@ -1,4 +1,5 @@
 import {
+  CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
@@ -54,6 +55,7 @@ function CommandesProduits() {
     dataCopy: bonsCommandesListCopy,
     setDataCopy: setBonsCommandesListCopy,
     onRefresh,
+    isLoading,
   } = useFetch(endpoints.commande_produit.LIST);
 
   const [selectedRows, setSelectedRows] = useState([]);
@@ -97,10 +99,23 @@ function CommandesProduits() {
 
   const onPrint = (record) => {};
 
-  const send = (record) => {
+  const onSend = (record) => {
     setOperationType("send");
     setOpen(true);
     setCurrentRecord(record);
+  };
+
+  const onCancel = (record) => {
+    deletePopup().then((result) => {
+      if (result.isConfirmed) {
+        // postActions(endpoints.commande_produit.CANCEL, record).then(
+        //   (response) => {
+        //     message.success(response?.data);
+        //     onRefresh();
+        //   }
+        // );
+      }
+    });
   };
 
   const columns = [
@@ -174,59 +189,129 @@ function CommandesProduits() {
           ) : record === "cancel" ? (
             <Tag color="red">Annulée</Tag>
           ) : (
-            <Tag color="green">Recue</Tag>
+            <Tag color="green">Receptionnée</Tag>
           )}
         </div>
       ),
     },
     {
-      render: (record) => (
-        <Flex align="center">
-          <Space size="middle">
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    label: "Voir détails",
-                    icon : <EyeOutlined />,
-                    key: "1",
-                    onClick: () => {
-                      onViewDetails(record);
-                    },
-                  },
-                  {
-                    label: "Editer",
-                    key: "2",
-                    icon : <EditOutlined />,
-                    onClick: () => {
-                      onEdit(record);
-                    },
-                  },
-                  {
-                    label: "Imprimer",
-                    key: "3",
-                    icon : <PrinterOutlined />,
-                    onClick: () => {
-                      onPrint(record);
-                    },
-                  },
-                  {
-                    label: "Envoyer",
-                    key: "4",
-                    icon : <SendOutlined />,
-                    onClick: () => {
-                      send(record);
-                    },
-                  },
-                ],
-              }}
-              trigger={["click"]}
-            >
-              <Button type="text" icon={<MoreOutlined />} />
-            </Dropdown>
-          </Space>
-        </Flex>
-      ),
+      render: (record) => {
+        const viewDetailsObj = {
+          label: "Voir détails",
+          icon: <EyeOutlined />,
+          key: "1",
+          onClick: () => {
+            onViewDetails(record);
+          },
+        };
+        const editObj = {
+          label: "Editer",
+          key: "2",
+          icon: <EditOutlined />,
+          onClick: () => {
+            onEdit(record);
+          },
+        };
+        const printObj = {
+          label: "Imprimer",
+          key: "3",
+          icon: <PrinterOutlined />,
+          onClick: () => {
+            onPrint(record);
+          },
+        };
+        const sendObj = {
+          label: "Envoyer",
+          key: "4",
+          icon: <SendOutlined />,
+          onClick: () => {
+            onSend(record);
+          },
+        };
+        const cancelObj = {
+          label: "Annuler",
+          key: "5",
+          icon: <CloseCircleOutlined />,
+          onClick: () => {
+            onCancel(record);
+          },
+        };
+
+        let temp = [];
+        switch (record.etat) {
+          case "pending":
+            temp.push(viewDetailsObj, editObj, printObj, sendObj, cancelObj);
+            break;
+          case "send":
+            temp.push(viewDetailsObj, printObj, cancelObj);
+            break;
+          case "cancel":
+            temp.push(viewDetailsObj, printObj);
+            break;
+          case "received":
+            temp.push(viewDetailsObj, printObj);
+            break;
+        
+          default:
+            break;
+        }
+        return (
+          <Flex align="center">
+            <Space size="middle">
+              <Dropdown
+                menu={{
+                  items: temp
+                  // [
+                  //   {
+                  //     label: "Voir détails",
+                  //     icon: <EyeOutlined />,
+                  //     key: "1",
+                  //     onClick: () => {
+                  //       onViewDetails(record);
+                  //     },
+                  //   },
+                  //   {
+                  //     label: "Editer",
+                  //     key: "2",
+                  //     icon: <EditOutlined />,
+                  //     onClick: () => {
+                  //       onEdit(record);
+                  //     },
+                  //   },
+                  //   {
+                  //     label: "Imprimer",
+                  //     key: "3",
+                  //     icon: <PrinterOutlined />,
+                  //     onClick: () => {
+                  //       onPrint(record);
+                  //     },
+                  //   },
+                  //   {
+                  //     label: "Envoyer",
+                  //     key: "4",
+                  //     icon: <SendOutlined />,
+                  //     onClick: () => {
+                  //       onSend(record);
+                  //     },
+                  //   },
+                  //   {
+                  //     label: "Annuler",
+                  //     key: "5",
+                  //     icon: <CloseCircleOutlined />,
+                  //     onClick: () => {
+                  //       onCancel(record);
+                  //     },
+                  //   },
+                  // ],
+                }}
+                trigger={["click"]}
+              >
+                <Button type="text" icon={<MoreOutlined />} />
+              </Dropdown>
+            </Space>
+          </Flex>
+        );
+      },
     },
   ];
 
@@ -237,7 +322,6 @@ function CommandesProduits() {
       <Flex justify="space-between" align="center">
         <Segmented
           defaultValue={segmentedValue}
-          
           options={[
             {
               value: "pending",
@@ -252,7 +336,7 @@ function CommandesProduits() {
               label: "Annulées",
             },
             {
-              value: "done",
+              value: "received",
               label: "Réceptionnées",
             },
           ]}
@@ -279,6 +363,7 @@ function CommandesProduits() {
       <br />
 
       <DataTable
+        tableLoading={isLoading}
         dataSource={bonsCommandesList || []}
         dataSourceCopy={
           bonsCommandesListCopy.filter(
@@ -290,6 +375,9 @@ function CommandesProduits() {
         selectedRowKeys={selectedRows}
         setSelectedRowKeys={setSelectedRows}
         rowKey={(record) => record.num_bc}
+        getCheckboxProps={(record) => ({
+          disabled: record?.etat === "received",
+        })}
         columns={
           segmentedValue !== "pending"
             ? insertObjectIntoDataTableAfterIndex(
@@ -308,23 +396,7 @@ function CommandesProduits() {
                 },
                 "date_bc"
               )
-            : // [
-              //   {
-              //     title: "Envoyé le",
-              //     dataIndex: "date_envoi",
-              //     key: "date_envoi",
-              //     render: (record) => (
-              //       <div className="table-data">
-              //         <span style={{ textOverflow: "ellipsis" }}>
-              //           {formatDateTime(record)}
-              //         </span>
-              //       </div>
-              //     ),
-              //   },
-              //     ...columns,
-
-              //   ]
-              columns
+            : columns
         }
       />
 
@@ -341,7 +413,7 @@ function CommandesProduits() {
             padding: "12px 24px",
           },
         }}
-        width={1000}
+        width={operationType === "view" ? 1000 : 500}
         title={
           operationType === "send"
             ? "Envoyer commande"

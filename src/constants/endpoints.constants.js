@@ -141,21 +141,28 @@ export const endpoints = {
         LIST : "/api/CommandeProduit/Recep/list",
         UPDATE : "/api/CommandeProduit/Recep/update",
         DELETE_MULTIPLE : "/api/CommandeProduit/Recep/delete",
+        VALID_MULTIPLE : "/api/CommandeProduit/Recep/validate",
         GET_DETAILS : "/api/CommandeProduit/Recep/getDetails"
     },
     sorties_produits : {
-        ADD : "/api/CommandeProduit/Recep/add",
-        LIST : "/api/CommandeProduit/Recep/list",
-        UPDATE : "/api/CommandeProduit/Recep/update",
-        DELETE_MULTIPLE : "/api/CommandeProduit/Recep/delete",
-        GET_DETAILS : "/api/CommandeProduit/Recep/getDetails"
+        ADD : "/api/Produit/Sortie/add",
+        LIST : "/api/Produit/Sortie/list",
+        UPDATE : "/api/Produit/Sortie/update",
+        DELETE_MULTIPLE : "/api/Produit/Sortie/delete",
+        GET_DETAILS : "/api/Produit/Sortie/getDetails"
     },
     saisie_inventaire : {
         ADD : "/api/Inventory/add",
         LIST : "/api/Inventory/list",
         UPDATE : "/api/Inventory/update",
-        DELETE_MULTIPLE : "/api/Inventory/delete",
-        GET_DETAILS : "/api/Inventory/getDetails"
+        DELETE : "/api/Inventory/delete",
+        //DELETE_MULTIPLE : "/api/Inventory/delete",
+        GET_DETAILS : "/api/Inventory/getDetails",
+        VALIDATE : "/api/Inventory/validate",
+        STOCK : "/api/Inventory/getStock"
+    },
+    situation_stock : {
+        LIST : "/api/Inventory/situationStock",
     },
     services_medicaux : {
         LIST : "/api/smed/ServiceMedicaux/list"

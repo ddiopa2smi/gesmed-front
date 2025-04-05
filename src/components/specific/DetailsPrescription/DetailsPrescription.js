@@ -279,7 +279,7 @@ function DetailsPrescription({
               Prescripteur : <Text strong>{prescriptionItem?.username}</Text>
             </span>
             <span style={{ fontSize: 18 }}>
-              Servi par : <Text strong>{userConnected?.username}</Text>
+              Effectué par : <Text strong>{userConnected?.username}</Text>
             </span>
           </Flex>
           <br />
@@ -319,7 +319,7 @@ function DetailsPrescription({
               Prescripteur : <Text strong>{prescriptionItem.username}</Text>
             </span>
             <span style={{ fontSize: 18 }}>
-              Servi par : <Text strong>{userConnected.username}</Text>
+              Effectué par : <Text strong>{userConnected.username}</Text>
             </span>
           </Flex>
 

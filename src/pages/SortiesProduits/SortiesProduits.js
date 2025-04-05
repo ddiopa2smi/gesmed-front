@@ -13,6 +13,7 @@ import {
   message,
   Segmented,
   Space,
+  Tag,
   Tooltip,
   Typography,
 } from "antd";
@@ -22,7 +23,7 @@ import DataTable from "../../components/common/DataTable/DataTable";
 import useFetch from "../../utils/hooks/useFetch";
 import { endpoints } from "../../constants/endpoints.constants";
 import ReloadButton from "../../components/common/ReloadButton/ReloadButton";
-import { deletePopup } from "../../utils/helpers";
+import { deletePopup, formatDate } from "../../utils/helpers";
 import { postActions } from "../../actions/actions";
 
 const { Title } = Typography;
@@ -34,7 +35,21 @@ function SortiesProduits() {
   );
   const [selectedRows, setSelectedRows] = useState([]);
   const [segmentedValue, setSegmentedValue] = useState("all");
-  const onAdd = () => {};
+  const onAdd = () => {
+    navigate(
+      "/espace-pharmacie/sorties-produits/new-mouvement-sortie"
+    );
+  }
+  
+  const onEdit = (record) => {
+    navigate(
+      "/espace-pharmacie/sorties-produits/new-mouvement-sortie", {
+        state: {
+          currentRecord: record,
+        },
+      }
+    );
+  };
   const onMultipleDelete = (records) => {
     deletePopup().then((result) => {
       if (result.isConfirmed) {
@@ -64,11 +79,11 @@ function SortiesProduits() {
               label: "Tout",
             },
             {
-              value: "recu",
-              label: "Réceptionnées",
+              value: "Saisie",
+              label: "Saisies",
             },
             {
-              value: "valid",
+              value: "Valid",
               label: "Validées",
             },
           ]}
@@ -88,11 +103,7 @@ function SortiesProduits() {
           </Button>
           <Button
             type="primary"
-            onClick={() => {
-              navigate(
-                "/espace-pharmacie/sorties-produits/new-mouvement-sortie"
-              );
-            }}
+            onClick={onAdd}
             icon={<PlusOutlined />}
           >
             Nouveau
@@ -103,24 +114,35 @@ function SortiesProduits() {
       <br />
 
       <DataTable
-        dataSource={[]}
-        dataSourceCopy={[]}
-        setDataSourceCopy={null}
+        dataSource={data}
+        dataSourceCopy={
+          segmentedValue === "all"
+            ? dataCopy
+            : dataCopy.filter((record) => record?.etat === segmentedValue)
+        }
+        setDataSourceCopy={setDataCopy}
+        rowSelected
+        selectedRowKeys={selectedRows}
+        setSelectedRowKeys={setSelectedRows}
+        rowKey={(record) => record.num_sortie}
         columns={[
           {
             title: "Date",
-            dataIndex: "date",
-            key: "date",
+            dataIndex: "date_sortie",
+            key: "date_sortie",
             render: (record) => (
               <div className="table-data">
-                <span style={{ textOverflow: "ellipsis" }}> {record} </span>
+                <span style={{ textOverflow: "ellipsis" }}>
+                  {" "}
+                  {formatDate(record)}{" "}
+                </span>
               </div>
             ),
           },
           {
             title: "Numéro",
-            dataIndex: "numero",
-            key: "numero",
+            dataIndex: "num_sortie",
+            key: "num_sortie",
             render: (record) => (
               <div className="table-data">
                 <span style={{ textOverflow: "ellipsis" }}> {record} </span>
@@ -131,21 +153,48 @@ function SortiesProduits() {
             title: "Motif sortie",
             dataIndex: "motif_sortie",
             key: "motif_sortie",
+            render : (record) => {
+              let result = "";
+              switch (record) {
+                case "Comptoir":
+                  result = "Livraison comptoir"
+                  break;
+                case "Perime":
+                  result = "Produit périmé"
+                  break;
+                case "Gratuit":
+                  result = "Déstockage";
+                  break;
+                case "Defaut":
+                  result = "Défault";
+                  break;
+                default:
+                  result = "Livraison comptoir"
+                  break;
+              }
+              return <div className="table-data" >{result}</div>;
+            }
           },
           {
             title: "Etat",
             dataIndex: "etat",
             key: "etat",
+            render: (record) => (
+              <div className="table-data">
+                {record === "Saisie" ? (
+                  <Tag color="blue">{record}</Tag>
+                ) : (
+                  <Tag color="green">{record}</Tag>
+                )}
+              </div>
+            ),
           },
           {
             render: (record) => (
               <Flex align="center">
                 <Space size="middle">
                   <Tooltip title="Editer">
-                    <Button type="link" icon={<EditOutlined />} />
-                  </Tooltip>
-                  <Tooltip title="Supprimer">
-                    <Button type="link" danger icon={<DeleteOutlined />} />
+                    <Button type="link" icon={<EditOutlined />} onClick={() => onEdit(record)} />
                   </Tooltip>
                 </Space>
               </Flex>

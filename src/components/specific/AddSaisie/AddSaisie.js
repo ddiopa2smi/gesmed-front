@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { formatDate } from "../../../utils/helpers";
 import { postActions } from "../../../actions/actions";
 import { endpoints } from "../../../constants/endpoints.constants";
-function AddSaisie({ date, setDate, setOpen }) {
+function AddSaisie({ date, setDate, setOpen , onRefresh }) {
   const [form] = Form.useForm();
   const [formLoading, setFormLoading] = useState(false);
   const save = () => {
@@ -13,21 +13,22 @@ function AddSaisie({ date, setDate, setOpen }) {
       .validateFields()
       .then((values) => {
         setFormLoading(true);
-          const payload = {
-            inv_num : "INV"+formatDate(values.date_saisie).split("/").join(""),
-            inv_date : new Date(values.date_saisie).toISOString(),
-          };
-          //console.log(payload);
+        const payload = {
+          inv_num: "INV" + formatDate(values.date_saisie).split("/").join(""),
+          inv_date: new Date(values.date_saisie).toISOString(),
+        };
+        //console.log(payload);
 
-          postActions(endpoints.saisie_inventaire.ADD, payload)
-            .then((response) => {
-              if (response?.data) {
-                message.success("Traitement éffectué avec succès");
-                //onRefresh();
-                setOpen(false);
-              }
-            })
-            .finally(() => setFormLoading(false));
+        postActions(endpoints.saisie_inventaire.ADD, payload)
+          .then((response) => {
+            if (response?.data) {
+              message.success("Traitement éffectué avec succès");
+              setDate(response?.data?.inv_date)
+              onRefresh();
+              setOpen(false);
+            }
+          })
+          .finally(() => setFormLoading(false));
       })
       .catch((info) => {
         console.log("Validate Failed:", info);

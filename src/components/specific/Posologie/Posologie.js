@@ -6,8 +6,7 @@ const {TextArea} = Input;
 const {Title} = Typography;
 const { Option } = Select;
 
-const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentSelected, quantity , setIsModalVisible}) => {
-    
+const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentSelected, quantity , conditionnement, setIsModalVisible}) => {
     
     const [form] = Form.useForm();
 
@@ -18,16 +17,17 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
             let inc = 0; // increment
             let index = 0;
             const payload = {
-                codeacte : medicamentSelected.codeacte ,
-                libacte : medicamentSelected.libacte ,
-                posologie : `${values.qte} ${values.forme_galenique} - ${values.qd} - ${values.comment} - pendant ${values.duree} jour(s)` ,
+                codeacte : medicamentSelected.code_produit ,
+                libacte : medicamentSelected.libelle_produit ,
+                posologie : `${values.qte} ${values.forme_galenique} - ${values.qd} ${values.comment === "Aucun" ? "" : `- ${values.comment}`} - pendant ${values.duree} jour(s)` ,
                 qte : quantity ,
+                cond : conditionnement,
                 observation : values.observation
             }
 
             // Tester l'existence du médicament dans la table des medicaments si oui incrementer inc
             for (let i = 0; i < medicamentsPrescrites.length; i++) {
-                if (medicamentsPrescrites[i].codeacte === medicamentSelected.codeacte ) {
+                if (medicamentsPrescrites[i].codeacte === medicamentSelected.code_produit ) {
                     inc+=1;
                     index = i ;
                 }
@@ -40,6 +40,7 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                 medicamentsPrescrites[index].libacte =temp.libacte;
                 medicamentsPrescrites[index].posologie =temp.posologie;
                 medicamentsPrescrites[index].qte =temp.qte;
+                medicamentsPrescrites[index].cond =temp.cond;
                 medicamentsPrescrites[index].observation =temp.observation;
                 setMedicamentsPrescrites(medicamentsPrescrites);
                 //message.info("Médicament déjà existant et modifié avec succès");
@@ -64,7 +65,7 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
             onFinish={onFinish}
             preserve={false}
         >
-            <Title level={5} > { medicamentSelected !== null ? medicamentSelected.libacte : ""} </Title>
+            <Title level={5} > { medicamentSelected !== null ? medicamentSelected.libelle_produit : ""} </Title>
             <Row gutter={[24,24]}>
                 <Col xs={24} sm={12} md={12} lg={12} xl={12} >
                     <Form.Item 

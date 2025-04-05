@@ -1,6 +1,9 @@
 import {
+  CheckCircleFilled,
+  CheckCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   HomeOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
@@ -11,6 +14,7 @@ import {
   Card,
   Flex,
   message,
+  Modal,
   Segmented,
   Space,
   Tag,
@@ -22,9 +26,11 @@ import { useNavigate } from "react-router";
 import DataTable from "../../components/common/DataTable/DataTable";
 import useFetch from "../../utils/hooks/useFetch";
 import { endpoints } from "../../constants/endpoints.constants";
-import { deletePopup, formatDate } from "../../utils/helpers";
-import { postActions } from "../../actions/actions";
+import { deletePopup, formatDate, validPopup } from "../../utils/helpers";
+import { postActions, putActions } from "../../actions/actions";
 import ReloadButton from "../../components/common/ReloadButton/ReloadButton";
+import EditButton from "../../components/common/EditButton/EditButton";
+import DetailsEntree from "./components/DetailsEntree";
 
 const { Title } = Typography;
 
@@ -33,6 +39,8 @@ function EntreesProduits() {
   const { data, dataCopy, setDataCopy, onRefresh, isLoading } = useFetch(
     endpoints.entrees_produits.LIST
   );
+  const [open, setOpen] = useState(false);
+  const [currentRecord, setCurrentRecord] = useState({});
   const [selectedRows, setSelectedRows] = useState([]);
   //const [segmentedValue, setSegmentedValue] = useState("");
   const [segmentedValue, setSegmentedValue] = useState("all");
@@ -44,6 +52,23 @@ function EntreesProduits() {
         postActions(endpoints.entrees_produits.DELETE_MULTIPLE, records).then(
           (response) => {
             if (response?.data) {
+              message.success("Eléments supprimés avec succès");
+              setSelectedRows([]);
+              onRefresh();
+            }
+          }
+        );
+      }
+    });
+  };
+
+  const onMultipleValid = (records) => {
+    validPopup().then((result) => {
+      if (result.isConfirmed) {
+        const temp = dataCopy.filter((item) => records.includes(item?.num_br));
+        putActions(endpoints.entrees_produits.VALID_MULTIPLE, temp).then(
+          (response) => {
+            if (response?.data) {
               message.success(response?.data);
               setSelectedRows([]);
               onRefresh();
@@ -52,6 +77,11 @@ function EntreesProduits() {
         );
       }
     });
+  };
+
+  const onViewDetails = (record) => {
+    setCurrentRecord(record);
+    setOpen(true);
   };
 
   return (
@@ -92,10 +122,16 @@ function EntreesProduits() {
           </Button>
           <Button
             type="primary"
+            onClick={() => onMultipleValid(selectedRows)}
+            disabled={selectedRows.length === 0}
+          >
+            Valider
+          </Button>
+          <Button
+            type="primary"
             onClick={() => {
               navigate("/espace-pharmacie/entrees-produits/reception-commande");
             }}
-            icon={<PlusOutlined />}
           >
             Réception commande
           </Button>
@@ -117,11 +153,27 @@ function EntreesProduits() {
         selectedRowKeys={selectedRows}
         setSelectedRowKeys={setSelectedRows}
         rowKey={(record) => record.num_br}
+        getCheckboxProps={(record) => ({
+          disabled: record?.etat === "valid",
+        })}
         columns={[
           {
             title: "Date",
             dataIndex: "date_liv",
             key: "date_liv",
+            render: (record) => (
+              <div className="table-data">
+                <span style={{ textOverflow: "ellipsis" }}>
+                  {" "}
+                  {formatDate(record)}{" "}
+                </span>
+              </div>
+            ),
+          },
+          {
+            title: "Date péremption",
+            dataIndex: "date_peremption",
+            key: "date_peremption",
             render: (record) => (
               <div className="table-data">
                 <span style={{ textOverflow: "ellipsis" }}>
@@ -172,37 +224,71 @@ function EntreesProduits() {
             ),
           },
           {
+            title: "N° Lot",
+            dataIndex: "num_lot",
+            key: "num_lot",
+            render: (record) => (
+              <div className="table-data">
+                <span style={{ textOverflow: "ellipsis" }}> {record} </span>
+              </div>
+            ),
+          },
+          {
             title: "Etat",
             dataIndex: "etat",
             key: "etat",
             render: (record) => (
               <div className="table-data">
                 {record === "recu" ? (
-                  <Tag color="cyan"> Reçue </Tag>
+                  <Tag color="cyan"> Receptionnée </Tag>
                 ) : record === "valid" ? (
                   <Tag color="green">Validée</Tag>
                 ) : (
-                  <Tag color="orange">En attente</Tag>  
+                  <Tag color="orange">En attente</Tag>
                 )}
               </div>
             ),
           },
-          // {
-          //     render :  (record)=>(
-          //         <Flex align='center' >
-          //             <Space size="middle" >
-          //                 <Tooltip title="Editer">
-          //                     <Button type='link' icon={<EditOutlined/>} />
-          //                 </Tooltip>
-          //                 <Tooltip title="Supprimer">
-          //                     <Button type='link' danger icon={<DeleteOutlined/>} />
-          //                 </Tooltip>
-          //             </Space>
-          //         </Flex>
-          //     )
-          // }
+          {
+            render: (record) => (
+              <Flex align="center">
+                <Space size="middle">
+                  <Tooltip title="Voir détails">
+                    <Button type="text" icon={<EyeOutlined />} onClick={() => onViewDetails(record)} />
+                  </Tooltip>
+                </Space>
+              </Flex>
+            ),
+          },
         ]}
       />
+
+      <Modal
+        style={{ top: 20 }}
+        styles={{
+          header: { padding: "12px 24px" },
+          footer: { padding: "12px 24px" },
+          content: { margin: 0, padding: 0 },
+          body: {
+            overflow: "auto",
+            maxHeight: "80vh",
+            padding: "12px 24px",
+          },
+        }}
+        width={1000}
+        title={"Détails entrée produit"}
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+        }}
+        footer={null}
+      >
+        <DetailsEntree
+          setOpen={setOpen}
+          currentRecord={currentRecord}
+          onRefresh={onRefresh}
+        />
+      </Modal>
     </Card>
   );
 }

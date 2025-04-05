@@ -127,7 +127,7 @@ function ReceptionCommande() {
       currentRecord ? dayjs(currentRecord.date_br) : dayjs(new Date())
     );
 
-    console.log(currentRecord);
+    // console.log(currentRecord);
     
   }, [currentRecord]);
 
@@ -243,7 +243,7 @@ function ReceptionCommande() {
           Référence du bon de livraison fournisseur
         </Divider>
         <Row gutter={[24, 24]} align={"middle"}>
-          <Col xs={24} sm={24} md={12} lg={8} xl={8}>
+          <Col xs={24} sm={24} md={12} lg={6} xl={6}>
             <Form.Item
               name="date_liv"
               label="Date BL"
@@ -258,10 +258,39 @@ function ReceptionCommande() {
               <DatePicker placeholder="Choisir la date" format="DD/MM/YYYY" />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={24} md={12} lg={8} xl={8}>
+          <Col xs={24} sm={24} md={12} lg={6} xl={6}>
             <Form.Item
               name="num_bl"
               label="Numéro BL"
+              rules={[
+                {
+                  required: true,
+                  message: "Sélection obligatoire",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={24} md={12} lg={6} xl={6}>
+            <Form.Item
+              name="date_peremption"
+              label="Date péremption"
+              rules={[
+                {
+                  required: true,
+                  message: "Sélection obligatoire",
+                },
+              ]}
+              initialValue={dayjs(new Date())}
+            >
+              <DatePicker placeholder="Choisir la date" format="DD/MM/YYYY" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={24} md={12} lg={6} xl={6}>
+            <Form.Item
+              name="num_lot"
+              label="Numéro Lot"
               rules={[
                 {
                   required: true,

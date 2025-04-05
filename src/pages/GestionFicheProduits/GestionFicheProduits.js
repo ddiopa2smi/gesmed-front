@@ -135,6 +135,7 @@ function GestionFicheProduits() {
             title: "N°",
             dataIndex: "code_produit",
             key: "code_produit",
+             fixed: 'left',
             ...getColumnSearchProps("code_produit"),
           },
           {
@@ -203,6 +204,7 @@ function GestionFicheProduits() {
           // {
           {
             width: "auto",
+            fixed : "right",
             render: (record) => (
               <Flex justify="center" align="center">
                 <Space>
