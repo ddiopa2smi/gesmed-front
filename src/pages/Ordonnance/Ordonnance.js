@@ -275,8 +275,8 @@ const Ordonnance = () => {
                 
                 loading={selectMedicamentsListLoading}
               >
-                {listMedicaments.map((item) => (
-                  <Option key={item.code_produit} value={item.code_produit}>
+                {listMedicaments.map((item , index) => (
+                  <Option key={index} value={item.code_produit}>
                     {item.libelle_produit}
                   </Option>
                 ))}

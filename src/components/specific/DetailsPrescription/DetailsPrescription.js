@@ -67,6 +67,11 @@ function DetailsPrescription({
             },
           },
           {
+            title: "Unité",
+            dataIndex: "cond",
+            key: "cond",
+          },
+          {
             title: "Posologie",
             dataIndex: "posologie",
             key: "posologie",
