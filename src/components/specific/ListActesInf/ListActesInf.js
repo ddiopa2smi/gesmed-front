@@ -11,6 +11,7 @@ import { endpoints } from '../../../constants/endpoints.constants';
 import DetailsPrescription from '../DetailsPrescription/DetailsPrescription';
 import { ServiceType } from '../../../utils/types/types.ts';
 import { formatDate, formatDateTime } from '../../../utils/helpers';
+import { LOGO_BROWN } from '../../../constants/app.constants.js';
 import { render } from '@testing-library/react';
 
 const {Option} = Select;
@@ -32,7 +33,7 @@ function ListActesInf() {
     return (
         <Card >
             <Flex justify="space-between" align="center" >
-                <Title level={4} > Liste des actes infirmiers </Title>
+                <Title level={4} style={{ color: LOGO_BROWN }} > Liste des actes infirmiers </Title>
                 <Space>
                     {/* <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp; */}
                     <ReloadButton onRefresh={onRefresh} /> 
@@ -57,7 +58,7 @@ function ListActesInf() {
                 </Space>
             </Flex>
             <br/>
-            <DataTable 
+            <DataTable compact
                 isLoading={isLoading}
                 dataSource={data.filter((element)=> element.code === "ORD")}
                 dataSourceCopy = {segmentedValue === "Non" ? dataCopy.filter((element)=> element.code === "ORD" && element.isdone === "Non" ) : dataCopy.filter((element)=> element.code === "ORD" && element.isdone === "Oui")}
@@ -132,20 +133,19 @@ function ListActesInf() {
                 ]}
             />
 
-            <Modal 
-                style={{ top: 20 }}
+            <Modal
+                style={{ top: 20, maxWidth: 1000 }}
                 styles={{
                   header: { padding: "12px 24px" },
                   footer: { padding: "12px 24px" },
                   content: { margin: 0, padding: 0 },
                   body: {
                     overflow: "auto",
-                    minHeight: "50vh",
                     maxHeight: "80vh",
                     padding: "12px 24px",
                   },
                 }}
-                width={1000}
+                width="90%"
                 title={`Acte N° ${currentRecord?.numpresc}`}
                 open={open} 
                 onCancel={()=>{
@@ -154,7 +154,7 @@ function ListActesInf() {
                 }}
                 footer={null}
             >
-                <DetailsPrescription prescriptionItem={currentRecord} serviceType={ServiceType.PHARMACIE} setOpen={setOpen} onRefresh={onRefresh} />
+                <DetailsPrescription prescriptionItem={currentRecord} setPrescriptionItem={setCurrentRecord} serviceType={ServiceType.PHARMACIE} setOpen={setOpen} onRefresh={onRefresh} />
             </Modal>
         </Card>
     )

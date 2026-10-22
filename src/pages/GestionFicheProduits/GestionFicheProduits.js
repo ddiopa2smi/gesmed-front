@@ -12,6 +12,7 @@ import DeleteButton from "../../components/common/DeleteButton/DeleteButton";
 import { deleteActions, postActions } from "../../actions/actions";
 import { useNavigate } from "react-router";
 import SearchBar from "../../components/common/SearchBar/SearchBar";
+import { LOGO_BROWN } from "../../constants/app.constants.js";
 
 const { Title } = Typography;
 function GestionFicheProduits() {
@@ -83,7 +84,7 @@ function GestionFicheProduits() {
 
   return (
     <Card>
-      <Title level={3}>Liste des produits</Title>
+      <Title level={3} style={{ color: LOGO_BROWN }}>Liste des produits</Title>
 
       <br />
 
@@ -122,6 +123,8 @@ function GestionFicheProduits() {
       <br />
 
       <DataTable
+        scroll={{ x: "max-content" }}
+        compact
         dataSource={produitsList}
         dataSourceCopy={produitsListCopy}
         setDataSourceCopy={setProduitListCopy}
@@ -135,7 +138,7 @@ function GestionFicheProduits() {
             title: "N°",
             dataIndex: "code_produit",
             key: "code_produit",
-             fixed: 'left',
+            fixed: 'left',
             ...getColumnSearchProps("code_produit"),
           },
           {
@@ -174,7 +177,12 @@ function GestionFicheProduits() {
             dataIndex: "cond_lib",
             key: "cond_lib",
           },
-          
+          {
+            title: "Unité de distribution",
+            dataIndex: "unite_distribution",
+            key: "unite_distribution",
+          },
+
           // {
           //     title: 'Sexe',
           //     dataIndex: 'sexe_patient',
@@ -204,7 +212,7 @@ function GestionFicheProduits() {
           // {
           {
             width: "auto",
-            fixed : "right",
+            fixed: "right",
             render: (record) => (
               <Flex justify="center" align="center">
                 <Space>

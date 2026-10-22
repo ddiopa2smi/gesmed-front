@@ -78,15 +78,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-medical/rendez-vous");
       },
     },
-    {
-      key: "mon-agenda",
-      icon: <CalendarOutlined />,
-      label: "Mon agenda",
-      title: "Mon agenda",
-      onClick: () => {
-        navigate("/espace-medical/mon-agenda");
-      },
-    },
+    // {
+    //   key: "mon-agenda",
+    //   icon: <CalendarOutlined />,
+    //   label: "Mon agenda",
+    //   title: "Mon agenda",
+    //   onClick: () => {
+    //     navigate("/espace-medical/mon-agenda");
+    //   },
+    // },
     {
       key: "patients",
       icon: <TeamOutlined />,
@@ -105,15 +105,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-medical/consultations");
       },
     },
-    {
-      key: "prescriptions-groupes",
-      icon: <RiStethoscopeLine size={16} />,
-      label: "Prescriptions groupées",
-      title: "Prescriptions groupées",
-      onClick: () => {
-        navigate("/espace-medical/prescriptions-groupes");
-      },
-    },
+    // {
+    //   key: "prescriptions-groupes",
+    //   icon: <RiStethoscopeLine size={16} />,
+    //   label: "Prescriptions groupées",
+    //   title: "Prescriptions groupées",
+    //   onClick: () => {
+    //     navigate("/espace-medical/prescriptions-groupes");
+    //   },
+    // },
     {
       key: "visites",
       icon: <ApartmentOutlined />,
@@ -133,7 +133,7 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-medical/dossier-accident-travail");
       },
     },
-    
+
   ];
 
   const pharmacieMenu: ItemType<MenuItemType>[] = [
@@ -200,7 +200,7 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-pharmacie/situation-stocks");
       },
     },
-    
+
     {
       key: "fournisseurs",
       icon: <CarOutlined />,
@@ -231,15 +231,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-dentist/rendez-vous");
       },
     },
-    {
-      key: "agenda",
-      icon: <CalendarOutlined />,
-      label: "Mon agenda",
-      title: "Mon agenda",
-      onClick: () => {
-        navigate("/espace-dentist/agenda");
-      },
-    },
+    // {
+    //   key: "agenda",
+    //   icon: <CalendarOutlined />,
+    //   label: "Mon agenda",
+    //   title: "Mon agenda",
+    //   onClick: () => {
+    //     navigate("/espace-dentist/agenda");
+    //   },
+    // },
     {
       key: "patients",
       icon: <TeamOutlined />,
@@ -279,15 +279,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-infirmerie/rendez-vous");
       },
     },
-    {
-      key: "agenda",
-      icon: <CalendarOutlined />,
-      label: "Mon agenda",
-      title: "Mon agenda",
-      onClick: () => {
-        navigate("/espace-infirmerie/agenda");
-      },
-    },
+    // {
+    //   key: "agenda",
+    //   icon: <CalendarOutlined />,
+    //   label: "Mon agenda",
+    //   title: "Mon agenda",
+    //   onClick: () => {
+    //     navigate("/espace-infirmerie/agenda");
+    //   },
+    // },
     {
       key: "patients",
       icon: <TeamOutlined />,
@@ -327,15 +327,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-analyse/rendez-vous");
       },
     },
-    {
-      key: "agenda",
-      icon: <CalendarOutlined />,
-      label: "Mon agenda",
-      title: "Mon agenda",
-      onClick: () => {
-        navigate("/espace-analyse/agenda");
-      },
-    },
+    // {
+    //   key: "agenda",
+    //   icon: <CalendarOutlined />,
+    //   label: "Mon agenda",
+    //   title: "Mon agenda",
+    //   onClick: () => {
+    //     navigate("/espace-analyse/agenda");
+    //   },
+    // },
     {
       key: "patients",
       icon: <TeamOutlined />,
@@ -375,15 +375,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-radiologie/rendez-vous");
       },
     },
-    {
-      key: "agenda",
-      icon: <CalendarOutlined />,
-      label: "Mon agenda",
-      title: "Mon agenda",
-      onClick: () => {
-        navigate("/espace-radiologie/agenda");
-      },
-    },
+    // {
+    //   key: "agenda",
+    //   icon: <CalendarOutlined />,
+    //   label: "Mon agenda",
+    //   title: "Mon agenda",
+    //   onClick: () => {
+    //     navigate("/espace-radiologie/agenda");
+    //   },
+    // },
     {
       key: "patients",
       icon: <TeamOutlined />,
@@ -423,15 +423,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-hospitalisation/rendez-vous");
       },
     },
-    {
-      key: "agenda",
-      icon: <CalendarOutlined />,
-      label: "Mon agenda",
-      title: "Mon agenda",
-      onClick: () => {
-        navigate("/espace-hospitalisation/agenda");
-      },
-    },
+    // {
+    //   key: "agenda",
+    //   icon: <CalendarOutlined />,
+    //   label: "Mon agenda",
+    //   title: "Mon agenda",
+    //   onClick: () => {
+    //     navigate("/espace-hospitalisation/agenda");
+    //   },
+    // },
     {
       key: "patients",
       icon: <TeamOutlined />,
@@ -452,7 +452,7 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
     },
   ];
 
-  const gynecologieMenu: ItemType<MenuItemType>[]  = [
+  const gynecologieMenu: ItemType<MenuItemType>[] = [
     {
       key: "dashboard",
       icon: <DashboardOutlined />,
@@ -471,15 +471,15 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-gynecologie/rendez-vous");
       },
     },
-    {
-      key: "agenda",
-      icon: <CalendarOutlined />,
-      label: "Mon agenda",
-      title: "Mon agenda",
-      onClick: () => {
-        navigate("/espace-gynecologie/agenda");
-      },
-    },
+    // {
+    //   key: "agenda",
+    //   icon: <CalendarOutlined />,
+    //   label: "Mon agenda",
+    //   title: "Mon agenda",
+    //   onClick: () => {
+    //     navigate("/espace-gynecologie/agenda");
+    //   },
+    // },
     {
       key: "patients",
       icon: <TeamOutlined />,
@@ -502,59 +502,106 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
 
   const administrationMenu: ItemType<MenuItemType>[] = [
     {
-      key: "settings",
-      label: "Paramètres",
-      title: "Paramètres",
-      icon: <SettingOutlined />,
-      children: [
-        {
-          key: "accounts",
-          icon: <TeamOutlined />,
-          label: "Comptes",
-          title: "Comptes",
-          onClick: () => {
-            navigate("/espace-administration/settings/accounts");
-          },
-        },
-        {
-          key: "privileges",
-          icon: <SafetyOutlined />,
-          label: "Privilèges",
-          title: "Privilèges",
-          onClick: () => {
-            navigate("/espace-administration/settings/privileges");
-          },
-        },
-        {
-          key: "gestion-mot-de-passe",
-          label: "Gestion de mot de passe",
-          title: "Gestion de mot de passe",
-          icon: <LockOutlined />,
-          onClick: () => {
-            navigate("/espace-administration/settings/gestion-mot-de-passe");
-          },
-        },
-        {
-          key: "profil",
-          label: "Mon profil",
-          title: "Mon profil",
-          icon: <UserOutlined />,
-          onClick: () => {
-            navigate("/espace-administration/settings/profil");
-          },
-        },
-        {
-          key: "config",
-          label: "Configurations",
-          title: "Configurations",
-          icon: <ToolOutlined />,
-          onClick: () => {
-            navigate("/espace-administration/settings/config");
-          },
-        },
-      ],
+      key: "accounts",
+      icon: <TeamOutlined />,
+      label: "Comptes",
+      title: "Comptes",
+      onClick: () => {
+        navigate("/espace-administration/settings/accounts");
+      },
     },
+    // {
+    //   key: "privileges",
+    //   icon: <SafetyOutlined />,
+    //   label: "Privilèges",
+    //   title: "Privilèges",
+    //   onClick: () => {
+    //     navigate("/espace-administration/settings/privileges");
+    //   },
+    // },
+    {
+      key: "gestion-mot-de-passe",
+      label: "Gestion de mot de passe",
+      title: "Gestion de mot de passe",
+      icon: <LockOutlined />,
+      onClick: () => {
+        navigate("/espace-administration/settings/gestion-mot-de-passe");
+      },
+    },
+    {
+      key: "profil",
+      label: "Mon profil",
+      title: "Mon profil",
+      icon: <UserOutlined />,
+      onClick: () => {
+        navigate("/espace-administration/settings/profil");
+      },
+    },
+    // {
+    //   key: "config",
+    //   label: "Configurations",
+    //   title: "Configurations",
+    //   icon: <ToolOutlined />,
+    //   onClick: () => {
+    //     navigate("/espace-administration/settings/config");
+    //   },
+    // },
   ];
+  // [
+  //   {
+  //     key: "settings",
+  //     label: "Paramètres",
+  //     title: "Paramètres",
+  //     icon: <SettingOutlined />,
+  //     children: [
+  //       {
+  //         key: "accounts",
+  //         icon: <TeamOutlined />,
+  //         label: "Comptes",
+  //         title: "Comptes",
+  //         onClick: () => {
+  //           navigate("/espace-administration/settings/accounts");
+  //         },
+  //       },
+  //       {
+  //         key: "privileges",
+  //         icon: <SafetyOutlined />,
+  //         label: "Privilèges",
+  //         title: "Privilèges",
+  //         onClick: () => {
+  //           navigate("/espace-administration/settings/privileges");
+  //         },
+  //       },
+  //       {
+  //         key: "gestion-mot-de-passe",
+  //         label: "Gestion de mot de passe",
+  //         title: "Gestion de mot de passe",
+  //         icon: <LockOutlined />,
+  //         onClick: () => {
+  //           navigate("/espace-administration/settings/gestion-mot-de-passe");
+  //         },
+  //       },
+  //       {
+  //         key: "profil",
+  //         label: "Mon profil",
+  //         title: "Mon profil",
+  //         icon: <UserOutlined />,
+  //         onClick: () => {
+  //           navigate("/espace-administration/settings/profil");
+  //         },
+  //       },
+  //       {
+  //         key: "config",
+  //         label: "Configurations",
+  //         title: "Configurations",
+  //         icon: <ToolOutlined />,
+  //         onClick: () => {
+  //           navigate("/espace-administration/settings/config");
+  //         },
+  //       },
+  //     ],
+  //   },
+  // ];
   useEffect(() => {
     switch (serviceType) {
       case ServiceType.ACCUEIL:

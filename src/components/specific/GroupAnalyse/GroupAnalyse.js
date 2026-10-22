@@ -210,7 +210,7 @@ function GroupAnalyse() {
             </Row>
             <br/>         
             <Title level={5} >Liste des analyses</Title>
-            <DataTable 
+            <DataTable compact
                 dataSourceCopy={analysesPrescrites}
                 columns={[
                     {

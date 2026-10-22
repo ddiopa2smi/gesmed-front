@@ -8,6 +8,7 @@ import { endpoints } from '../../constants/endpoints.constants';
 import { deletePopup } from '../../utils/helpers';
 import AddPrivilege from '../../components/specific/AddPrivilege/Addprivilege';
 import { Link } from 'react-router-dom';
+import { LOGO_BROWN } from '../../constants/app.constants.js';
 
 
 const privileges = [
@@ -82,7 +83,7 @@ function Privileges() {
                 </Space>
             </Flex>
 
-            <Title level={3} >Liste des privilèges </Title>
+            <Title level={3} style={{ color: LOGO_BROWN }} >Liste des privilèges </Title>
             <DataTable 
                 dataSource={dataSourceCopy}
                 dataSourceCopy={dataSourceCopy}

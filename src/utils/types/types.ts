@@ -21,3 +21,8 @@ export enum TypePatient {
     STAGIAIRE = 6,
     EXTERNE = 7,
 }
+
+export enum TypePrescription {
+    ANALYSE = "ANALYSE",
+    IMAGERIE = "IMAGERIE",
+}

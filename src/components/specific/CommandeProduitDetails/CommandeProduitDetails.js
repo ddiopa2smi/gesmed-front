@@ -74,7 +74,7 @@ function CommandeProduitDetails({ currentRecord }) {
               alignItems: "center",
             },
             children: (
-              <div style={{width:"100%"}} >
+              <div style={{ width: "100%" }} >
                 <DataTable
                   dataSource={[]}
                   dataSourceCopy={listProduitsCommandes || []}
@@ -121,8 +121,8 @@ function CommandeProduitDetails({ currentRecord }) {
                         <div style={{ textAlign: "right" }}>
                           {formatAmount(
                             record.prix_unit *
-                              record.qte_com *
-                              (record.tva / 100)
+                            record.qte_com *
+                            (record.tva / 100)
                           )}
                         </div>
                       ),
@@ -133,8 +133,8 @@ function CommandeProduitDetails({ currentRecord }) {
                         <div style={{ textAlign: "right" }}>
                           {formatAmount(
                             record.prix_unit *
-                              record.qte_com *
-                              (1 + record.tva / 100)
+                            record.qte_com *
+                            (1 + record.tva / 100)
                           )}
                         </div>
                       ),

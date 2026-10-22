@@ -67,7 +67,7 @@ function ListProduits() {
 
                 <br/>
 
-                <DataTable 
+                <DataTable compact
                     dataSource={produitsList}
                     dataSourceCopy={produitsListCopy}
                     setDataSourceCopy={setProduitListCopy}

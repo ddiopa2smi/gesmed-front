@@ -29,7 +29,7 @@ const getInitCons = (initCons) => {
     return initCons;
 }
 
-function ConsultationDentaire({numPatient , numRV , serviceType}) { 
+function ConsultationDentaire({numPatient , numRV , serviceType , codeService}) { 
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const {state} = useLocation();
@@ -62,7 +62,7 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
             if (response?.data) {
                 setInitConsultation(getInitCons(response?.data))
                 form.setFieldsValue(getInitCons(response?.data))
-                form.setFieldValue("code_region", "Bouche");
+                //form.setFieldValue("code_region", "Bouche");
             }
         })
         .finally(()=>{
@@ -92,7 +92,9 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
     const [motifs,  setMotifs] = useState([]);
     useEffect(() => {
       if (motifsList) {
-        setMotifs(motifsList.filter((motif) => motif.code_spe === codeServices.DENTAIRE));
+        //setMotifs(motifsList.filter((motif) => motif.code_spe === codeServices.DENTAIRE));
+         // Ici pas de filtre par spécialité car les motifs sont communs à toutes les spécialités
+        setMotifs(motifsList);
       }
     }, [motifsList])
     
@@ -100,7 +102,8 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
     const [regions,  setRegions] = useState([]);
     useEffect(() => {
       if (regionsList) {
-        setRegions(regionsList.filter((region) => region.code_spe === codeServices.DENTAIRE));
+        //setRegions(regionsList.filter((region) => region.code_spe === codeServices.DENTAIRE));
+        setRegions(regionsList);
       }
     }, [regionsList])
 
@@ -129,6 +132,11 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
         {
             label: <span onClick={()=>{openModal("update","PATHOLOGIE")}} >Modifier</span>,
             key: '1',
+            disabled : pathologieSelected === null ? true : false
+        },
+        {
+            label: <span onClick={()=>{openModal("details","PATHOLOGIE")}} >Voir détails</span>,
+            key: '2',
             disabled : pathologieSelected === null ? true : false
         },
     ];
@@ -427,32 +435,7 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
             >
                 <Divider/>
                 <Row gutter={[24,24]}>
-                    <Col xs={24} sm={12} md={8} lg={8} xl={8} >
-                        <Flex align='center' >
-                            <Form.Item 
-                                label="Pathologie"
-                                name="code_patho" 
-                                style={{width:"90%"}}
-                            >
-                                <Select
-                                    style={{width:'100%',background:"transparent"}}
-                                    showSearch
-                                    placeholder="Pathologie"
-                                    optionFilterProp="children" 
-                                    loading={pathologiesLoading}
-                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                >     
-                                    {
-                                        pathologies.map((item , key)=>(
-                                            <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
-                                        ))
-                                    }
-                                        
-                                </Select>
-                            </Form.Item>
-                            <AddAndEditDropdown items={itemsPathologie} />
-                        </Flex>        
-                    </Col>
+                    
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Flex align='center' >
                             <Form.Item 
@@ -484,24 +467,49 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
                                 name="code_region" 
                                 style={{width:"90%"}}
                             >
-                                <Input />
-                                {/* <Select
-                                    style={{width:'100%',background:"transparent"}}
+                                {/* <Input /> */}
+                                <Select
                                     showSearch
                                     placeholder="Région concernée"
                                     optionFilterProp="children" 
                                     loading={regionsLoading}
                                     filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
                                 >     
-                                    {
-                                        regions.map((item , key)=>(
-                                            <Option key={key}  value={item.code_region} > {item.libelle_region} </Option>
-                                        ))
-                                    }
-                                </Select> */}
+                                        {
+                                            regions.map((item , key)=>(
+                                                <Option key={key}  value={item.code_region} > {item.libelle_region} </Option>
+                                            ))
+                                        }
+                                </Select>
                             </Form.Item>
                             <AddAndEditDropdown items={itemsRegion} />
                         </Flex>
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={8} xl={8} >
+                        <Flex align='center' >
+                            <Form.Item 
+                                label="Pathologie"
+                                name="code_patho" 
+                                style={{width:"90%"}}
+                            >
+                                <Select
+                                    style={{width:'100%',background:"transparent"}}
+                                    showSearch
+                                    placeholder="Pathologie"
+                                    optionFilterProp="children" 
+                                    loading={pathologiesLoading}
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                >     
+                                    {
+                                        pathologies.map((item , key)=>(
+                                            <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
+                                        ))
+                                    }
+                                        
+                                </Select>
+                            </Form.Item>
+                            <AddAndEditDropdown items={itemsPathologie} />
+                        </Flex>        
                     </Col>
                 </Row>
 
@@ -533,7 +541,7 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
                         </Form.Item>
                     </Col>
                 </Row>
-                <Divider> Examen clinique </Divider>
+                <Divider> Données cliniques </Divider>
                 <Row gutter={[24,24]}>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Form.Item 
@@ -700,13 +708,21 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
                             name="structure_ref" 
                             label="Structure médicale"
                         >
-                            <Input/>
+                            <Select
+                                style={{width:'100%',background:"transparent"}}
+                                showSearch
+                                placeholder="Structure médicale"
+                                optionFilterProp="children" 
+                                filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                            >     
+                                <Option value={"1"} >  Structure médicale 1 </Option>
+                            </Select>
                         </Form.Item>
                     </Col>
                     <Col xs={24} sm={12} md={6} lg={6} xl={6} >
                         <Form.Item 
                             name="motif_ref" 
-                            label="Motif"
+                            label="Motif référencement"
                         >
                             <Input/>
                         </Form.Item>
@@ -719,7 +735,7 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
                             <Select
                                 style={{width:'100%',background:"transparent"}}
                                 showSearch
-                                placeholder="Pathologie"
+                                placeholder="Moyen de transport"
                                 optionFilterProp="children" 
                                 filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                             >     
@@ -753,11 +769,11 @@ function ConsultationDentaire({numPatient , numRV , serviceType}) {
                 footer={null}
                 destroyOnClose
             >
-                {currentSelectableTask === "PATHOLOGIE" && <AddPathologie  setOpen={setOpen} operationType={operationType} onRefresh={pathologiesRefreshList} currentRecord={pathologieSelected} /> }
+                {currentSelectableTask === "PATHOLOGIE" && <AddPathologie  setOpen={setOpen} operationType={operationType} onRefresh={pathologiesRefreshList} currentRecord={pathologieSelected} codeService={codeService} /> }
 
-                {currentSelectableTask === "MOTIF" && <AddMotif  setOpen={setOpen} operationType={operationType} onRefresh={motifsRefreshList} currentRecord={motifSelected} /> }
+                {currentSelectableTask === "MOTIF" && <AddMotif  setOpen={setOpen} operationType={operationType} onRefresh={motifsRefreshList} currentRecord={motifSelected} codeService={codeService} /> }
 
-                {currentSelectableTask === "REGION" && <AddRegion  setOpen={setOpen} operationType={operationType} onRefresh={regionsRefreshList} currentRecord={regionSelected} />}
+                {currentSelectableTask === "REGION" && <AddRegion  setOpen={setOpen} operationType={operationType} onRefresh={regionsRefreshList} currentRecord={regionSelected} codeService={codeService} />}
                 
             </Modal>
             

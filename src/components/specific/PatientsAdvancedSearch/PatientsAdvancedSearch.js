@@ -1,174 +1,148 @@
-import { Form , Row , Col , Input , Select , DatePicker } from "antd";
+import { Form, Row, Col, Input, InputNumber, Select, DatePicker, Space } from "antd";
 import FormFooter from "../../common/FormFooter/FormFooter";
 import useFetch from "../../../utils/hooks/useFetch";
 import { endpoints } from "../../../constants/endpoints.constants";
-const {Option } = Select;
 const { RangePicker } = DatePicker;
 
-function PatientsAdvancedSearch({dataSource,dataSourceCopy,setDataSourceCopy, setOpen}) {
-    const [form] = Form.useForm();
-    const {data : listTypePatients , isLoading : listTypePatientsLoading } = useFetch(endpoints.patients.LIST_TYPE)
+/**
+ * Formulaire de recherche multi-critères : un champ par colonne de la liste des patients.
+ * Les valeurs saisies sont transmises à onSearch, la recherche est exécutée côté serveur.
+ */
+function PatientsAdvancedSearch({ setOpen, form, onSearch, onReset, hideSexe }) {
+    const [localForm] = Form.useForm();
+    const activeForm = form || localForm;
+    const { data: listTypePatients, isLoading: listTypePatientsLoading } = useFetch(endpoints.patients.LIST_TYPE);
+    const { data: listDepartements, isLoading: listDepartementsLoading } = useFetch(endpoints.departements.LIST);
 
     return (
         <Form
-            form={form}
+            form={activeForm}
             layout="vertical"
             name="search_form"
-            onFinish={(values)=>{
-                const result = dataSource.filter((item) => {
-                    let defaultStatus = true;
-                    for (const key in values) {
-                        if (values[key]) {
-                            if (key === "date_creation") {
-                                const itemCreatedDate = new Date(item[key]).getTime();
-                                const startDate = new Date(values[key][0]).getTime();
-                                const endDate = new Date(values[key][1]).getTime();
-                                if (itemCreatedDate>= startDate && itemCreatedDate <= endDate) {
-                                    defaultStatus = defaultStatus && true;
-                                }else{
-                                    defaultStatus = defaultStatus && false;
-                                }
-                            }else if (key === "date_rv") {
-                                const itemRvDate = new Date(item[key]).getTime();
-                                const startDate = new Date(values[key][0]).getTime();
-                                const endDate = new Date(values[key][1]).getTime();
-                                if (itemRvDate>= startDate && itemRvDate <= endDate) {
-                                    defaultStatus = defaultStatus && true;
-                                }else{
-                                    defaultStatus = defaultStatus && false;
-                                }
-                            }else if (key === "age_patient" && values[key].includes("-") ) {
-                                const splitValue = values[key].split("-");
-                                if (item[key] >= parseInt(splitValue[0],10) && item[key] < parseInt(splitValue[1],10)  ) {
-                                    defaultStatus = defaultStatus && true;
-                                }else{
-                                    defaultStatus = defaultStatus && false;
-                                }
-                            }
-                            else {
-                                if (item[key].toString().trim().toLowerCase().includes(values[key].toString().trim().toLowerCase())) {
-                                    defaultStatus = defaultStatus && true;
-                                }else {
-                                    defaultStatus = defaultStatus && false;
-                                }
-                            }
-                            
-                        }
-                    }
-                    
-                    return defaultStatus;
-                })
-                setDataSourceCopy(result);
+            onFinish={(values) => {
+                onSearch(values);
                 setOpen(false);
-                
             }}
         >
-            <Row gutter={[24,24]} >
-                <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                    <Form.Item
-                        name="num_patient"
-                        label="Numéro patient" 
-                    >
-                        <Input placeholder="Entrer un numéro"/>
+            <Row gutter={[24, 0]} >
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item name="num_patient" label="Matricule">
+                        <Input placeholder="Entrer un matricule" allowClear />
                     </Form.Item>
                 </Col>
-                <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                    <Form.Item
-                        name="nom_patient"
-                        label="Nom" 
-                    >
-                        <Input placeholder="Entrer un nom" />
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item name="nom_patient" label="Nom">
+                        <Input placeholder="Entrer un nom" allowClear />
                     </Form.Item>
                 </Col>
-                <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                    <Form.Item
-                        name="prenom_patient"
-                        label="Prénom"
-                    >
-                        <Input placeholder="Entrer un prénom"/>
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item name="prenom_patient" label="Prénom">
+                        <Input placeholder="Entrer un prénom" allowClear />
                     </Form.Item>
                 </Col>
-            </Row>
-            <Row gutter={[24,24]} >
-                <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                    <Form.Item 
-                        name="sexe_patient" 
-                        label="Sexe du patient"
-                    >
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item name="tel_patient" label="Téléphone">
+                        <Input placeholder="Entrer un numéro" allowClear />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item label="Age (min - max)">
+                        <Space.Compact style={{ width: "100%" }}>
+                            <Form.Item name="age_min" noStyle>
+                                <InputNumber min={0} max={150} placeholder="Min" style={{ width: "50%" }} />
+                            </Form.Item>
+                            <Form.Item
+                                name="age_max"
+                                noStyle
+                                dependencies={["age_min"]}
+                                rules={[
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            const min = getFieldValue("age_min");
+                                            if (value == null || min == null || value >= min) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error("L'âge max doit être supérieur ou égal à l'âge min"));
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <InputNumber min={0} max={150} placeholder="Max" style={{ width: "50%" }} />
+                            </Form.Item>
+                        </Space.Compact>
+                    </Form.Item>
+                </Col>
+                {!hideSexe && (
+                    <Col xs={24} sm={12} md={8}>
+                        <Form.Item name="sexe_patient" label="Sexe">
                             <Select
-                                style={{width:'100%',background:"transparent"}}
-                                showSearch
                                 placeholder="Choisir"
-                                optionFilterProp="children" 
-                                filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                
-                            >     
-                                <Option key={1}  value={"MA"} > MA </Option>
-                                <Option key={2}  value={"FE"} > FE </Option>
-                                
-                            </Select>
-                    </Form.Item>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                    <Form.Item
-                        name="age_patient"
-                        label="Age(min-max)"
-                    >
-                        <Input placeholder="Ex: 30; 40-50" />
-                    </Form.Item>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                    <Form.Item
-                        name="type_patient"
-                        label="Type de patient"
-                    >
+                                allowClear
+                                options={[
+                                    { value: "MA", label: "Masculin" },
+                                    { value: "FE", label: "Féminin" },
+                                ]}
+                            />
+                        </Form.Item>
+                    </Col>
+                )}
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item name="type_patient" label="Type">
                         <Select
-                            style={{width:'100%',background:"transparent"}}
-                            showSearch
                             placeholder="Choisir"
-                            optionFilterProp="children" 
-                            filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                            allowClear
+                            showSearch
+                            optionFilterProp="label"
                             loading={listTypePatientsLoading}
-                        >     
-                            {
-                                listTypePatients
-                                .filter((item)=> item?.code_patient !== 2 && item?.code_patient !== 3)
-                                .map((item , key)=>( 
-                                    <Option key={key}  value={item.code_patient} > {item.type_patient} </Option>
-                                ))
-                            }
-                            
-                        </Select>
+                            options={(listTypePatients || []).map((item) => ({
+                                value: item.code_patient,
+                                label: item.type_patient,
+                            }))}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item name="code_dept" label="Département">
+                        <Select
+                            placeholder="Choisir"
+                            allowClear
+                            showSearch
+                            optionFilterProp="label"
+                            loading={listDepartementsLoading}
+                            options={(listDepartements || []).map((item) => ({
+                                value: item.code_dept,
+                                label: item.lib_dept,
+                            }))}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                    <Form.Item name="suspension" label="Etat">
+                        <Select
+                            placeholder="Choisir"
+                            allowClear
+                            options={[
+                                { value: "A", label: "Actif" },
+                                { value: "S", label: "Suspendu" },
+                            ]}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col xs={24} sm={24} md={16}>
+                    <Form.Item name="date_creation" label="Date de création">
+                        <RangePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
                     </Form.Item>
                 </Col>
             </Row>
-            <Row gutter={[24,24]} >
-                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
-                    <Form.Item
-                        name="date_rv"
-                        label="Date de rendez-vous"
-                    >
-                        <RangePicker style={{width:'100%'}} format="DD/MM/YYYY" />
-                    </Form.Item>
-                </Col>
-                <Col xs={24} sm={24} md={12} lg={12} xl={12}>
-                    <Form.Item
-                        name="date_creation"
-                        label="Date de création"
-                    >
-                        <RangePicker style={{width:'100%'}} format="DD/MM/YYYY" />
-                    </Form.Item>
-                </Col>
-            </Row>
-            <FormFooter 
-                onCancel={()=>{
-                    form.resetFields();
+            <FormFooter
+                onCancel={() => {
+                    activeForm.resetFields();
                     setOpen(false);
-                    setDataSourceCopy(dataSource);
+                    onReset();
                 }}
                 htmlType='submit'
                 cancelLabel={"Réinitialiser"}
-                validLabel={"Valider"}
+                validLabel={"Rechercher"}
             />
         </Form>
     )

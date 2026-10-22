@@ -1,15 +1,18 @@
 import React, { useState , useEffect } from 'react'
-import { Breadcrumb, Button, Card , Flex, Modal, Space, Tooltip, Typography} from "antd"
+import { Breadcrumb, Button, Card , Flex, Modal, Popover, Space, Tag, Tooltip, Typography, message} from "antd"
 import { useNavigate } from 'react-router';
-import { HomeOutlined , ExclamationCircleFilled, PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { HomeOutlined , ExclamationCircleFilled, PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined, PrinterOutlined } from '@ant-design/icons';
 import { deleteActions, getActions } from '../../actions/actions';
 import { endpoints } from '../../constants/endpoints.constants';
+import { LOGO_BROWN } from '../../constants/app.constants';
 import useFetch from '../../utils/hooks/useFetch';
 import DataTable from '../../components/common/DataTable/DataTable';
-import { deletePopup, formatDate } from '../../utils/helpers';
+import { deletePopup, formatDateTime } from '../../utils/helpers';
 import AddAT from '../../components/specific/AddAT/AddAT';
+import BodyMap, { parseZonesLesions, ZONES_LESIONS } from '../../components/common/BodyMap/BodyMap';
+import { printAccidentTravail } from '../../utils/printAT';
 
-const {Title} = Typography;
+const {Title, Text} = Typography;
 
 function DossierAT() {
   const navigate = useNavigate();
@@ -35,15 +38,17 @@ function DossierAT() {
   const onDelete = (record) => {
     deletePopup()
     .then((result)=>{
-        // if (result.isConfirmed) {
-        //     deleteActions(`${endpoints.visitesLieux.}/${record?.num_patient}`)
-        //     .then((response)=>{
-        //         if (response.data.Deleted === true) {
-        //             message.success("Ligne retirée avec succès");
-        //             onRefresh()
-        //         }
-        //     })
-        // }
+        if (result.isConfirmed) {
+            deleteActions(`${endpoints.AT.DELETE}/${record?.num_at}`)
+            .then((response)=>{
+                if (response?.data?.Deleted === true) {
+                    message.success("Accident de travail supprimé avec succès");
+                    onRefresh()
+                } else {
+                    message.error("La suppression n'a pas pu être effectuée");
+                }
+            })
+        }
     });
   }
 
@@ -51,7 +56,7 @@ function DossierAT() {
   return (
     <Card>
 
-      <Title level={3} > Accidents de travail </Title>
+      <Title level={3} style={{ color: LOGO_BROWN }} >Accidents de travail</Title>
 
       <Flex justify="flex-end" align="center" >
           <Space>
@@ -70,7 +75,7 @@ function DossierAT() {
 
       <br/>
         
-        <DataTable 
+        <DataTable compact
             dataSource={data}
             dataSourceCopy={dataCopy}
             setDataSourceCopy={setDataCopy}
@@ -114,13 +119,41 @@ function DossierAT() {
                   dataIndex: 'date_at',
                   key: 'date_at',
                   render: (record) => <div className='table-data'>
-                      {formatDate(record)}
+                      {formatDateTime(record)}
                   </div>
+              } ,
+              {
+                  title: 'Lésions',
+                  dataIndex: 'zones_lesions',
+                  key: 'zones_lesions',
+                  render: (value) => {
+                      const lesions = parseZonesLesions(value);
+                      if (lesions.length === 0) return <Text type="secondary">-</Text>;
+                      return (
+                          <Popover
+                              trigger="click"
+                              title="Localisation des lésions"
+                              content={<div style={{ width: 520 }}><BodyMap value={lesions} readOnly size={120} /></div>}
+                          >
+                              <Space size={4} wrap style={{ cursor: "pointer" }}>
+                                  {lesions.slice(0, 2).map((lesion) => (
+                                      <Tag key={lesion.zone} color="error" style={{ marginInlineEnd: 0 }}>
+                                          {ZONES_LESIONS[lesion.zone] || lesion.zone}
+                                      </Tag>
+                                  ))}
+                                  {lesions.length > 2 && <Tag style={{ marginInlineEnd: 0 }}>+{lesions.length - 2}</Tag>}
+                              </Space>
+                          </Popover>
+                      );
+                  },
               } ,
               {
                 render :  (record)=>(
                     <Flex justify="center" align="center" >
                         <Space>
+                            <Tooltip title="Imprimer la fiche AT">
+                                <Button type='link' icon={<PrinterOutlined/>} onClick={()=>{printAccidentTravail(record)}} />
+                            </Tooltip>
                             <Tooltip title="Editer">
                                 <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEdit(record)}} />
                             </Tooltip>

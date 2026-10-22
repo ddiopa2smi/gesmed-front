@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { HomeOutlined , ExclamationCircleFilled, EditOutlined, DeleteOutlined, SearchOutlined, ExportOutlined, ReloadOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import { deleteActions, getActions } from '../../actions/actions';
 import { endpoints } from '../../constants/endpoints.constants';
-import { tableTypes } from '../../constants/app.constants';
+import { LOGO_BROWN, tableTypes } from '../../constants/app.constants';
 import useFetch from '../../utils/hooks/useFetch';
 import { deletePopup, formatDate } from '../../utils/helpers';
 import DataTable from '../../components/common/DataTable/DataTable';
@@ -55,7 +55,7 @@ function Visites() {
     return (
         <Card loading={isLoading} >
 
-            <Title level={3} > Visite des lieux </Title>
+            <Title level={3} style={{ color: LOGO_BROWN }} >Visite des lieux</Title>
 
             <Flex justify="flex-end" align="center" >
                 <Space>
@@ -74,7 +74,7 @@ function Visites() {
 
             <br/>     
             
-            <DataTable 
+            <DataTable compact
                 dataSource={data}
                 dataSourceCopy={dataCopy}
                 setDataSourceCopy={setDataCopy}

@@ -22,6 +22,8 @@ import {
   Modal,
   TreeSelect,
   Tag,
+  Dropdown,
+  Table,
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
@@ -39,7 +41,7 @@ import FormFooter from "../../components/common/FormFooter/FormFooter";
 import DataTable from "../../components/common/DataTable/DataTable";
 import useFetch from "../../utils/hooks/useFetch";
 import Posologie from "../../components/specific/Posologie/Posologie";
-import { deletePopup, printPDF } from "../../utils/helpers";
+import { deletePopup, printPDF, formatMontant } from "../../utils/helpers";
 import BackButton from "../../components/common/BackButton/BackButton";
 import PrintButton from "../../components/common/PrintButton/PrintButton";
 import DeleteButton from "../../components/common/DeleteButton/DeleteButton";
@@ -59,7 +61,7 @@ const Ordonnance = () => {
   //const initConsultation  = JSON.parse(sessionStorage.getItem("initConsultation"));
   const prescription = JSON.parse(sessionStorage.getItem("prescription"));
   const editPrescription = JSON.parse(
-    sessionStorage.getItem("editPrescription")
+    sessionStorage.getItem("editPrescription"),
   );
   // console.log(prescription)
   // console.log(editPrescription)
@@ -68,12 +70,12 @@ const Ordonnance = () => {
   //const [listMedicaments , setListMedicaments] = useState([]);
   const [medicamentSelected, setMedicamentSelected] = useState(null);
   const [medicamentsPrescrites, setMedicamentsPrescrites] = useState(
-    editPrescription?.listActes || []
+    editPrescription?.listActes || [],
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [posologieButtonStatus, setPosologieButtonStatus] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [conditionnement, setConditionnement] = useState("boite");
+  const [conditionnement, setConditionnement] = useState(null);
   const [isPrintDisabled, setIsPrintDisabled] = useState(true);
   const [numCons, setNumCons] = useState(null);
   //const [selectMedicamentsListLoading , setSelectMedicamentsListLoading ] = useState(false);
@@ -91,24 +93,40 @@ const Ordonnance = () => {
       value: "comprime",
       libelle: "Comprimé(s)",
     },
+    {
+      value: "unite",
+      libelle: "Unité(s)",
+    },
+
   ];
   const [qteStock, setQteStock] = useState(0);
   const save = () => {
     form
-      .validateFields()
-      .then((values) => {
+      .validateFields(["datepresc"])
+      .then(() => {
+        const values = form.getFieldsValue();
         switch (operationType) {
           case "add":
+            const listActes = medicamentsPrescrites.map((acte) => {
+              const produit = listMedicaments.find(
+                (item) => item.code_produit === acte.codeacte,
+              );
+              return {
+                ...acte,
+                tarif: getPrixUnitaire(produit),
+              };
+            });
             const payload = {
               datepresc:
                 editPrescription?.datepresc ||
                 new Date(values.datepresc).toISOString(),
               num_patient:
                 editPrescription?.num_patient || currentPatient.num_patient,
+              code_prescripteur: userConnected?.code_ipm,
               qte_presc: values.qte_presc,
               cond: values.cond,
               codepresc: editPrescription?.codepresc || "06",
-              listActes: medicamentsPrescrites,
+              listActes: listActes,
               numcons: editPrescription?.numcons || prescription?.numcons,
               numpresc: editPrescription?.numpresc || null,
             };
@@ -125,11 +143,13 @@ const Ordonnance = () => {
                 })
                 .finally(() => {
                   setFormLoading(false);
+                  form.resetFields();
+                  //navigate(-1);
                 });
               //setMedicamentsPrescrites([]);
             } else {
               message.warning(
-                "Veuillez  sélectionner le ou les médicament(s) à prescrire"
+                "Veuillez svp renseigner la posologie de ce médicament, cliquer le boutton posologie ci-dessous pour l'ajouter",
               );
             }
 
@@ -139,8 +159,6 @@ const Ordonnance = () => {
           default:
             break;
         }
-        form.resetFields();
-        navigate(-1);
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -161,6 +179,28 @@ const Ordonnance = () => {
   const listMedicaments = medicamentsFetched.data;
   const selectMedicamentsListLoading = medicamentsFetched.isLoading;
 
+  // Prix unitaire d'un produit : le prix de vente pour les produits distribués en boîtes,
+  // sinon (prix de vente / quantité d'emballage) arrondi au franc supérieur.
+  // Sans quantité d'emballage renseignée, on retombe sur le prix de vente.
+  const getPrixUnitaire = (produit) => {
+    const prixVente = produit?.prix_vente || 0;
+    if (produit?.unite_distribution !== "Boîtes" && produit?.qte_emb > 0) {
+      return Math.ceil(prixVente / produit.qte_emb);
+    }
+    return prixVente;
+  };
+
+  const getTarifLigne = (acte) => {
+    const produit = listMedicaments.find(
+      (item) => item.code_produit === acte.codeacte,
+    );
+    return getPrixUnitaire(produit) * (acte.qte || 0);
+  };
+
+  const totalTarif = medicamentsPrescrites.reduce(
+    (acc, acte) => acc + getTarifLigne(acte),
+    0,
+  );
 
   useEffect(() => {
     if (editPrescription === null) {
@@ -172,7 +212,7 @@ const Ordonnance = () => {
 
   const getQteStock = async (id) => {
     const response = await getActions(
-      `${endpoints.saisie_inventaire.STOCK}/${id}`
+      `${endpoints.saisie_inventaire.STOCK}/${id}`,
     );
     return response;
   };
@@ -192,16 +232,46 @@ const Ordonnance = () => {
           Prescription ordonnance du patient N° {currentPatient.num_patient} /{" "}
           {currentPatient.prenom_patient} {currentPatient.nom_patient}{" "}
         </Title>
-        <Button
-          type="primary"
-          onClick={() => {
-            printPDF(`/api/Print/smed/Prescription/${numCons}/ordonnance`);
+
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: "1",
+                label: (
+                  <span
+                    onClick={() => {
+                      printPDF(
+                        `/api/Print/smed/Prescription/${numCons}/ordonnance`,
+                      );
+                    }}
+                  >
+                    Imprimer ordonnance
+                  </span>
+                ),
+              },
+              {
+                key: "2",
+                label: (
+                  <span
+                    onClick={() => {
+                      printPDF(
+                        `/api/Print/smed/Prescription/${numCons}/ordonnance_Ticket`,
+                      );
+                    }}
+                  >
+                    Format ticket
+                  </span>
+                ),
+              },
+            ],
           }}
-          disabled={isPrintDisabled}
+          trigger={["click"]}
         >
-          {" "}
-          Imprimer{" "}
-        </Button>
+          <Button type="primary" disabled={isPrintDisabled}>
+            Imprimer
+          </Button>
+        </Dropdown>
       </Flex>
 
       <br />
@@ -211,11 +281,26 @@ const Ordonnance = () => {
         layout="vertical"
         onFinish={save}
         onValuesChange={(changedValues, values) => {
+          // L'unité de distribution est celle de la fiche du médicament sélectionné
+          const uniteDistribution = (listMedicaments || []).find(
+            (element) => element.code_produit === values.medicament,
+          )?.unite_distribution;
+          if ("medicament" in changedValues) {
+            form.setFieldValue("cond", uniteDistribution);
+            setConditionnement(uniteDistribution ?? null);
+          }
+
+          const requiredFieldsFilled =
+            !!values.datepresc &&
+            !!values.medicament &&
+            !!uniteDistribution &&
+            values.qte_presc !== undefined &&
+            values.qte_presc !== null &&
+            values.qte_presc > 0;
+          setPosologieButtonStatus(!requiredFieldsFilled);
+
           if (changedValues.medicament) {
             const medicamentCode = changedValues.medicament;
-            medicamentCode !== null
-              ? setPosologieButtonStatus(false)
-              : setPosologieButtonStatus(true);
             listMedicaments.forEach((element) => {
               if (element.code_produit === medicamentCode) {
                 setMedicamentSelected(element);
@@ -257,25 +342,20 @@ const Ordonnance = () => {
             <Form.Item
               label="Médicament"
               name="medicament"
-              rules={[
-                {
-                  required: true,
-                  message: "Sélection obligatoire",
-                },
-              ]}
             >
               <Select
                 style={{ width: "100%", background: "transparent" }}
                 showSearch
                 placeholder="Médicament"
                 optionFilterProp="children"
-                filterOption={(input, option) =>
-                  option.children[1].toLowerCase().includes(input.toLowerCase())
-                }
-                
+                filterOption={(input, option) => {
+                  return option.children
+                    .toLowerCase()
+                    .includes(input.toLowerCase());
+                }}
                 loading={selectMedicamentsListLoading}
               >
-                {listMedicaments.map((item , index) => (
+                {listMedicaments.map((item, index) => (
                   <Option key={index} value={item.code_produit}>
                     {item.libelle_produit}
                   </Option>
@@ -283,7 +363,7 @@ const Ordonnance = () => {
               </Select>
             </Form.Item>
           </Col>
-          {medicamentSelected && qteStock === 0 ? (
+          {/* {medicamentSelected && qteStock === 0 ? (
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>
               <Form.Item
                 label={`Suggestion famille des ${medicamentSelected.libelle_famille}`}
@@ -306,22 +386,32 @@ const Ordonnance = () => {
                       .includes(input.toLowerCase())
                   }
                 >
-                  {listMedicaments.filter((item) => {
-                    return (
-                      item.famille === medicamentSelected.famille &&
-                      item.code_produit !== medicamentSelected.code_produit 
-                      // && item.qte_stock_th > 0
-                    );
-                  })
-                  .map((item) => (
-                    <Option key={item.code_produit} value={item.code_produit} disabled={item.qte_stock_th === 0}>
-                      {item.libelle_produit} <Tag color={item.qte_stock_th > 0 ? "success" : "error"} >{item.qte_stock_th}</Tag>
-                    </Option>
-                  ))}
+                  {listMedicaments
+                    .filter((item) => {
+                      return (
+                        item.famille === medicamentSelected.famille &&
+                        item.code_produit !== medicamentSelected.code_produit
+                        // && item.qte_stock_th > 0
+                      );
+                    })
+                    .map((item) => (
+                      <Option
+                        key={item.code_produit}
+                        value={item.code_produit}
+                        disabled={item.qte_stock_th === 0}
+                      >
+                        {item.libelle_produit}{" "}
+                        <Tag
+                          color={item.qte_stock_th > 0 ? "success" : "error"}
+                        >
+                          {item.qte_stock_th}
+                        </Tag>
+                      </Option>
+                    ))}
                 </Select>
               </Form.Item>
             </Col>
-          ) : null}
+          ) : null} */}
 
           {/* <Col xs={24} sm={24} md={4} lg={4} xl={4}>
             <Form.Item
@@ -342,12 +432,6 @@ const Ordonnance = () => {
             <Form.Item
               label="Qte stock"
               name="qte_pres"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
               initialValue={0}
             >
               <InputNumber min={0} disabled />
@@ -357,45 +441,16 @@ const Ordonnance = () => {
         <Row gutter={[24, 24]} align={"middle"}>
           <Col xs={24} sm={24} md={8} lg={8} xl={8}>
             <Form.Item
-              label="Conditionnement"
+              label="Unité de Distribution  "
               name="cond"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
             >
-              <Select
-                style={{ width: "100%", background: "transparent" }}
-                showSearch
-                placeholder="Conditionnement"
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                  option.children[1].toLowerCase().includes(input.toLowerCase())
-                }
-                onChange={(value) => {
-                  setConditionnement(value);
-                }}
-              >
-                {conditionnements?.map((item) => (
-                  <Option key={item.value} value={item.value}>
-                    {item.libelle}
-                  </Option>
-                ))}
-              </Select>
+              <Input readOnly placeholder="Unité de Distribution" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={4} lg={4} xl={4}>
             <Form.Item
               label="Qte à prescrire"
               name="qte_presc"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
               initialValue={editPrescription?.qte_presc || 1}
             >
               <InputNumber min={1} />
@@ -404,14 +459,13 @@ const Ordonnance = () => {
           <Col xs={24} sm={24} md={4} lg={4} xl={4}>
             <Button
               type="primary"
-              ghost
               disabled={posologieButtonStatus}
               onClick={() => {
                 //console.log(form.getFieldValue("qte_pres"));
 
                 if (
                   form.getFieldValue("qte_presc") >
-                    form.getFieldValue("qte_pres") ||
+                  form.getFieldValue("qte_pres") ||
                   form.getFieldValue("qte_pres") === 0
                 ) {
                   Swal.fire({
@@ -441,7 +495,7 @@ const Ordonnance = () => {
         <br />
 
         <Title level={5}>Liste des médicaments</Title>
-        <DataTable
+        <DataTable compact
           dataSourceCopy={medicamentsPrescrites}
           rowKey={(record) => record.codeacte}
           columns={[
@@ -459,17 +513,17 @@ const Ordonnance = () => {
               title: "Quantité",
               dataIndex: "qte",
               key: "qte",
+              align: "center",
             },
             {
-              title: "Conditionnement",
+              title: "Unité de distribution",
               dataIndex: "cond",
               key: "cond",
               render: (text, record) => {
-                return conditionnements.map((item) => {
-                  if (item.value === record.cond) {
-                    return item.libelle;
-                  }
-                });
+                // Anciennes prescriptions : code de conditionnement ; nouvelles : unité de distribution du médicament
+                return (
+                  conditionnements.find((item) => item.value === record.cond)?.libelle ?? record.cond
+                );
               },
             },
             {
@@ -478,9 +532,10 @@ const Ordonnance = () => {
               key: "posologie",
             },
             {
-              title: "Observation",
-              dataIndex: "observation",
-              key: "observation",
+              title: "Montant",
+              key: "tarif",
+              align: "right",
+              render: (record) => formatMontant(getTarifLigne(record)),
             },
             {
               width: "auto",
@@ -492,7 +547,7 @@ const Ordonnance = () => {
                         deletePopup().then((response) => {
                           if (response?.isConfirmed) {
                             const temp = medicamentsPrescrites.filter(
-                              (element) => element.codeacte !== record.codeacte
+                              (element) => element.codeacte !== record.codeacte,
                             );
                             setMedicamentsPrescrites(temp);
                           }
@@ -504,6 +559,19 @@ const Ordonnance = () => {
               ),
             },
           ]}
+          summary={() => (
+            <Table.Summary fixed>
+              <Table.Summary.Row>
+                <Table.Summary.Cell index={0} colSpan={5}>
+                  <Text strong>Total</Text>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={5} align="right">
+                  <Text strong>{formatMontant(totalTarif)}</Text>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={6} />
+              </Table.Summary.Row>
+            </Table.Summary>
+          )}
         />
 
         <br />
@@ -514,16 +582,19 @@ const Ordonnance = () => {
           }}
           htmlType={"submit"}
           loading={formLoading}
+          disabled={medicamentsPrescrites.length === 0}
         />
       </Form>
 
       <Modal
-        title={"Posologie"}
+        style={{ top: 20 }}
+        title="Ajouter la posologie"
         footer={null}
         open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);
         }}
+        width={700}
         destroyOnClose
       >
         <Posologie
@@ -533,6 +604,14 @@ const Ordonnance = () => {
           quantity={quantity}
           conditionnement={conditionnement}
           setIsModalVisible={setIsModalVisible}
+          onValidate={() => {
+            form.resetFields(["medicament", "qte_pres", "cond", "qte_presc"]);
+            setMedicamentSelected(null);
+            setQteStock(0);
+            setQuantity(1);
+            setConditionnement(null);
+            setPosologieButtonStatus(true);
+          }}
         />
       </Modal>
     </Card>

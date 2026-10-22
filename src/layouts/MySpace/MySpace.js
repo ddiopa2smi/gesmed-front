@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useIdleTimer } from "../../utils/hooks/useIdleTimer";
 import "./MySpace.scss";
 import {
   Outlet,
@@ -130,21 +131,69 @@ const MySpace = () => {
     });
   };
 
+  // Déconnexion automatique après 30 minutes d'inactivité (aucune interaction souris/clavier/scroll).
+  const handleIdleLogout = useCallback(() => {
+    if (!userConnected) {
+      return;
+    }
+    postActions(`${endpoints.users.DISCONNECT}`, userConnected).finally(() => {
+      sessionStorage.clear();
+      navigate("/login", { replace: true });
+      message.warning("Vous avez été déconnecté après 30 minutes d'inactivité");
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate]);
+
+  useIdleTimer(30 * 60 * 1000, handleIdleLogout);
+
   const profilMenu = [
     {
-      key: 1,
-      icon: <UserOutlined />,
-      label: "Mon profil",
-      onClick: () => navigate("/myspace/settings/profil"),
+      key: "user-header",
+      label: (
+        <Flex align="center" justify="start" gap={12}>
+          <Avatar size="default" icon={<UserOutlined />} />
+          <div className="flex flex-col items-start">
+            <Text
+              type="secondary"
+            >
+              {userConnected?.username}
+            </Text>
+            <div>
+              <Tag color="blue" variant="outlined">
+                {userConnected?.role_name}
+              </Tag>
+            </div>
+
+          </div>
+        </Flex>
+      ),
+      disabled: true,
+      style: { cursor: "default" },
     },
     {
       type: "divider",
     },
     {
+      key: 1,
+      icon: <UserOutlined />,
+      label: "Mon profil",
+      onClick: () => navigate("/myspace/profil"),
+    },
+    {
       key: 2,
+      icon: <LockOutlined />,
+      label: "Gestion de mot de passe",
+      onClick: () => navigate("/myspace/gestion-mot-de-passe"),
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: 3,
       icon: <LogoutOutlined />,
       label: "Déconnexion",
       onClick: logout,
+      danger: true
     },
   ];
 
@@ -173,7 +222,7 @@ const MySpace = () => {
         {
           key: "grp",
           label: (
-            <Text style={{ color: "var(--app-color)", fontSize: 16  }} strong>
+            <Text style={{ color: "var(--app-color)", fontSize: 16 }} strong>
               {serviceType === ServiceType.ADMINISTRATION
                 ? "ADMINISTRATION"
                 : `SERVICE ${serviceType}`}
@@ -194,7 +243,7 @@ const MySpace = () => {
     ) {
       navigate("/", { replace: true });
     }
-    return () => {};
+    return () => { };
   }, []);
 
   useEffect(() => {
@@ -248,7 +297,7 @@ const MySpace = () => {
         setCurrentSelectedKeys(element?.key);
       }
     });
-  }, [location , sideBarMenu]);
+  }, [location, sideBarMenu]);
 
   // const [value, setValue] = useState('');
   // const [options, setOptions] = useState([]);
@@ -321,13 +370,13 @@ const MySpace = () => {
             collapsible
             collapsed={collapsed}
             breakpoint="lg"
-            width={"20vw"}
-            //collapsedWidth="0"
-            //width={screens.xxl ? 300 : "20%"}
+            width={"15vw"}
+          //collapsedWidth="0"
+          //width={screens.xxl ? 300 : "20%"}
           >
             <Flex justify="center" align="center" style={{ height: "56px" }}>
               {/* <Text strong>GESMED</Text> */}
-              <img src={images.logoWithoutBg}  height={collapsed ? 38 : 56} style={{objectFit:"cover"}} />
+              <img src={images.logoWithoutBg} height={collapsed ? 38 : 56} style={{ objectFit: "cover" }} />
             </Flex>
             {menu}
           </Sider>
@@ -392,6 +441,14 @@ const MySpace = () => {
                                 /> */}
                 </Flex>
                 <div className="header-right">
+                  <Tooltip placement="bottomRight" title={<>Accueil</>}>
+                    <Button
+                      type="text"
+                      icon={<HomeOutlined style={{ fontSize: 24 }} />}
+                      onClick={() => navigate("/home")}
+                    />
+                  </Tooltip>
+
                   {isDark ? (
                     <Tooltip placement="bottomRight" title={<>Mode Sombre</>}>
                       <Button
@@ -435,18 +492,17 @@ const MySpace = () => {
                       size="large"
                       icon={
                         <Avatar
-                          size="small"
                           icon={<UserOutlined />}
                           style={{ cursor: "pointer" }}
                         />
                       }
                     >
                       <Text>
-                        {userConnected ? userConnected?.username : ""} <br />{" "}
-                        <div style={{ marginTop: -5 }}>
+                        {userConnected ? userConnected?.username : ""}
+                        {/* <div style={{ marginTop: -5 }}>
                           {" "}
                           {userConnected?.role_name}{" "}
-                        </div>
+                        </div> */}
                       </Text>
                     </Button>
                   </Dropdown>
@@ -457,20 +513,20 @@ const MySpace = () => {
 
           <Content
             className="content"
-            // style={{
-            //   marginLeft:
-            //     screenWidth > 992
-            //       ? collapsed
-            //         ? "5%"
-            //         : screens.xxl
-            //         ? screenWidth >= 1600 && screenWidth <= 1670
-            //           ? "18.3%"
-            //           : "16%"
-            //         : "20%"
-            //       : 0,
-            // }}
+          // style={{
+          //   marginLeft:
+          //     screenWidth > 992
+          //       ? collapsed
+          //         ? "5%"
+          //         : screens.xxl
+          //         ? screenWidth >= 1600 && screenWidth <= 1670
+          //           ? "18.3%"
+          //           : "16%"
+          //         : "20%"
+          //       : 0,
+          // }}
           >
-            <Breadcrumb items={breadCrumbItems} />
+            {/* <Breadcrumb items={breadCrumbItems} /> */}
             {/* <Breadcrumbs /> */}
             <br />
             <Outlet />

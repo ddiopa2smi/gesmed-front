@@ -15,7 +15,7 @@ import { TypePatient } from "../../../utils/types/types.ts";
 const { TextArea } = Input;
 const { Option } = Select;
 
-function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
+function AddPatient({ setOpen, operationType, onRefresh, currentRecord, initialMatricule, onCreated }) {
   const [form] = Form.useForm();
   const [formLoading, setFormLoading] = useState(false);
   const [typePatient, setTypePatient] = useState(null);
@@ -26,8 +26,8 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
   const [benefLuiMeme, setBenefLuiMeme] = useState(null);
   const { data: listTypePatients, isLoading: listTypePatientsLoading } =
     useFetch(endpoints.patients.LIST_TYPE);
-    
-  const { data : listDepartements } = useFetch(endpoints.departements.LIST);
+
+  const { data: listDepartements } = useFetch(endpoints.departements.LIST);
 
   const save = () => {
     form
@@ -48,12 +48,13 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
 
                   setOpen(false);
                   form.resetFields();
-                  onRefresh();
+                  onRefresh?.();
+                  onCreated?.(values.num_patient);
                 } else {
                   message.warning("Patient déja ajouté");
                 }
               })
-              
+
               .finally(() => {
                 setFormLoading(false);
               });
@@ -67,19 +68,19 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
               ? currentRecord.num_patient
               : null;
             putActions(endpoints.patients.UPDATE, values).then((response) => {
-              
+
               message.success("Opération éffectuée avec succès");
               setOpen(false);
               form.resetFields();
               onRefresh();
             })
-            .finally(()=>{
-              setFormLoading(false);
-            })
+              .finally(() => {
+                setFormLoading(false);
+              })
             setOpen(false);
             break;
           default:
-              break;
+            break;
         }
       })
       .catch((info) => {
@@ -104,11 +105,27 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             } else {
               // Swal.fire("Succès", "Ouvrir la liste Patient pour sélectionner un participant")
               setBenefLuiMeme(response.data);
-              getActions(`/api/Benef/list/${response.data.numcont}`).then(
+              getActions(`/api/Benef/Gesmed/list/${response.data.numcont}`).then(
                 (res) => {
                   const data = res.data;
 
                   setListBeneficiaires(data);
+
+                  // Setter par defaut le premier element du tableau
+
+                  let firstBenef = data[0];
+                  form.setFieldValue(
+                    "benef",
+                    data.length > 0 ? firstBenef.matribenef : null
+                  );
+
+                  form.setFieldValue("nom_patient", firstBenef?.nom);
+                  form.setFieldValue("prenom_patient", firstBenef?.prenoms);
+                  form.setFieldValue("sexe_patient", firstBenef?.sexe);
+                  form.setFieldValue(
+                    "datenaiss_patient",
+                    dayjs(new Date(firstBenef.datenaiss))
+                  );
                 }
               );
             }
@@ -122,18 +139,31 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
   }, [matriculeToSearch]);
 
   useEffect(() => {
+    // Ouverture depuis un formulaire de prescription externe : le matricule saisi là-bas a
+    // déjà été identifié comme un participant IPM sans patient GESMED correspondant. On
+    // présélectionne "Permanent" (cas le plus courant, ajustable par l'utilisateur) pour
+    // révéler les champs matricule/patient IPM et déclencher directement la recherche.
+    if (initialMatricule) {
+      setTypePatient(TypePatient.PERMANENT);
+      form.setFieldValue("code_patient", TypePatient.PERMANENT);
+      form.setFieldValue("matricule", initialMatricule);
+      setMatriculeToSearch(initialMatricule);
+    }
+  }, [initialMatricule]);
+
+  useEffect(() => {
     if (currentRecord !== null) {
       form.setFieldsValue(currentRecord);
-      
-      if (currentRecord.code_patient === 2 || currentRecord.code_patient === 3 ) {
-        form.setFieldValue("code_patient" , 1);
+
+      if (currentRecord.code_patient === 2 || currentRecord.code_patient === 3) {
+        form.setFieldValue("code_patient", 1);
       }
       form.setFieldValue("datenaiss_patient", dayjs(new Date(currentRecord.datenaiss_patient)))
-      
+
     }
   }, [currentRecord])
-  
-  
+
+
 
   return (
     <Form
@@ -197,18 +227,18 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
               loading={listTypePatientsLoading}
             >
               {listTypePatients
-              .filter((item)=> item?.code_patient !== 2 && item?.code_patient !== 3)
-              .map(
-                (
-                  item,
-                  key //item.code_pat !== 1 &&
-                ) => (
-                  <Option key={key} value={item.code_patient}>
-                    {" "}
-                    {item.type_patient}{" "}
-                  </Option>
-                )
-              )}
+                .filter((item) => item?.code_patient !== 2 && item?.code_patient !== 3)
+                .map(
+                  (
+                    item,
+                    key //item.code_pat !== 1 &&
+                  ) => (
+                    <Option key={key} value={item.code_patient}>
+                      {" "}
+                      {item.type_patient}{" "}
+                    </Option>
+                  )
+                )}
             </Select>
           </Form.Item>
         </Col>
@@ -231,7 +261,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                   />
                 </Form.Item>
               </Col>
-              <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+              <Col xs={24} sm={8} md={8} lg={8} xl={8}>
                 <Form.Item
                   name="benef"
                   label="Patient"
@@ -241,8 +271,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                       message: "Sélection obligatoire",
                     },
                   ]}
-                  //initialValue={currentRecord?.benef}
-                  //initialValue={listBeneficiaires[0]?.matribenef}
                 >
                   <Select
                     style={{ width: "100%", background: "transparent" }}
@@ -259,7 +287,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                     {listBeneficiaires?.map((item, key) => (
                       <Option key={key} value={item?.matribenef}>
                         {" "}
-                        {item?.matribenef} - {item?.prenoms}{" "}
+                        {item?.matribenef} - {item?.prenoms}{" "} {item?.nom}
                       </Option>
                     ))}
                   </Select>
@@ -268,6 +296,37 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             </>
           )
         }
+        <Col xs={24} sm={4} md={4} lg={4} xl={4}>
+          <Form.Item
+            name="suspension"
+            label="Etat"
+            initialValue={
+              (currentRecord && currentRecord.suspension) || "A"
+            }
+            rules={[
+              {
+                required: true,
+                message: "Champ obligatoire",
+              },
+            ]}
+          >
+            <Select
+              style={{ width: "100%", background: "transparent" }}
+              showSearch
+              placeholder="Etat suspension"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={[
+                { label: "Actif", value: "A" },
+                { label: "Suspendu", value: "S" },
+              ]}
+            />
+          </Form.Item>
+        </Col>
       </Row>
       {typePatient !== TypePatient.EXTERNE && (
         <Row gutter={[24, 24]}>
@@ -275,12 +334,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             <Form.Item
               name="direction"
               label="Direction"
-              // rules={[
-              //     {
-              //         required: true,
-              //         message: 'Sélection obligatoire',
-              //     },
-              // ]}
             >
               <Select
                 style={{ width: "100%", background: "transparent" }}
@@ -318,12 +371,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             <Form.Item
               name="code_dept"
               label="Département"
-              rules={[
-                {
-                  required: true,
-                  message: "Sélection obligatoire",
-                },
-              ]}
             >
               <Select
                 style={{ width: "100%", background: "transparent" }}
@@ -396,7 +443,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                     message: "Champ obligatoire",
                   },
                 ]}
-                //initialValue={currentRecord?.prenom_patient}
               >
                 <Input />
               </Form.Item>
@@ -411,7 +457,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                     message: "Champ obligatoire",
                   },
                 ]}
-                //initialValue={currentRecord?.prenom_patient}
               >
                 <Input />
               </Form.Item>
@@ -424,11 +469,10 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                 label="Nom du père"
                 rules={[
                   {
-                    required: true,
+                    required: false,
                     message: "Champ obligatoire",
                   },
                 ]}
-                //initialValue={currentRecord?.prenom_patient}
               >
                 <Input />
               </Form.Item>
@@ -439,11 +483,10 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                 label="Nom de la mère"
                 rules={[
                   {
-                    required: true,
+                    required: false,
                     message: "Champ obligatoire",
                   },
                 ]}
-                //initialValue={currentRecord?.prenom_patient}
               >
                 <Input />
               </Form.Item>
@@ -480,7 +523,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                 message: "Sélection obligatoire",
               },
             ]}
-            //initialValue={currentRecord?.sexe_patient || "MA"}
           >
             <Select
               style={{ width: "100%", background: "transparent" }}
@@ -501,12 +543,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             name="group_sanguin"
             label="Groupe sanguin"
             rules={
-              [
-                //   {
-                //     required: true,
-                //     message: "Sélection obligatoire",
-                //   },
-              ]
+              []
             }
             initialValue={currentRecord?.group_sanguin}
           >
@@ -555,7 +592,7 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
           <Form.Item
             name="nom_patient"
             label="Nom"
-            rules={[
+            rules={typePatient === TypePatient.SAISONNIER ? [] : [
               {
                 required: true,
                 message: "Champ obligatoire",
@@ -576,10 +613,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
                 message: "Champ obligatoire",
               },
             ]}
-            // initialValue={
-            //   currentRecord !== null &&
-            //   dayjs(new Date(currentRecord?.datenaiss_patient))
-            // }
           >
             <DatePicker placeholder="choisir la date" format="DD/MM/YYYY" />
           </Form.Item>
@@ -601,10 +634,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
             name="email_patient"
             label="Email"
             rules={[
-              // {
-              //     required: true,
-              //     message: 'Champ obligatoire',
-              // },
               {
                 type: "email",
                 message: "Entrer un email svp",
@@ -633,12 +662,6 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
               name="ville"
               label="Ville"
               initialValue={currentRecord?.ville}
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
             >
               <Input />
             </Form.Item>
@@ -648,31 +671,12 @@ function AddPatient({ setOpen, operationType, onRefresh, currentRecord }) {
               name="quartier"
               label="Quartier"
               initialValue={currentRecord?.quartier}
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
             >
               <Input />
             </Form.Item>
           </Col>
         </Row>
       )}
-
-      {/* <Row gutter={[24, 24]}>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-          <Form.Item
-            name="obs_part"
-            label="Observation"
-            initialValue={currentRecord?.obs_part}
-          >
-            <TextArea rows={4} placeholder="Observation" />
-          </Form.Item>
-        </Col>
-      </Row> */}
-
       <FormFooter
         loading={formLoading}
         onCancel={() => {

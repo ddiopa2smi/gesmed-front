@@ -239,7 +239,7 @@ const NewAccount = () => {
                             label="Service"
                             rules={[
                                 {
-                                    required: true,
+                                    required: false,
                                     message: 'Champ obligatoire',
                                 }
                             ]}
@@ -264,7 +264,7 @@ const NewAccount = () => {
                 </Row>
                 
                 {
-                    //currentAccount === null && 
+                    currentAccount === null && 
                     <Row gutter={[24,24]}>
                         <Col xs={24} sm={24} md={8} lg={12} xl={12} >
                             <Form.Item

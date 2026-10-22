@@ -413,32 +413,7 @@ function ConsultationRadiologie({numPatient , numRV , serviceType}) {
             >
                 <Divider/>
                 <Row gutter={[24,24]}>
-                    <Col xs={24} sm={12} md={8} lg={8} xl={8} >
-                        <Flex align='center' >
-                            <Form.Item 
-                                label="Pathologie"
-                                name="code_patho" 
-                                style={{width:"90%"}}
-                            >
-                                <Select
-                                    style={{width:'100%',background:"transparent"}}
-                                    showSearch
-                                    placeholder="Pathologie"
-                                    optionFilterProp="children" 
-                                    loading={pathologiesLoading}
-                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-                                >     
-                                    {
-                                        pathologies.map((item , key)=>(
-                                            <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
-                                        ))
-                                    }
-                                        
-                                </Select>
-                            </Form.Item>
-                            <AddAndEditDropdown items={itemsPathologie} />
-                        </Flex>        
-                    </Col>
+                    
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Flex align='center' >
                             <Form.Item 
@@ -488,6 +463,32 @@ function ConsultationRadiologie({numPatient , numRV , serviceType}) {
                             <AddAndEditDropdown items={itemsRegion} />
                         </Flex>
                     </Col>
+                    <Col xs={24} sm={12} md={8} lg={8} xl={8} >
+                        <Flex align='center' >
+                            <Form.Item 
+                                label="Pathologie"
+                                name="code_patho" 
+                                style={{width:"90%"}}
+                            >
+                                <Select
+                                    style={{width:'100%',background:"transparent"}}
+                                    showSearch
+                                    placeholder="Pathologie"
+                                    optionFilterProp="children" 
+                                    loading={pathologiesLoading}
+                                    filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
+                                >     
+                                    {
+                                        pathologies.map((item , key)=>(
+                                            <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
+                                        ))
+                                    }
+                                        
+                                </Select>
+                            </Form.Item>
+                            <AddAndEditDropdown items={itemsPathologie} />
+                        </Flex>        
+                    </Col>
                 </Row>
 
                 <Divider> Séance </Divider>
@@ -518,7 +519,7 @@ function ConsultationRadiologie({numPatient , numRV , serviceType}) {
                         </Form.Item>
                     </Col>
                 </Row>
-                <Divider> Examen clinique </Divider>
+                <Divider> Données cliniques </Divider>
                 <Row gutter={[24,24]}>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Form.Item 

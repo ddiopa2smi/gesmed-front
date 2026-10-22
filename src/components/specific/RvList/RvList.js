@@ -1,11 +1,13 @@
 import {
   EditOutlined,
+  FileAddOutlined,
   FolderOpenOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
   Button,
   Card,
+  DatePicker,
   Flex,
   Modal,
   Segmented,
@@ -21,6 +23,7 @@ import { useNavigate } from "react-router";
 import DataTable from "../../common/DataTable/DataTable";
 import useFetch from "../../../utils/hooks/useFetch";
 import { endpoints } from "../../../constants/endpoints.constants";
+import PeriodeSelect from "../../common/PeriodeSelect/PeriodeSelect";
 import { RiStethoscopeLine } from "react-icons/ri";
 import { AiOutlineFolder } from "react-icons/ai";
 import Examen from "../Examen/Examen";
@@ -39,26 +42,47 @@ import {
 } from "../../../utils/helpers.js";
 import AddRv from "../AddRv/AddRv.js";
 import EditButton from "../../common/EditButton/EditButton.js";
+import TotalTag from "../../common/TotalTag/TotalTag.js";
+import AddAnalyseExterne from "../AddAnalyseExterne/AddAnalyseExterne.js";
+import { LOGO_BROWN } from "../../../constants/app.constants.js";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 const RvList = ({ serviceType, today }) => {
   const navigate = useNavigate();
-  const { data, dataCopy, setDataCopy, isLoading, error, onRefresh } = useFetch(
-    today ? endpoints.rendezVous.TODAY_LIST : endpoints.rendezVous.LIST
-  );
+  const userConnected = JSON.parse(sessionStorage.getItem('userConnected'));
+  const [periode, setPeriode] = useState(1);
+  const [dateRange, setDateRange] = useState(null);
+
+  const listUrl = today
+    ? endpoints.rendezVous.TODAY_LIST
+    : (periode === 9
+      ? (dateRange && dateRange[0] && dateRange[1]
+        ? endpoints.rendezVous.LIST_BY_DATE(
+          dateRange[0].format("YYYY-MM-DD"),
+          dateRange[1].format("YYYY-MM-DD"),
+        )
+        : null)
+      : endpoints.rendezVous.LIST(periode));
+
+  const { data, dataCopy, setDataCopy, isLoading, error, onRefresh } = useFetch(listUrl);
   const [operationType, setOperationType] = useState("");
-  const { data: services_medicaux } = useFetch(
-    endpoints.services_medicaux.LIST
-  );
-  const { getColumnSearchProps } = useSearch();
+  const { getColumnSearchProps, getColumnRangeSearchProps } = useSearch();
   const [open, setOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState(null);
   const [defaultExamPayload, setDefaultExamPayload] = useState(null);
   const [examActionLoading, setExamActionLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [isAddPrescriptionModalVisible, setIsAddPrescriptionModalVisible] = useState(false);
+  const [prescriptionPatient, setPrescriptionPatient] = useState(null);
 
   const [segmentedValue, setSegmentedValue] = useState("attente");
+
+  const onAddPrescription = (record) => {
+    setPrescriptionPatient(record);
+    setIsAddPrescriptionModalVisible(true);
+  };
 
   const handleExamenClinique = (record) => {
     setOpen(true);
@@ -102,36 +126,39 @@ const RvList = ({ serviceType, today }) => {
   const openMedicalFile = (record) => {
     switch (serviceType) {
       case ServiceType.MEDICAL:
-        navigate(`/espace-medical/patients/dossier`);
+        //navigate(`/espace-medical/patients/dossier`);
+        navigate(
+          `/espace-medical/patients/${record.num_patient}`
+        );
         break;
       case ServiceType.GYNECOLOGIE:
         navigate(
-          `/espace-gynecologie/patients/dossier-medical/${record.num_patient}`
+          `/espace-gynecologie/patients/${record.num_patient}`
         );
         break;
       case ServiceType.DENTAIRE:
         navigate(
-          `/espace-dentist/patients/dossier-medical/${record?.num_patient}`
+          `/espace-dentist/patients/${record?.num_patient}`
         );
         break;
       case ServiceType.ANALYSE_BIO_MEDICAL:
         navigate(
-          `/espace-analyse/patients/dossier-medical/${record?.num_patient}`
+          `/espace-analyse/patients/${record?.num_patient}`
         );
         break;
       case ServiceType.RADIOLOGIE:
         navigate(
-          `/espace-radiologie/patients/dossier-medical/${record?.num_patient}`
+          `/espace-radiologie/patients/${record?.num_patient}`
         );
         break;
       case ServiceType.HOSPITALISATION:
         navigate(
-          `/espace-hospitalisation/patients/dossier-medical/${record?.num_patient}`
+          `/espace-hospitalisation/patients/${record?.num_patient}`
         );
         break;
       case ServiceType.INFIRMERIE:
         navigate(
-          `/espace-infirmerie/patients/dossier-medical/${record?.num_patient}`
+          `/espace-infirmerie/patients/${record?.num_patient}`
         );
         break;
       default:
@@ -141,22 +168,55 @@ const RvList = ({ serviceType, today }) => {
     sessionStorage.setItem("currentPatient", JSON.stringify(record));
   };
 
-  useEffect(() => {
-    console.log(selectedRows);
-  }, [selectedRows]);
+  const getFilteredData = () => {
+    if (segmentedValue === "attente") {
+      if (serviceType === ServiceType.ACCUEIL) {
+        return dataCopy.filter(element => element.effectue === false).reverse()
+      } else {
+        return dataCopy.filter(element => element.effectue === false && element.service_medical === serviceType && element.id_medecin === userConnected.login).reverse()
+      }
+    } else {
+      if (serviceType === ServiceType.ACCUEIL) {
+        return dataCopy.filter(element => element.effectue === true).reverse()
+      } else {
+        return dataCopy.filter(element => element.effectue === true && element.service_medical === serviceType && element.id_medecin === userConnected.login).reverse()
+      }
+    }
+  }
 
   return (
     <Card>
       <Flex justify="space-between" align="center">
-        <Space>
-          <Title level={4}>
+        <div>
+          <Title level={4} style={{ color: LOGO_BROWN }}>
             {today
               ? "Liste des patients du jour"
-              : "Liste de tous les rendez-vous"}
+              : "Liste complète des rendez-vous"}
+            &nbsp; <TotalTag value={getFilteredData().length} />
           </Title>
-        </Space>
+          <Text type="secondary" >
+            {
+              today ? "Visualisez et gérez les rendez-vous du jour."
+                : "Gérer et suivre l'ensemble des rendez-vous des patients des différents services de la clinique."
+            }
+          </Text>
+        </div>
         <Space size="large">
           <ReloadButton onRefresh={onRefresh} />
+          {!today && (
+            <PeriodeSelect
+              value={periode}
+              onChange={(value) => setPeriode(value)}
+            />
+          )}
+          {!today && periode === 9 && (
+            <RangePicker
+              variant="filled"
+              format="DD/MM/YYYY"
+              value={dateRange}
+              onChange={(dates) => setDateRange(dates)}
+            />
+          )}
           <Button
             type="primary"
             size="small"
@@ -191,25 +251,12 @@ const RvList = ({ serviceType, today }) => {
       <br />
 
       <DataTable
-        dataSource={data}
+        compact
+        dataSource={serviceType === ServiceType.ACCUEIL ? data : data.filter((element) => element.id_medecin === userConnected.login)}
         rowSelected
         selectedRowKeys={selectedRows}
         setSelectedRowKeys={setSelectedRows}
-        dataSourceCopy={
-          segmentedValue === "attente"
-            ? dataCopy.filter((element) => {
-                return serviceType === ServiceType.ACCUEIL
-                  ? element.effectue === false
-                  : element.service_medical === serviceType &&
-                      element.effectue === false;
-              })
-            : dataCopy.filter((element) =>
-                serviceType === ServiceType.ACCUEIL
-                  ? element.effectue === true
-                  : element.service_medical === serviceType &&
-                    element.effectue === true
-              )
-        }
+        dataSourceCopy={getFilteredData()}
         setDataSourceCopy={setDataCopy}
         rowKey={(record) => record.num_ordre}
         tableLoading={isLoading}
@@ -242,12 +289,14 @@ const RvList = ({ serviceType, today }) => {
             title: "Age",
             dataIndex: "age_patient",
             key: "age_patient",
-            ...getColumnSearchProps("age_patient"),
+            align: "center",
+            ...getColumnRangeSearchProps("age_patient"),
           },
           {
             title: "Sexe",
             dataIndex: "sexe_patient",
             key: "sexe_patient",
+            align: "center",
             filters: ["MA", "FE"].map((item) => {
               return {
                 text: item,
@@ -258,7 +307,7 @@ const RvList = ({ serviceType, today }) => {
               record.sexe_patient.indexOf(value) === 0,
           },
           {
-            title: "Examens",
+            title: serviceType === ServiceType.ANALYSE_BIO_MEDICAL ? "Saisie" : "Examens",
             dataIndex: "effectue",
             key: "effectue",
             render: (record) => (
@@ -291,12 +340,9 @@ const RvList = ({ serviceType, today }) => {
             title: "Service",
             dataIndex: "service_medical",
             key: "service_medical",
-            filters: services_medicaux.map((item) => {
-              return {
-                text: item?.lib_service,
-                value: item?.lib_service,
-              };
-            }),
+            filters: Array.from(
+              new Set((dataCopy || []).map((item) => item?.service_medical).filter(Boolean))
+            ).map((value) => ({ text: value, value })),
             onFilter: (value, record) =>
               record.service_medical.indexOf(value) === 0,
           },
@@ -311,36 +357,64 @@ const RvList = ({ serviceType, today }) => {
             render: (record) => (
               <Flex align="center">
                 <Space>
-                  <Tooltip title="Modifier">
-                    <EditButton
-                      onEdit={() => {
-                        onUpdate(record);
-                      }}
-                    />
-                  </Tooltip>
-                  <Tooltip title="Examiner">
-                    <Button
-                      type="text"
-                      onClick={() => {
-                        handleExamenClinique(record);
-                      }}
-                      icon={<RiStethoscopeLine cursor="pointer" size={18} color="#3867d6" />}
-                    />
-                  </Tooltip>
-                  {serviceType !== ServiceType.ACCUEIL && (
-                    <Tooltip title="Ouvrir dossier">
-                      <Button
-                        type="text"
-                        onClick={() => {
-                          openMedicalFile(record);
-                        }}
-                        icon={
-                          <FolderOpenOutlined
-                            style={{ fontSize: 18, color: "#eb3b5a" }}
+                  {serviceType === ServiceType.ANALYSE_BIO_MEDICAL ? (
+                    !record.effectue && (
+                      <Tooltip title="Nouvelle prescription externe">
+                        <Button
+                          type="text"
+                          onClick={() => {
+                            onAddPrescription(record);
+                          }}
+                          icon={<FileAddOutlined style={{ fontSize: 18, color: "#3867d6" }} />}
+                        />
+                      </Tooltip>
+                    )
+                  ) : (
+                    <>
+                      <Tooltip title="Modifier">
+                        {!record.effectue && (
+                          <EditButton
+                            onEdit={() => {
+                              onUpdate(record);
+                            }}
                           />
-                        }
-                      />
-                    </Tooltip>
+                        )}
+                      </Tooltip>
+                      {
+                        serviceType !== ServiceType.ACCUEIL &&
+                        <Tooltip title="Données cliniques">
+                          <Button
+                            type="text"
+                            onClick={() => {
+                              handleExamenClinique(record);
+                            }}
+                            icon={
+                              <RiStethoscopeLine
+                                cursor="pointer"
+                                size={18}
+                                color="#3867d6"
+                              />
+                            }
+                          />
+                        </Tooltip>
+                      }
+
+                      {(record.effectue && serviceType !== ServiceType.ACCUEIL) && (
+                        <Tooltip title="Ouvrir dossier">
+                          <Button
+                            type="text"
+                            onClick={() => {
+                              openMedicalFile(record);
+                            }}
+                            icon={
+                              <FolderOpenOutlined
+                                style={{ fontSize: 18, color: "#eb3b5a" }}
+                              />
+                            }
+                          />
+                        </Tooltip>
+                      )}
+                    </>
                   )}
                 </Space>
               </Flex>
@@ -352,7 +426,7 @@ const RvList = ({ serviceType, today }) => {
       <Modal
         style={{ top: 20 }}
         styles={{
-          header: { padding: "12px 24px", },
+          header: { padding: "12px 24px" },
           footer: { padding: "12px 24px" },
           content: { margin: 0, padding: 0 },
           body: {
@@ -366,7 +440,7 @@ const RvList = ({ serviceType, today }) => {
         title={
           operationType === "update"
             ? "Modifier le rendez-vous"
-            : "Examen clinique"
+            : "Données cliniques"
         }
         open={open}
         onCancel={() => {
@@ -393,6 +467,32 @@ const RvList = ({ serviceType, today }) => {
             defaultExamPayload={defaultExamPayload}
           />
         )}
+      </Modal>
+
+      <Modal
+        style={{ top: 20, maxWidth: 850 }}
+        styles={{
+          body: {
+            overflowY: "auto",
+            overflowX: "hidden",
+            maxHeight: "90vh",
+          },
+        }}
+        width="80%"
+        title="Nouvelle prescription d'analyse externe"
+        open={isAddPrescriptionModalVisible}
+        onCancel={() => {
+          setIsAddPrescriptionModalVisible(false);
+          setPrescriptionPatient(null);
+        }}
+        footer={null}
+        destroyOnClose
+      >
+        <AddAnalyseExterne
+          setIsModalVisible={setIsAddPrescriptionModalVisible}
+          onRefresh={onRefresh}
+          initialPatient={prescriptionPatient}
+        />
       </Modal>
     </Card>
   );

@@ -8,52 +8,62 @@ import Patients from "./Patients/Patients";
 import Consultations from "./Consultations/Consultations";
 import DossierMedical from "./DossierMedical/DossierMedical";
 import ConsultationPage from "../ConsultationPage/ConsultationPage";
+import InfosCliniques from "./InfosCliniques/InfosCliniques";
 
-export const hospitalisationRouter : RouteObject = {
-    path : "espace-hospitalisation",
-    element : <MySpace />,
-    children : [
+export const hospitalisationRouter: RouteObject = {
+    path: "espace-hospitalisation",
+    element: <MySpace />,
+    children: [
         {
-            path : "",
-            element : <Navigate to="/espace-hospitalisation/dashboard" />,
+            path: "",
+            element: <Navigate to="/espace-hospitalisation/dashboard" />,
         },
         {
-            path : "dashboard",
-            element : <Dashboard />
+            path: "dashboard",
+            element: <Dashboard />
         },
         {
-            path : "rendez-vous",
-            element : <RendezVous />
+            path: "rendez-vous",
+            element: <RendezVous />
         },
         {
-            path : "agenda",
-            element : <Agenda />
+            path: "agenda",
+            element: <Agenda />
         },
         {
-            path : "patients",
-            children : [
+            path: "patients",
+            children: [
                 {
-                    path : "",
-                    element : <Patients />
+                    path: "",
+                    element: <Patients />
                 },
                 {
-                    path : "dossier-medical",
-                    children : [
+                    path: "",
+                    children: [
                         {
-                            path : ":id",
-                            element : <DossierMedical />
+                            path: ":id",
+                            children: [
+                                {
+                                    index: true,
+                                    element: <DossierMedical />,
+                                },
+                                {
+                                    path: "infos-cliniques",
+                                    element: <InfosCliniques />
+                                },
+                            ]
                         },
                     ]
                 },
             ]
         },
         {
-            path : "consultations",
-            element : <Consultations />
+            path: "consultations",
+            element: <Consultations />
         },
         {
-            path : "consultation/:numPatient/:numRv",
-            element : <ConsultationPage/>
+            path: "consultation/:numPatient/:numRv",
+            element: <ConsultationPage />
         },
     ]
 }

@@ -1,17 +1,25 @@
 import Swal from "sweetalert2";
 import printJS from "print-js";
+import * as XLSX from "xlsx";
 import { API_URL } from "../constants/environment.constants";
 import { message } from "antd";
 import { v4 as uuidv4 } from "uuid";
+
+export const exportToExcel = (rows, fileName = "export") => {
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Feuille1");
+  XLSX.writeFile(workbook, `${fileName}.xlsx`);
+};
 
 export const formatDate = (record) => {
   return record === null || record === ""
     ? ""
     : new Intl.DateTimeFormat("fr-FR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }).format(new Date(record));
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(new Date(record));
 };
 
 export const formatDateTime = (record) => {
@@ -34,6 +42,13 @@ export const formatDateTime = (record) => {
     minute: "2-digit",
   }).format(date);
   return `${formattedDate} - ${formattedTime}`;
+};
+
+export const formatMontant = (montant) => {
+  if (montant === null || montant === undefined || montant === "") {
+    return "";
+  }
+  return new Intl.NumberFormat("fr-FR").format(montant);
 };
 
 export const deletePopup = () => {
@@ -229,17 +244,21 @@ export const getTypePatient = (code) => {
     case 1:
       libelle_code = "PERMANENT";
       break;
-    case 2:
+    case 4:
       libelle_code = "JOURNALIER";
       break;
-    case 3:
+    case 5:
       libelle_code = "SAISONNIER";
       break;
-    case 4:
+    case 6:
+      libelle_code = "STAGIAIRE";
+      break;
+    case 7:
       libelle_code = "EXTERNE";
       break;
 
     default:
+      libelle_code = "PERMANENT";
       break;
   }
   return libelle_code;
@@ -299,10 +318,10 @@ export const insertObjectIntoDataTableAfterIndex = (array, object, indexBefore) 
   const index = array.findIndex((col) => col.dataIndex === indexBefore);
   if (index !== -1) {
     array.splice(index + 1, 0, object);
-  }else{
+  } else {
     array.push(object);
   }
-  
+
   return array;
 };
 

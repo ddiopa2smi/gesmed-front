@@ -105,7 +105,9 @@ function Infirmerie() {
   const [form] = Form.useForm();
   const [operationType, setOperationType] = useState("add");
 
-  const [checkKeys, setCheckKeys] = useState([]);
+  const [checkKeys, setCheckKeys] = useState(
+    (editPrescription?.listActes || []).map((item) => item?.codeacte)
+  );
 
   const [infirmeriePrescritions, setInfirmeriePrescritions] = useState(
     editPrescription?.listActes || []
@@ -217,7 +219,21 @@ function Infirmerie() {
                 };
               })}
               onChange={(value) => {
+                const added = value.filter((key) => !checkKeys.includes(key));
+                const removed = checkKeys.filter((key) => !value.includes(key));
+
                 setCheckKeys(value);
+
+                setInfirmeriePrescritions((prev) => {
+                  const updated = prev.filter((item) => !removed.includes(item.codeacte));
+                  added.forEach((code) => {
+                    const acte = dataCopy?.find((item) => item.codeacte === code);
+                    if (acte && !updated.some((item) => item.codeacte === code)) {
+                      updated.push(acte);
+                    }
+                  });
+                  return updated;
+                });
               }}
             />
           </Col>
@@ -228,34 +244,18 @@ function Infirmerie() {
                 danger
                 onClick={() => {
                   setCheckKeys([]);
+                  setInfirmeriePrescritions([]);
                 }}
                 disabled={checkKeys.length === 0}
               >
                 Réinitialiser
-              </Button>
-              <Button
-                type="primary"
-                onClick={() => {
-                  let tmp = [];
-                  checkKeys.forEach((element) => {
-                    let res = dataCopy?.find(
-                      (item) => item.codeacte === element
-                    );
-                    tmp.push(res);
-                  });
-                  setInfirmeriePrescritions(tmp);
-                  //setCheckKeys([]);
-                }}
-                disabled={checkKeys.length === 0}
-              >
-                Ajouter
               </Button>
             </Space>
           </Flex>
         </Row>
         <br />
         <Title level={5}>Liste des soins à faire</Title>
-        <DataTable
+        <DataTable compact
           dataSourceCopy={infirmeriePrescritions}
           columns={[
             {
@@ -285,6 +285,7 @@ function Infirmerie() {
                               (element) => element.codeacte !== record.codeacte
                             );
                             setInfirmeriePrescritions(temp);
+                            setCheckKeys((prev) => prev.filter((key) => key !== record.codeacte));
                           }
                         });
                       }}

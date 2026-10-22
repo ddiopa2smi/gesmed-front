@@ -7,6 +7,7 @@ import ConsultationGynecologie from "../../components/specific/ConsultationGynec
 import ConsultationInfirmerie from "../../components/specific/ConsultationInfirmerie/ConsultationInfirmerie.js";
 import ConsultationHospitalisation from "../../components/specific/ConsultationHospitalisation/ConsultationHospitalisation.js";
 import ConsultationRadiologie from "../../components/specific/ConsultationRadiologie/ConsultationRadiologie.js";
+import { codeServices } from "../../constants/app.constants.js";
 
 function ConsultationPage() {
   const { numPatient, numRv } = useParams();
@@ -17,22 +18,22 @@ function ConsultationPage() {
 
   switch (serviceType) {
     case ServiceType.MEDICAL:
-      renderConsultation = <ConsultationMedical numRV={numRv} numPatient={numPatient} />;
+      renderConsultation = <ConsultationMedical numRV={numRv} numPatient={numPatient} codeService={codeServices.MEDICAL} />;
       break;
     case ServiceType.DENTAIRE:
-      renderConsultation = <ConsultationDentaire numRV={numRv} numPatient={numPatient} />;
+      renderConsultation = <ConsultationDentaire numRV={numRv} numPatient={numPatient} codeService={codeServices.DENTAIRE} />;
       break;
     case ServiceType.GYNECOLOGIE:
-      renderConsultation = <ConsultationGynecologie numRV={numRv} numPatient={numPatient} />;
+      renderConsultation = <ConsultationGynecologie numRV={numRv} numPatient={numPatient} codeService={codeServices.GYNECOLOGIE} />;
       break;
     case ServiceType.INFIRMERIE:
-      renderConsultation = <ConsultationInfirmerie numRV={numRv} numPatient={numPatient} />;
+      renderConsultation = <ConsultationInfirmerie numRV={numRv} numPatient={numPatient} codeService={codeServices.INFIRMERIE} />;
       break;
     case ServiceType.HOSPITALISATION:
-      renderConsultation = <ConsultationHospitalisation numRV={numRv} numPatient={numPatient} />;
+      renderConsultation = <ConsultationHospitalisation numRV={numRv} numPatient={numPatient} codeService={codeServices.HOSPITALISATION} />;
       break;
     case ServiceType.RADIOLOGIE:
-      renderConsultation = <ConsultationRadiologie numRV={numRv} numPatient={numPatient} />;
+      renderConsultation = <ConsultationRadiologie numRV={numRv} numPatient={numPatient} codeService={codeServices.RADIOLOGIE} />;
       break;
     default:
       break;

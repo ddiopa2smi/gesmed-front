@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { DeleteOutlined, EditOutlined, HomeOutlined,PrinterOutlined } from '@ant-design/icons';
 import { endpoints } from '../../constants/endpoints.constants';
 import { deleteActions} from '../../actions/actions';
-import { codesPrescriptions } from '../../constants/app.constants';
+import { codesPrescriptions, LOGO_BROWN } from '../../constants/app.constants';
 import { Link } from 'react-router-dom';
 import DataTable from '../../components/common/DataTable/DataTable';
 import { deletePopup, formatDate, printPDF } from '../../utils/helpers';
@@ -232,7 +232,7 @@ function Prescriptions() {
             </Flex>
             <br/>
             <Flex align='center' justify='space-between' >
-                <Title level={4} >Liste des {getTitleByType(prescription.codepresc).type2} de la consultation N° {prescription.numcons} </Title>            
+                <Title level={4} style={{ color: LOGO_BROWN }} >Liste des {getTitleByType(prescription.codepresc).type2} de la consultation N° {prescription.numcons} </Title>
 
                 <Space>
                     {/* <Button type='ghost' className='button-close' onClick={()=>{navigate(-1);}}  >Retour</Button>  */}
@@ -247,7 +247,7 @@ function Prescriptions() {
 
             <br/>
 
-            <DataTable 
+            <DataTable compact
                 dataSourceCopy={dataCopy?.listPrescription?.filter(element => {
                     return element.codepresc === prescription.codepresc && element.numcons === prescription.numcons
                     //return element.codepresc === prescription.codepresc && element.numpresc === prescription.numpresc

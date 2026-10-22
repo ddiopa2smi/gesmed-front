@@ -10,77 +10,81 @@ import Agenda from "./Agenda/Agenda";
 import RendezVous from "./RendezVous/RendezVous";
 import DossierMedical from "./DossierMedical/DossierMedical";
 import ConsultationPage from "../ConsultationPage/ConsultationPage";
+import InfosCliniques from "./InfosCliniques/InfosCliniques";
 
-export const gynecologieRouter : RouteObject = {
-    path : "espace-gynecologie",
-    element : <MySpace />,
-    children : [
+export const gynecologieRouter: RouteObject = {
+    path: "espace-gynecologie",
+    element: <MySpace />,
+    children: [
         {
-            path : "",
-            element : <Navigate to="/espace-gynecologie/dashboard" />,
+            path: "",
+            element: <Navigate to="/espace-gynecologie/dashboard" />,
         },
         {
-            path : "dashboard",
-            element : <Dashboard />
+            path: "dashboard",
+            element: <Dashboard />
         },
         {
-            id : "patients",
-            path : "patients",
-            children : [
+            id: "patients",
+            path: "patients",
+            children: [
                 {
-                   index : true,
-                    element : <Patients />,
+                    index: true,
+                    element: <Patients />,
                 },
                 {
-                    id : "dossier-medical",
-                    path : "dossier-medical",
-                    children : [
+                    path: "",
+                    children: [
                         {
-                            path : ":id",
-                            children : [
+                            path: ":id",
+                            children: [
                                 {
-                                    index : true,
-                                    element : <DossierMedical /> 
+                                    index: true,
+                                    element: <DossierMedical />,
                                 },
                                 {
-                                    path : "consultation",
-                                    element : <Consultation /> 
+                                    path: "consultation",
+                                    element: <Consultation />
+                                },
+                                {
+                                    path: "infos-cliniques",
+                                    element: <InfosCliniques />
                                 },
                             ]
                         },
                         {
-                            path : "consultation",
-                            element : <Consultation /> 
+                            path: "consultation",
+                            element: <Consultation />
                         },
-                        
+
                     ]
                 },
             ]
         },
         {
-            path : "agenda",
-            element : <Agenda />
+            path: "agenda",
+            element: <Agenda />
         },
         {
-            path : "rendez-vous",
-            element : <RendezVous />
+            path: "rendez-vous",
+            element: <RendezVous />
         },
         {
-            path : "consultations",
-            children : [
+            path: "consultations",
+            children: [
                 {
-                    path : "",
-                    element : <Consultations /> ,
+                    path: "",
+                    element: <Consultations />,
                 },
                 {
-                    path : "details-consultation",
-                    element : <DetailsConsultation /> 
+                    path: "details-consultation",
+                    element: <DetailsConsultation />
                 },
             ]
         },
         {
-            path : "consultation/:numPatient/:numRv",
-            element : <ConsultationPage/>
+            path: "consultation/:numPatient/:numRv",
+            element: <ConsultationPage />
         },
     ]
 }

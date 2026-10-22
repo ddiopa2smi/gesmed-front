@@ -15,6 +15,7 @@ import {
 } from "antd";
 import React, { useState } from "react";
 import useFetch from "../../utils/hooks/useFetch";
+import usePaginatedFetch from "../../utils/hooks/usePaginatedFetch";
 import { endpoints } from "../../constants/endpoints.constants";
 import test_img from "./../../assets/test_img.jpg";
 import { codesPrescriptions } from "../../constants/app.constants";
@@ -39,12 +40,15 @@ function PrescriptionsGroupes() {
   const navigate = useNavigate();
   const [formLoading, setFormLoading] = useState(false);
   const { getColumnSearchProps } = useSearch();
-  const {
-    data: patientsList,
-    dataCopy: patientsListCopy,
-    setDataCopy: setPatientsListCopy,
-    isLoading,
-  } = useFetch(endpoints.patients.LIST);
+  // NB: cette vue permet de sélectionner des patients parmi la liste complète (pas de pagination
+  // ici), on demande donc une grande page au endpoint paginé plutôt que de le paginer réellement.
+  const { content: patientsList, isLoading } = usePaginatedFetch(
+    endpoints.patients.LIST({ page: 0, size: 5000, sortField: "nom_patient", sortOrder: "ASC" })
+  );
+  const [patientsListCopy, setPatientsListCopy] = useState([]);
+  useEffect(() => {
+    setPatientsListCopy(patientsList);
+  }, [patientsList]);
   const [open, setOpen] = useState(false);
   const [prescriptionType, setPrescriptionType] = useState(
     codesPrescriptions.ORD
@@ -172,7 +176,7 @@ function PrescriptionsGroupes() {
           </Text>
           <br />
           <br />
-          <DataTable
+          <DataTable compact
             dataSource={patientsList}
             dataSourceCopy={patientsListCopy}
             setDataSourceCopy={setPatientsListCopy}

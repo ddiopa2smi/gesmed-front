@@ -7,9 +7,10 @@ import {
   theme,
   message,
   Typography,
+  Progress,
 } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import "./Auth.scss";
 import axios from "axios";
@@ -31,7 +32,33 @@ function Auth() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const MAX_ATTEMPTS = 3;
+  const LOCK_DURATION = 60; // secondes
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const isLocked = remainingSeconds > 0;
+
+  useEffect(() => {
+    if (remainingSeconds <= 0) {
+      return;
+    }
+    const interval = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setFailedAttempts(0);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [remainingSeconds > 0]);
+
   const login = () => {
+    if (isLocked) {
+      return;
+    }
     form
       .validateFields()
       .then((values) => {
@@ -44,10 +71,20 @@ function Auth() {
                 JSON.stringify(response.data)
               );
               form.resetFields();
+              setFailedAttempts(0);
               navigate("/home", { replace: true });
               message.success("Bienvenue dans votre espace de gestion");
             } else {
-              message.error("Login et/ou mot de passe incorrect(s)");
+              const attempts = failedAttempts + 1;
+              setFailedAttempts(attempts);
+              if (attempts >= MAX_ATTEMPTS) {
+                setRemainingSeconds(LOCK_DURATION);
+                message.error(
+                  `Trop de tentatives échouées, veuillez patienter ${LOCK_DURATION} secondes`
+                );
+              } else {
+                message.error("Login et/ou mot de passe incorrect(s)");
+              }
             }
           })
           .finally(() => {
@@ -126,7 +163,7 @@ function Auth() {
     //   </div>
     // </div>
     <div className="AuthWrapper" style={{ background: colorBgElevated }}>
-      <Carousel className="carousel-content" autoplay>
+      <Carousel className="carousel-content" style={{ borderRadius: 10 }} autoplay>
         <div>
           <img src={image1} alt="image1" className="carousel-img" />
         </div>
@@ -146,7 +183,7 @@ function Auth() {
           <center>
             <img
               //src={images.logoWithoutBg}
-              src={images.logo1}
+              src={images.logoWithoutBg}
               width={200}
               height={100}
               style={{
@@ -159,7 +196,7 @@ function Auth() {
           <br />
 
           <div style={{ margin: 0 }}>
-            <Title level={4} style={{textAlign :"center"}} >Veuillez vous authentifier pour continuer</Title>
+            <Title level={5} style={{ textAlign: "center" }} > Bienvenue sur l'espace de gestion médicale de la CSS. Veuillez vous authentifier pour continuer</Title>
             <br />
             <Form
               form={form}
@@ -181,6 +218,7 @@ function Auth() {
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Entrer votre login"
                   size="large"
+                  disabled={isLocked}
                 />
               </Form.Item>
               <Form.Item
@@ -197,15 +235,29 @@ function Auth() {
                   prefix={<LockOutlined className="site-form-item-icon" />}
                   placeholder="Entrer votre mot de passe"
                   size="large"
+                  disabled={isLocked}
                 />
               </Form.Item>
 
-              <Link style={{ textAlign: "end", color: "var(--app-color)" }}>
+              {/* <Link style={{ textAlign: "end", color: "var(--app-color)" }}>
                 Mot de passe oublié
-              </Link>
+              </Link> */}
+
+              {isLocked && (
+                <div style={{ marginBottom: 16 }}>
+                  <Text type="danger">
+                    {`Trop de tentatives échouées. Réessayez dans ${remainingSeconds}s`}
+                  </Text>
+                  <Progress
+                    percent={(remainingSeconds / LOCK_DURATION) * 100}
+                    showInfo={false}
+                    status="exception"
+                  />
+                </div>
+              )}
 
               <br />
-              <br />
+
 
               <Button
                 loading={loading}
@@ -214,6 +266,7 @@ function Auth() {
                 className="login-form-button"
                 size="large"
                 style={{ width: "100%" }}
+                disabled={isLocked}
               >
                 Se connecter
               </Button>

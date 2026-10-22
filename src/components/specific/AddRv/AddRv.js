@@ -16,6 +16,7 @@ import FormFooter from "../../common/FormFooter/FormFooter";
 import dayjs from "dayjs";
 import useFetch from "../../../utils/hooks/useFetch";
 import { ServiceType } from "../../../utils/types/types.ts";
+import { codeServices } from "../../../constants/app.constants.js";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -48,11 +49,7 @@ function AddRv({ setOpen, onRefresh, currentRecord, operationType }) {
   );
   const [medecins, setMedecins] = useState([]);
   const [medecinsCopy, setMedecinsCopy] = useState([]);
-  useEffect(() => {
-    const temp = users.filter((item) => item.role_name === "Medecin");
-    setMedecins(temp);
-    setMedecinsCopy(temp);
-  }, [users]);
+
 
 
   const createRV = () => {
@@ -66,8 +63,8 @@ function AddRv({ setOpen, onRefresh, currentRecord, operationType }) {
         if (operationType === "update") {
           putActions(endpoints.rendezVous.UPDATE, values)
             .then((response) => {
-            //   if (response.data.Created === true) {
-            //   }
+              //   if (response.data.Created === true) {
+              //   }
               message.success("Rendez-vous mise à jour avec succès");
               onRefresh();
               setOpen(false);
@@ -90,27 +87,52 @@ function AddRv({ setOpen, onRefresh, currentRecord, operationType }) {
       });
   };
 
-  const getCodeByLabel = (listServices) => {
-    return listServices?.find((item) => item.lib_service === serviceType)
+  const getCodeByLabel = (listServices, label) => {
+    return listServices?.find((item) => item.lib_service === label)
       ?.code_service;
   };
+
+
+  useEffect(() => {
+    setMedecins(users);
+    setMedecinsCopy(users);
+
+    form.setFieldValue("date_rv", dayjs(new Date()));
+  }, [users]);
 
   useEffect(() => {
     if (servicesMedicaux) {
       if (serviceType !== ServiceType.ACCUEIL) {
-        form.setFieldValue("code_serv", getCodeByLabel(servicesMedicaux));
+        form.setFieldValue("code_serv", getCodeByLabel(servicesMedicaux, serviceType));
         form.setFieldValue("id_medecin", userConnected?.login);
       }
     }
   }, [servicesMedicaux]);
 
   useEffect(() => {
-    if (operationType === "update") {
-      form.setFieldValue("code_serv", currentRecord.service_medical);
+
+    if (operationType === "update" && currentRecord) {
+      // currentRecord.service_medical est un libellé (ex: "MEDICAL"), il faut le résoudre
+      // en code_service court (ex: "MED") comme pour le flux d'ajout, sinon le payload
+      // envoyé au backend contient le libellé et l'update échoue (422).
+      const resolvedCodeServ = getCodeByLabel(servicesMedicaux, currentRecord.service_medical);
+      form.setFieldValue("code_serv", resolvedCodeServ);
+
+
+      // Charger par defaut les medecins du service selectionné
+      const temp = medecins.filter(
+        (item) => item.code_serv === resolvedCodeServ
+      );
+      setMedecinsCopy(temp);
+
+
+      // Appliquer le médécin traitant choisi par défaut
       form.setFieldValue("id_medecin", currentRecord.id_medecin);
+
+
       form.setFieldValue("date_rv", dayjs(new Date(currentRecord.date_rv)));
     }
-  }, [operationType]);
+  }, [operationType, servicesMedicaux, medecins]);
 
 
   return (
@@ -156,7 +178,7 @@ function AddRv({ setOpen, onRefresh, currentRecord, operationType }) {
               }
               loading={servicesMedicauxLoading}
             >
-              {servicesMedicaux.map((item, index) => (
+              {servicesMedicaux.filter((item) => item.code_service !== codeServices.ACCUEIL && item.code_service !== codeServices.ADMINISTRATION).map((item, index) => (
                 <Option key={index} value={item.code_service}>
                   {" "}
                   {item.lib_service}{" "}

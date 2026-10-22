@@ -13,7 +13,7 @@ import { endpoints } from '../../constants/endpoints.constants';
 import EditButton from '../../components/common/EditButton/EditButton';
 import DeleteButton from '../../components/common/DeleteButton/DeleteButton';
 import SearchBar from '../../components/common/SearchBar/SearchBar';
-
+import { LOGO_BROWN } from '../../constants/app.constants.js';
 
 
 
@@ -63,7 +63,7 @@ function Fournisseurs() {
         <Card>
            
 
-            <Title level={3} >Liste des fournisseurs</Title>
+            <Title level={3} style={{ color: LOGO_BROWN }} >Liste des fournisseurs</Title>
 
             <Flex justify="space-between" align="center" >
                 <Space>

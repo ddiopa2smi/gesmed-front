@@ -38,8 +38,9 @@ import EditButton from "../../components/common/EditButton/EditButton";
 import EditableCell from "../../components/common/EditableCell/EditableCell";
 import EditReceptionCommand from "./components/EditReceptionCommand";
 import { postActions } from "../../actions/actions";
+import BackButton from "../../components/common/BackButton/BackButton";
 const { Option } = Select;
-const { Title , Text } = Typography;
+const { Title, Text } = Typography;
 
 function ReceptionCommande() {
   const [form] = Form.useForm();
@@ -54,14 +55,14 @@ function ReceptionCommande() {
   const [currentRecord, setCurrentRecord] = useState(null);
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  
+
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [listProduitsCommandes, setListProduitsCommandes] = useState(
     currentRecord?.listCom || []
   );
 
-  const [editRecord , setEditRecord] = useState({});
+  const [editRecord, setEditRecord] = useState({});
 
   const calcTotal = () => {
     return listProduitsCommandes?.reduce((acc, item) => {
@@ -81,7 +82,7 @@ function ReceptionCommande() {
           montant_br: calcTotal(),
           code_fourn: currentRecord?.code_fourn
         };
-        
+
         postActions(endpoints.entrees_produits.ADD, payload)
           .then((response) => {
             if (response?.data) {
@@ -128,11 +129,12 @@ function ReceptionCommande() {
     );
 
     // console.log(currentRecord);
-    
+
   }, [currentRecord]);
 
   return (
     <Card>
+      <BackButton />
       <Title level={3}> Réception de commande </Title>
       <br />
       <Form layout="vertical" form={form} onFinish={save}>
@@ -162,7 +164,7 @@ function ReceptionCommande() {
                   );
                 }}
               >
-                {bonsCommandesList.filter((item) => item.etat === "send") .map((item) => (
+                {bonsCommandesList.filter((item) => item.etat === "send").map((item) => (
                   <Option key={1} value={item?.num_bc}>
                     {`${item?.num_bc}-${item?.fourn_raisoc}`}
                   </Option>
@@ -318,7 +320,7 @@ function ReceptionCommande() {
             </Row>
             <Row gutter={[24, 24]} align={"middle"}>
               <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-                <Title level={4} style={{color: "var(--app-color)"}} >
+                <Title level={4} style={{ color: "var(--app-color)" }} >
                   Total: {formatAmount(calcTotal())}
                 </Title>
               </Col>
@@ -432,8 +434,8 @@ function ReceptionCommande() {
                     render: (record) =>
                       formatAmount(
                         record.prix_unit *
-                          record.qte_liv *
-                          (1 + record.tva / 100)
+                        record.qte_liv *
+                        (1 + record.tva / 100)
                       ),
                   },
                   {

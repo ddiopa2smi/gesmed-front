@@ -240,7 +240,7 @@ const GroupOrdonnance = () => {
                 <br/>
 
                 <Title level={5} >Liste des médicaments</Title>
-                <DataTable 
+                <DataTable compact
                     dataSourceCopy={medicamentsPrescrites}
                     rowKey={(record)=>record.codeacte}
                     columns={[

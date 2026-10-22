@@ -14,8 +14,6 @@ import Fournisseurs from "./pages/Fournisseurs/Fournisseurs";
 import SaisieInventaire from "./pages/SaisieInventaire/SaisieInventaire";
 import SortiesProduits from "./pages/SortiesProduits/SortiesProduits";
 import NewMouvementSortie from "./pages/NewMouvementSortie/NewMouvementSortie";
-import Accounts from "./pages/Accounts/Accounts";
-import NewAccount from "./pages/NewAccount/NewAccount";
 import Profil from "./pages/Profil/Profil";
 import DossierMedical from "./pages/DossierMedical/DossierMedical";
 import InfosCliniques from "./pages/InfosCliniques/InfosCliniques";
@@ -54,99 +52,160 @@ import Infirmerie from "./pages/Infirmerie/Infirmerie.js"
 export const router = createHashRouter(
     [
         {
-            path : "/",
-            element : <Navigate to={"/login"} />
+            path: "/",
+            element: <Navigate to={"/login"} />
         },
         {
-            path : "/login",
-            element : <Auth />,
+            path: "/login",
+            element: <Auth />,
         },
         {
-            path : "/home",
-            element : <ProtectedRoute component={<Home/>} />
+            path: "/home",
+            element: <ProtectedRoute component={<Home />} />
         },
         {
-            path : "*",
-            element : <NotFound />
+            path: "*",
+            element: <NotFound />
         },
         {
-            path : "espace-medical",
+            path: "myspace",
+            element: <ProtectedRoute component={<MySpace />} />,
+            children: [
+                {
+                    path: "profil",
+                    element: <Profil />
+                },
+                {
+                    path: "profil",
+                    element: <ProtectedRoute component={<Profil />} />
+                },
+                {
+                    path: "gestion-mot-de-passe",
+                    element: <ProtectedRoute component={<GestionPassword />} />,
+                },
+            ]
+        },
+        {
+            path: "espace-medical",
             //path : "myspace",
             //element : <MySpace />  ,
-            element : <ProtectedRoute component={<MySpace />} />  ,
+            element: <ProtectedRoute component={<MySpace />} />,
             handle: {
                 breadcrumb: "Espace Médical",
             },
-            children : [
+            children: [
                 {
-                    path : "",
-                    element : <Navigate to={"/espace-medical/dashboard"} />
+                    path: "",
+                    element: <Navigate to={"/espace-medical/dashboard"} />
                 },
                 {
-                    path : "dashboard",
-                    element : <MedicalDashboard />,
+                    path: "dashboard",
+                    element: <MedicalDashboard />,
                     handle: {
                         breadcrumb: "Tableau de bord",
                     },
                 },
                 {
-                    path : "rendez-vous",
-                    element : <RendezVous /> ,
+                    path: "rendez-vous",
+                    element: <RendezVous />,
                     handle: {
                         breadcrumb: "Rendez-vous",
                     },
                 },
                 {
-                    path : "mon-agenda",
-                    element : <AgendaMedecin />,
+                    path: "mon-agenda",
+                    element: <AgendaMedecin />,
                     handle: {
                         breadcrumb: "Mon agenda",
                     },
                 },
                 {
-                    path : "patients",
-                    children : [
+                    path: "patients",
+                    children: [
                         {
-                            path : "",
-                            element : <Patients />
+                            path: "",
+                            element: <Patients />
                         },
                         {
-                            path : "dossier",
-                            children : [
+                            path: "dossier",
+                            children: [
                                 {
-                                    path : "" ,
-                                    element : <DossierMedical />
-                                } ,
-                                {
-                                    path : "consultation" ,
-                                    element  : <Consultation />
-                                } ,
-                                {
-                                    path : "infos-cliniques",
-                                    element : <InfosCliniques />
+                                    path: "",
+                                    element: <DossierMedical />
                                 },
                                 {
-                                    path : "prescriptions",
-                                    children : [
+                                    path: "consultation",
+                                    element: <Consultation />
+                                },
+                                {
+                                    path: "infos-cliniques",
+                                    element: <InfosCliniques />
+                                },
+                                {
+                                    path: "prescriptions",
+                                    children: [
                                         {
-                                            path : "",
-                                            element : <Prescriptions />
+                                            path: "",
+                                            element: <Prescriptions />
                                         },
                                         {
-                                            path : "ordonnance",
-                                            element : <Ordonnance />
+                                            path: "ordonnance",
+                                            element: <Ordonnance />
                                         },
                                         {
-                                            path : "analyse",
-                                            element : <Analyse />
+                                            path: "analyse",
+                                            element: <Analyse />
                                         },
                                         {
-                                            path : "imagerie",
-                                            element : <Imagerie />
+                                            path: "imagerie",
+                                            element: <Imagerie />
                                         },
                                         {
-                                            path : "infirmerie",
-                                            element : <Infirmerie />
+                                            path: "infirmerie",
+                                            element: <Infirmerie />
+                                        },
+                                    ]
+                                },
+                            ]
+                        },
+                        {
+                            path: ":id",
+                            children: [
+
+                                {
+                                    index: true,
+                                    element: <DossierMedical />,
+                                },
+                                {
+                                    path: "consultation",
+                                    element: <Consultation />
+                                },
+                                {
+                                    path: "infos-cliniques",
+                                    element: <InfosCliniques />
+                                },
+                                {
+                                    path: "prescriptions",
+                                    children: [
+                                        {
+                                            path: "",
+                                            element: <Prescriptions />
+                                        },
+                                        {
+                                            path: "ordonnance",
+                                            element: <Ordonnance />
+                                        },
+                                        {
+                                            path: "analyse",
+                                            element: <Analyse />
+                                        },
+                                        {
+                                            path: "imagerie",
+                                            element: <Imagerie />
+                                        },
+                                        {
+                                            path: "infirmerie",
+                                            element: <Infirmerie />
                                         },
                                     ]
                                 },
@@ -155,175 +214,175 @@ export const router = createHashRouter(
                     ]
                 },
                 {
-                    path : "dossier-medical:id",
+                    path: "dossier-medical:id",
                     handle: {
                         breadcrumb: ({ id }) => `Dossier patient ${id}`,
                     },
-                    children : [
+                    children: [
                         {
-                            path : "" ,
-                            element : <DossierMedical />
-                        } ,
-                        {
-                            path : "consultation" ,
-                            element  : <Consultation />
-                        } ,
-                        {
-                            path : "infos-cliniques",
-                            element : <InfosCliniques />
+                            path: "",
+                            element: <DossierMedical />
                         },
                         {
-                            path : "prescriptions",
-                            children : [
+                            path: "consultation",
+                            element: <Consultation />
+                        },
+                        {
+                            path: "infos-cliniques",
+                            element: <InfosCliniques />
+                        },
+                        {
+                            path: "prescriptions",
+                            children: [
                                 {
-                                    path : "",
-                                    element : <Prescriptions />
+                                    path: "",
+                                    element: <Prescriptions />
                                 },
                                 {
-                                    path : "ordonnance",
-                                    element : <Ordonnance />
+                                    path: "ordonnance",
+                                    element: <Ordonnance />
                                 },
                                 {
-                                    path : "analyse",
-                                    element : <Analyse />
+                                    path: "analyse",
+                                    element: <Analyse />
                                 },
                                 {
-                                    path : "imagerie",
-                                    element : <Imagerie />
+                                    path: "imagerie",
+                                    element: <Imagerie />
                                 },
                                 {
-                                    path : "infirmerie",
-                                    element : <Infirmerie />
+                                    path: "infirmerie",
+                                    element: <Infirmerie />
                                 },
                             ]
                         },
                     ]
                 },
                 {
-                    path : "consultations",
-                    children : [
+                    path: "consultations",
+                    children: [
                         {
-                            path : "",
-                            element : <Consultations />
+                            path: "",
+                            element: <Consultations />
                         },
                         {
-                            path : "details-consultation",
-                            element : <DetailsConsultation />
-                        },
-                    ]
-                },
-                {
-                    path : "prescriptions-groupes",
-                    element : <PrescriptionsGroupes />
-                },
-                {
-                    path : "visites",
-                    children : [
-                        {
-                            path : "",
-                            element : <Visites />
-                        },
-                        {
-                            path : "details",
-                            element : <VisiteDetails />
+                            path: "details-consultation",
+                            element: <DetailsConsultation />
                         },
                     ]
                 },
                 {
-                    path : "dossier-accident-travail",
-                    element : <DossierAT />
+                    path: "prescriptions-groupes",
+                    element: <PrescriptionsGroupes />
                 },
                 {
-                    path : "*",
-                    element : <NotFound />
+                    path: "visites",
+                    children: [
+                        {
+                            path: "",
+                            element: <Visites />
+                        },
+                        {
+                            path: "details",
+                            element: <VisiteDetails />
+                        },
+                    ]
                 },
-                
+                {
+                    path: "dossier-accident-travail",
+                    element: <DossierAT />
+                },
+                {
+                    path: "*",
+                    element: <NotFound />
+                },
+
             ]
         },
         {
-            path : "espace-pharmacie",
+            path: "espace-pharmacie",
             //path : "myspace",
             //element : <MySpace />  ,
-            element : <ProtectedRoute component={<MySpace />} />  ,
-            children : [
+            element: <ProtectedRoute component={<MySpace />} />,
+            children: [
                 {
-                    path : "",
-                    element : <Navigate to={"/espace-pharmacie/dashboard"} />
+                    path: "",
+                    element: <Navigate to={"/espace-pharmacie/dashboard"} />
                 },
                 {
-                    path : "dashboard",
-                    element : <PharmacyDashboard />,
+                    path: "dashboard",
+                    element: <PharmacyDashboard />,
                 },
                 {
-                    path : "gestion-fiche-produits",
-                    children : [
+                    path: "gestion-fiche-produits",
+                    children: [
                         {
-                            path : "",
-                            element : <GestionFicheProduits/>
+                            path: "",
+                            element: <GestionFicheProduits />
                         },
                         {
-                            path : "fiche-produit",
-                            element : <FicheProduit/>
-                        },
-                    ]
-                },
-                {
-                    path : "commandes-produits",
-                    children : [
-                        {
-                            path : "",
-                            element : <CommandesProduits/>
-                        },
-                        {
-                            path : "new-commande-produit",
-                            element : <NewCommandeProduit/>
+                            path: "fiche-produit",
+                            element: <FicheProduit />
                         },
                     ]
                 },
                 {
-                    path : "entrees-produits",
-                    children : [
+                    path: "commandes-produits",
+                    children: [
                         {
-                            path : "",
-                            element : <EntreesProduits/>
+                            path: "",
+                            element: <CommandesProduits />
                         },
                         {
-                            path : "reception-commande",
-                            element : <ReceptionCommande/>
-                        },
-                    ]
-                },
-                {
-                    path : "sorties-produits",
-                    children : [
-                        {
-                            path : "",
-                            element : <SortiesProduits/>
-                        },
-                        {
-                            path : "new-mouvement-sortie",
-                            element : <NewMouvementSortie/>
+                            path: "new-commande-produit",
+                            element: <NewCommandeProduit />
                         },
                     ]
                 },
                 {
-                    path : "situation-stocks",
-                    element : <SituationStocks />
+                    path: "entrees-produits",
+                    children: [
+                        {
+                            path: "",
+                            element: <EntreesProduits />
+                        },
+                        {
+                            path: "reception-commande",
+                            element: <ReceptionCommande />
+                        },
+                    ]
                 },
                 {
-                    path : "saisie-inventaire",
-                    element : <SaisieInventaire/>
+                    path: "sorties-produits",
+                    children: [
+                        {
+                            path: "",
+                            element: <SortiesProduits />
+                        },
+                        {
+                            path: "new-mouvement-sortie",
+                            element: <NewMouvementSortie />
+                        },
+                    ]
                 },
                 {
-                    path : "fournisseurs",
-                    element : <Fournisseurs />
+                    path: "situation-stocks",
+                    element: <SituationStocks />
+                },
+                {
+                    path: "saisie-inventaire",
+                    element: <SaisieInventaire />
+                },
+                {
+                    path: "fournisseurs",
+                    element: <Fournisseurs />
                 },
             ]
         },
         accueilRouter,
         pharmacieRouter,
-        gynecologieRouter ,
-        dentistRouter ,
+        gynecologieRouter,
+        dentistRouter,
         radiologieRouter,
         analyseRouter,
         hospitalisationRouter,

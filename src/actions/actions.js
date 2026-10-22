@@ -17,7 +17,9 @@ export const getActions = async (url) => {
         const response = await axios.get(`${API_URL}${url}` , {
             headers : {
                 //user_id: "ddiop"
-                user_id : JSON.parse(sessionStorage.getItem("userConnected"))?.login
+                user_id : JSON.parse(sessionStorage.getItem("userConnected"))?.login,
+                username : JSON.parse(sessionStorage.getItem("userConnected"))?.username ,
+
             }
         });
         return response; 
@@ -34,6 +36,7 @@ export const postActions = async (url , payload) => {
             headers : {
                 //user_id: "ddiop"
                 user_id : JSON.parse(sessionStorage.getItem("userConnected"))?.login ,
+                username : JSON.parse(sessionStorage.getItem("userConnected"))?.username ,
                 Authorization : ` Bearer ${JSON.parse(sessionStorage.getItem("userConnected"))?.login}`
             }
         });
@@ -68,7 +71,9 @@ export const deleteActions = async (url) => {
         const response = await axios.delete(`${API_URL}${url}`, {
             headers : {
                 //user_id: "ddiop"
-                user_id : JSON.parse(sessionStorage.getItem("userConnected"))?.login
+                user_id : JSON.parse(sessionStorage.getItem("userConnected"))?.login,
+                username : JSON.parse(sessionStorage.getItem("userConnected"))?.username ,
+
             }
         });
         return response; 

@@ -42,6 +42,7 @@ import {
 import useFetch from "../../utils/hooks/useFetch";
 import EditButton from "../../components/common/EditButton/EditButton";
 import CommandeProduitDetails from "../../components/specific/CommandeProduitDetails/CommandeProduitDetails";
+import { LOGO_BROWN } from "../../constants/app.constants.js";
 import SendCommande from "../../components/specific/SendCommande/SendCommande";
 
 const { Title } = Typography;
@@ -317,7 +318,7 @@ function CommandesProduits() {
 
   return (
     <Card>
-      <Title level={3}>Liste des bons de commandes produits</Title>
+      <Title level={3} style={{ color: LOGO_BROWN }}>Liste des bons de commandes produits</Title>
       <Divider />
       <Flex justify="space-between" align="center">
         <Segmented

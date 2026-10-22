@@ -51,8 +51,9 @@ function Consultation() {
     // const [initConsultation , setInitConsultation] = useState(initCons);
 
 
-    const currentPatient = state?.currentPatient;
+    const currentPatient = state?.currentPatient ? state?.currentPatient : state?.patient;
     const numRV = state?.numRV;
+    const serviceType = state?.serviceType;
 
     //const {data : consultationData , onRefresh : refreshConsultation , isLoading : consultationDataLoading} = useObjectFetch(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`);
     //const initCons = consultationData !== null ? getInitCons(consultationData) : null;
@@ -533,7 +534,7 @@ function Consultation() {
                         </Form.Item>
                     </Col>
                 </Row>
-                <Divider> Examen clinique </Divider>
+                <Divider> Données cliniques </Divider>
                 <Row gutter={[24,24]}>
                     <Col xs={24} sm={12} md={8} lg={8} xl={8} >
                         <Form.Item 

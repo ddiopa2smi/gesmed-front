@@ -1,46 +1,135 @@
-import { EyeOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Modal, Row, Segmented, Select, Space, Tag, Tooltip, Typography } from 'antd'
+import { DeleteOutlined, EyeOutlined, FileExcelOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Col, DatePicker, Flex, message, Modal, Row, Segmented, Select, Space, Tag, theme, Tooltip, Typography } from 'antd'
 import React, { useEffect, useState } from 'react'
+import dayjs from 'dayjs';
 import DataTable from '../../common/DataTable/DataTable';
 import useFetch from '../../../utils/hooks/useFetch';
 import useSearch from '../../../utils/hooks/useSearch';
 import ReloadButton from '../../common/ReloadButton/ReloadButton';
 import AdvancedSearchButton from '../../common/AdvancedSearchButton/AdvancedSearchButton';
 import FormFooter from '../../common/FormFooter/FormFooter';
+import PeriodeSelect from '../../common/PeriodeSelect/PeriodeSelect';
 import { endpoints } from '../../../constants/endpoints.constants';
 import DetailsPrescription from '../DetailsPrescription/DetailsPrescription';
+import AddPrescriptionExterne from '../AddPrescriptionExterne/AddPrescriptionExterne';
 import { ServiceType } from '../../../utils/types/types.ts';
-import { formatDate, formatDateTime } from '../../../utils/helpers';
+import { deletePopup, formatDate, formatDateTime, exportToExcel } from '../../../utils/helpers';
+import { getEtatSegmentedOptions } from '../../../constants/table.constants';
+import { deleteActions } from '../../../actions/actions';
+import { LOGO_BROWN } from '../../../constants/app.constants.js';
 import { render } from '@testing-library/react';
 
-const {Option} = Select;
-const {Title} = Typography;
-function OrdonnancesList() {
-    const [segmentedValue , setSegmentedValue] = useState("Non");
-    const {data , dataCopy, setDataCopy , isLoading , error , onRefresh} = useFetch(endpoints.prescriptions.LIST);
-    
-    const {getColumnSearchProps} = useSearch()
-    const [open , setOpen] = useState(false);
-    const [operationType , setOperationType] = useState("");
-    const [currentRecord , setCurrentRecord] = useState(null);
+const { Option } = Select;
+const { Title } = Typography;
+const { RangePicker } = DatePicker;
+
+const etatSegmentedOptions = getEtatSegmentedOptions({ non: "En instance", oui: "Servies" });
+
+function OrdonnancesList({ onDataChange }) {
+    const { token: { colorPrimary } } = theme.useToken();
+    const [segmentedValue, setSegmentedValue] = useState("Non");
+    const [periode, setPeriode] = useState(1);
+    const [dateRange, setDateRange] = useState(null);
+
+    const listUrl = periode === 9
+        ? (dateRange && dateRange[0] && dateRange[1]
+            ? endpoints.prescriptions.LIST_BY_DATE(
+                dateRange[0].format("YYYY-MM-DD"),
+                dateRange[1].format("YYYY-MM-DD"),
+                segmentedValue
+            )
+            : null)
+        : endpoints.prescriptions.LIST(periode, segmentedValue);
+
+    const { data, dataCopy, setDataCopy, isLoading, error, onRefresh: refreshList } = useFetch(listUrl);
+    // Après chaque action (service, suppression, ajout...) : recharge la liste
+    // et prévient le parent (ex : tableau de bord) pour qu'il mette à jour ses indicateurs
+    const onRefresh = () => {
+        refreshList();
+        onDataChange?.();
+    };
+    // Onglet affiché : une seule modale de détail ouverte à la fois
+    const [activeTab, setActiveTab] = useState("interne");
+
+    const { getColumnSearchProps, getColumnDateSearchProps, getColumnFilterProps } = useSearch()
+    const [open, setOpen] = useState(false);
+    const [operationType, setOperationType] = useState("");
+    const [currentRecord, setCurrentRecord] = useState(null);
+    const [isExternalModalVisible, setIsExternalModalVisible] = useState(false);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
     const onDisplayAdvancedSearch = () => {
         setOperationType("ads");
         setOpen(true);
     }
-    
+
+    const onDeletePrescription = (record) => {
+        deletePopup().then((result) => {
+            if (result.isConfirmed) {
+                deleteActions(`${endpoints.prescriptions.DELETE}/${record?.numpresc}`).then((response) => {
+                    if (response.data.Deleted === true) {
+                        message.success("Prescription supprimée avec succès");
+                        onRefresh();
+                    }
+                });
+            }
+        });
+    }
+
+    const handleExport = (typePrescription) => {
+        const rows = dataCopy
+            .filter((element) =>
+                element.code === "ORD" &&
+                element.type_prescription === typePrescription &&
+                element.isdone === segmentedValue
+            )
+            .map((item) => ({
+                "N°": item.numpresc,
+                "Date prescription": formatDateTime(item.datepresc),
+                "N° patient": item.num_patient,
+                "Patient": item.patient,
+                "Prescripteur": item.prescripteur,
+                "Etat": item.isdone === "Oui" ? "Servie" : "En instance",
+                ...(segmentedValue === "Oui" ? {
+                    "Date effet": formatDateTime(item.date_effet),
+                    "Effectué par": item.effectue_par,
+                } : {}),
+            }));
+        exportToExcel(rows, `Ordonnances_${typePrescription}_${dayjs().format("YYYYMMDD_HHmm")}`);
+    }
+
+    const buildActionsColumn = (showDelete) => ({
+        render: (record) => (
+            <Flex align='center' >
+                <Space size="middle" >
+                    <Tooltip title="Voir détails">
+                        <Button type='text' icon={<EyeOutlined />} onClick={() => { setCurrentRecord(record); setOpen(true); }} />
+                    </Tooltip>
+                    {showDelete && record.isdone === "Non" && (
+                        <Tooltip title="Supprimer">
+                            <Button danger type='text' icon={<DeleteOutlined />} onClick={() => onDeletePrescription(record)} />
+                        </Tooltip>
+                    )}
+                </Space>
+            </Flex>
+        )
+    });
+
     const columns = [
         {
             title: 'N°',
             dataIndex: 'numpresc',
             key: 'numpresc',
+            sorter: (a, b) => String(a.numpresc).localeCompare(String(b.numpresc)),
             ...getColumnSearchProps('numpresc')
         },
         {
             title: 'Date prescription',
             dataIndex: 'datepresc',
             key: 'datepresc',
-            render : (record)=>(<div className="table-data">{formatDateTime(record)}</div>)
+            sorter: (a, b) => new Date(a.datepresc) - new Date(b.datepresc),
+            ...getColumnDateSearchProps('datepresc'),
+            render: (record) => (<div className="table-data" style={{ color: colorPrimary }}  >{formatDateTime(record)}</div>)
         },
         {
             title: 'N° patient',
@@ -56,114 +145,234 @@ function OrdonnancesList() {
         },
         {
             title: 'Prescripteur',
-            dataIndex: 'username',
-            key: 'username',
-            ...getColumnSearchProps('username')
+            dataIndex: 'prescripteur',
+            key: 'prescripteur',
+            ...getColumnFilterProps('prescripteur', dataCopy)
         },
         {
-            title: 'Statut',
+            title: 'Etat',
             dataIndex: 'isdone',
             key: 'isdone',
             ...getColumnSearchProps('isdone'),
-            render : (record)=>(
+            render: (record) => (
                 <Tag color={record === "Oui" ? "green" : "red"}>{record === "Oui" ? "Servie" : "En instance"}</Tag>
             )
         },
-        {
-            render :  (record)=>(
-                <Flex align='center' >
-                    <Space size="middle" >
-                        {
-                            record.isdone === "Non" && (
-                                <Button type='text' icon={<EyeOutlined/>} onClick={()=>{setCurrentRecord(record); setOpen(true);}}  />
-                            )
-                        }
-                        
-                    </Space>
-                </Flex>
-            )
-        }
+        buildActionsColumn(false),
     ];
+
+    const columnsExterne = [...columns.slice(0, -1), buildActionsColumn(true)];
     return (
-        <Card >
-            <Flex justify="space-between" align="center" >
-                <Title level={4} > Liste des ordonnances prescrites </Title>
-                <Space>
-                    {/* <AdvancedSearchButton onClick={onDisplayAdvancedSearch} /> &nbsp;&nbsp; */}
-                    <ReloadButton onRefresh={onRefresh} /> 
-                    <Segmented 
-                        defaultValue={segmentedValue}
-                        options={[
-                            {
-                                value : "Non",
-                                label : "instance"
-                            },
-                            {
-                                value : "Oui",
-                                label : "Servies"
-                            }
-                        ]}
-                        
-                        onChange={(value)=>{
-                            setSegmentedValue(value)
-                        }}
-                    
-                    />
-                </Space>
-            </Flex>
+        <Card
+            title={<Title level={4} style={{ color: LOGO_BROWN }} > Liste des ordonnances </Title>}
+            activeTabKey={activeTab}
+            onTabChange={setActiveTab}
 
-            <br/>
+            tabList={[
+                {
+                    key: "interne",
+                    label: "Internes",
+                    children: (
+                        <div>
+                            <Flex justify="space-between" align="center" >
+                                <Title level={5} style={{ margin: 0 }}>Prescriptions Internes</Title>
+                                <Space>
 
-            <DataTable 
-                isLoading={isLoading}
-                dataSource={data.filter((element)=> element.code === "ORD")}
-                dataSourceCopy = {segmentedValue === "Non" ? dataCopy.filter((element)=> element.code === "ORD" && element.isdone === "Non" ) : dataCopy.filter((element)=> element.code === "ORD" && element.isdone === "Oui")}
-                setDataSourceCopy={setDataCopy}
-                columns={segmentedValue === "Oui" ?
-                    [
-                        ...columns,
-                        {
-                            title: 'Date effet',
-                            dataIndex: 'date_effet',
-                            key: 'date_effet',
-                            ...getColumnSearchProps('date_effet'),
-                            render : (record)=>(<div className="table-data">{formatDateTime(record)}</div>)
-                        },
-                        {
-                            title: 'Effectué par',
-                            dataIndex: 'effectue_par',
-                            key: 'effectue_par',
-                            ...getColumnSearchProps('effectue_par')
-                        },
-                    ] : columns
+                                    <ReloadButton onRefresh={onRefresh} />
+                                    <PeriodeSelect
+                                        value={periode}
+                                        onChange={(value) => setPeriode(value)}
+                                    />
+                                    {periode === 9 && (
+                                        <RangePicker
+                                            variant="filled"
+                                            format="DD/MM/YYYY"
+                                            value={dateRange}
+                                            onChange={(dates) => setDateRange(dates)}
+                                        />
+                                    )}
+                                    <Segmented
+                                        defaultValue={segmentedValue}
+                                        options={etatSegmentedOptions}
+                                        onChange={(value) => {
+                                            setSegmentedValue(value)
+                                        }}
+
+                                    />
+                                    <Button type="primary" style={{ backgroundColor: "green" }} icon={<FileExcelOutlined />} onClick={() => handleExport("Interne")} >Export Excel</Button>
+                                </Space>
+                            </Flex>
+
+                            <br />
+
+                            <DataTable
+                                isLoading={isLoading}
+                                compact
+                                dataSource={data.filter((element) => element.code === "ORD" && element.type_prescription === "Interne")}
+                                dataSourceCopy={segmentedValue === "Non" ? dataCopy.filter((element) => element.code === "ORD" && element.type_prescription === "Interne" && element.isdone === "Non") : dataCopy.filter((element) => element.code === "ORD" && element.type_prescription === "Interne" && element.isdone === "Oui")}
+                                setDataSourceCopy={setDataCopy}
+                                columns={segmentedValue === "Oui" ?
+                                    [
+                                        ...columns,
+                                        {
+                                            title: 'Date effet',
+                                            dataIndex: 'date_effet',
+                                            key: 'date_effet',
+                                            sorter: (a, b) => new Date(a.date_effet) - new Date(b.date_effet),
+                                            ...getColumnDateSearchProps('date_effet'),
+                                            render: (record) => (<div className="table-data">{formatDateTime(record)}</div>)
+                                        },
+                                        {
+                                            title: 'Effectué par',
+                                            dataIndex: 'effectue_par',
+                                            key: 'effectue_par',
+                                            ...getColumnFilterProps('effectue_par', dataCopy)
+                                        },
+                                    ] : columns
+                                }
+                            />
+
+                            <Modal
+                                style={{ top: 20, maxWidth: 1000 }}
+                                styles={{
+                                    header: { padding: "12px 24px" },
+                                    footer: { padding: "12px 24px" },
+                                    content: { margin: 0, padding: 0 },
+                                    body: {
+                                        overflow: "auto",
+                                        maxHeight: "80vh",
+                                        padding: "12px 24px",
+                                    },
+                                }}
+                                width="90%"
+                                title={`Ordonnance N° ${currentRecord?.numpresc}`}
+                                open={open && activeTab === "interne"}
+                                onCancel={() => {
+                                    setOpen(false);
+                                    setCurrentRecord(null);
+                                }}
+                                footer={null}
+                            >
+                                <DetailsPrescription prescriptionItem={currentRecord} setPrescriptionItem={setCurrentRecord} serviceType={ServiceType.PHARMACIE} setOpen={setOpen} onRefresh={onRefresh} />
+                            </Modal>
+                        </div>
+                    )
+                },
+                {
+                    key: "externe",
+                    label: "Externes",
+                    children: (
+                        <div>
+                            <Flex justify="space-between" align="center" >
+                                <Title level={5} style={{ margin: 0 }}>Prescriptions Externes</Title>
+                                <Space>
+                                    <ReloadButton onRefresh={onRefresh} />
+                                    <PeriodeSelect
+                                        value={periode}
+                                        onChange={(value) => setPeriode(value)}
+                                    />
+                                    {periode === 9 && (
+                                        <RangePicker
+                                            variant="filled"
+                                            format="DD/MM/YYYY"
+                                            value={dateRange}
+                                            onChange={(dates) => setDateRange(dates)}
+                                        />
+                                    )}
+                                    <Segmented
+                                        defaultValue={segmentedValue}
+                                        options={etatSegmentedOptions}
+                                        onChange={(value) => {
+                                            setSegmentedValue(value)
+                                        }}
+
+                                    />
+                                    <Button type="primary" style={{ backgroundColor: "green" }} icon={<FileExcelOutlined />} onClick={() => handleExport("Externe")} >Export Excel</Button>
+                                    <Button type="primary" style={{ backgroundColor: "green" }} onClick={() => setIsExternalModalVisible(true)} >Ajouter</Button>
+                                </Space>
+                            </Flex>
+
+                            <br />
+
+                            <DataTable
+                                isLoading={isLoading}
+                                compact
+                                dataSource={data.filter((element) => element.code === "ORD" && element.type_prescription === "Externe")}
+                                dataSourceCopy={segmentedValue === "Non" ? dataCopy.filter((element) => element.code === "ORD" && element.type_prescription === "Externe" && element.isdone === "Non") : dataCopy.filter((element) => element.code === "ORD" && element.type_prescription === "Externe" && element.isdone === "Oui")}
+                                setDataSourceCopy={setDataCopy}
+                                columns={segmentedValue === "Oui" ?
+                                    [
+                                        ...columnsExterne,
+                                        {
+                                            title: 'Date effet',
+                                            dataIndex: 'date_effet',
+                                            key: 'date_effet',
+                                            sorter: (a, b) => new Date(a.date_effet) - new Date(b.date_effet),
+                                            ...getColumnDateSearchProps('date_effet'),
+                                            render: (record) => (<div className="table-data">{formatDateTime(record)}</div>)
+                                        },
+                                        {
+                                            title: 'Effectué par',
+                                            dataIndex: 'effectue_par',
+                                            key: 'effectue_par',
+                                            ...getColumnFilterProps('effectue_par', dataCopy)
+                                        },
+                                    ] : columnsExterne
+                                }
+                                rowKey="numpresc"
+                                rowSelected
+                                selectedRowKeys={selectedRowKeys}
+                                setSelectedRowKeys={setSelectedRowKeys}
+                                getCheckboxProps={(record) => ({ disabled: record.isdone === "Oui" })}
+                            />
+
+                            <Modal
+                                style={{ top: 20, maxWidth: 1000 }}
+                                styles={{
+                                    header: { padding: "12px 24px" },
+                                    footer: { padding: "12px 24px" },
+                                    content: { margin: 0, padding: 0 },
+                                    body: {
+                                        overflow: "auto",
+                                        maxHeight: "80vh",
+                                        padding: "12px 24px",
+                                    },
+                                }}
+                                width="90%"
+                                title={`Ordonnance N° ${currentRecord?.numpresc}`}
+                                open={open && activeTab === "externe"}
+                                onCancel={() => {
+                                    setOpen(false);
+                                    setCurrentRecord(null);
+                                }}
+                                footer={null}
+                            >
+                                <DetailsPrescription prescriptionItem={currentRecord} setPrescriptionItem={setCurrentRecord} serviceType={ServiceType.PHARMACIE} setOpen={setOpen} onRefresh={onRefresh} />
+                            </Modal>
+
+                            <Modal
+                                style={{ top: 20, maxWidth: 850 }}
+                                styles={{
+                                    body: {
+                                        overflowY: "auto",
+                                        overflowX: "hidden",
+                                        maxHeight: "90vh",
+                                    },
+                                }}
+                                width="80%"
+                                title="Nouvelle prescription externe"
+                                open={isExternalModalVisible}
+                                onCancel={() => setIsExternalModalVisible(false)}
+                                footer={null}
+                                destroyOnClose
+                            >
+                                <AddPrescriptionExterne setIsModalVisible={setIsExternalModalVisible} onRefresh={onRefresh} />
+                            </Modal>
+                        </div>
+                    )
                 }
-            />
-
-            <Modal 
-                style={{ top: 20 }}
-                styles={{
-                  header: { padding: "12px 24px" },
-                  footer: { padding: "12px 24px" },
-                  content: { margin: 0, padding: 0 },
-                  body: {
-                    overflow: "auto",
-                    minHeight: "50vh",
-                    maxHeight: "80vh",
-                    padding: "12px 24px",
-                  },
-                }}
-                width={1000}
-                title={`Ordonnance N° ${currentRecord?.numpresc}`}
-                open={open} 
-                onCancel={()=>{
-                    setOpen(false);
-                    setCurrentRecord(null);
-                }}
-                footer={null}
-            >
-                <DetailsPrescription prescriptionItem={currentRecord} serviceType={ServiceType.PHARMACIE} setOpen={setOpen} onRefresh={onRefresh} />
-            </Modal>
-        </Card>
+            ]}
+        />
     )
 }
 

@@ -3,20 +3,22 @@ import { useNavigate, useParams } from "react-router";
 import useObjectFetch from "../../../utils/hooks/useObjectFetch";
 import { endpoints } from "../../../constants/endpoints.constants";
 import {
+  Avatar,
+  Badge,
   Button,
   Card,
   Col,
-  Collapse,
-  Descriptions,
   Dropdown,
+  Empty,
   Flex,
   Row,
   Space,
   Tabs,
-  Typography,
+  Tag,
   Tooltip,
+  Typography,
   message,
-  Input,
+  theme,
 } from "antd";
 import DataTable from "../../common/DataTable/DataTable";
 import BackButton from "../../common/BackButton/BackButton";
@@ -25,18 +27,58 @@ import EditButton from "../../common/EditButton/EditButton";
 import PrintButton from "../../common/PrintButton/PrintButton";
 import DeleteButton from "../../common/DeleteButton/DeleteButton";
 import NotSpecified from "../../common/NotSpecified/NotSpecified";
-import { formatDate, deletePopup, printPDF } from "../../../utils/helpers";
+import { formatDate, deletePopup, printPDF, formatDateTime } from "../../../utils/helpers";
 import useSearch from "../../../utils/hooks/useSearch";
-import { EditOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  DeleteOutlined,
+  ExperimentOutlined,
+  EyeOutlined,
+  FileSearchOutlined,
+  FileTextOutlined,
+  FolderOpenOutlined,
+  IdcardOutlined,
+  MailOutlined,
+  MedicineBoxOutlined,
+  PhoneOutlined,
+  PrinterOutlined,
+  ProfileOutlined,
+  UnorderedListOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { deleteActions } from "../../../actions/actions";
-import { codesPrescriptions } from "../../../constants/app.constants";
-import TextArea from "antd/es/input/TextArea";
+import { codesPrescriptions, LOGO_BROWN } from "../../../constants/app.constants";
 import EditObservationPatient from "../EditObservationPatient/EditObservationPatient";
 import { ServiceType } from "../../../utils/types/types.ts";
+import UploadResultatModal from "../../common/UploadResultatModal/UploadResultatModal.js";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+
+// Configuration des onglets de prescriptions (libellés et routes d'impression)
+const PRESCRIPTION_TYPES = {
+  [codesPrescriptions.ORD]: { label: "Ordonnances", numLabel: "N° ordonnance", print: "ordonnance", printLabel: "Imprimer l'ordonnance", icon: <MedicineBoxOutlined />, withResultat: false },
+  [codesPrescriptions.ANA]: { label: "Analyses", numLabel: "N° analyse", print: "analyse", printLabel: "Imprimer l'analyse", icon: <ExperimentOutlined />, withResultat: true },
+  [codesPrescriptions.IMG]: { label: "Imageries", numLabel: "N° imagerie", print: "imagerie", printLabel: "Imprimer l'imagerie", icon: <FileSearchOutlined />, withResultat: true },
+};
+
+const getInitials = (patient) =>
+  `${patient?.prenom_patient?.[0] || ""}${patient?.nom_patient?.[0] || ""}`.toUpperCase();
+
+// Bloc "libellé / valeur" de la fiche d'identité
+const InfoItem = ({ icon, label, value }) => (
+  <div>
+    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.4 }}>
+      {icon} {label}
+    </Text>
+    <div style={{ fontSize: 15, fontWeight: 500, marginTop: 2 }}>
+      {value || <NotSpecified />}
+    </div>
+  </div>
+);
+
 function DossierPatient({ serviceType }) {
   const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
+  const { token: { colorPrimary, colorPrimaryBg, colorPrimaryBorder, colorFillAlter, colorBorderSecondary } } = theme.useToken();
 
   const { getColumnSearchProps } = useSearch();
   const navigate = useNavigate();
@@ -44,7 +86,15 @@ function DossierPatient({ serviceType }) {
   const { id } = useParams();
   const numPatient = id;
 
-  const [editable, setEditable] = React.useState(false);
+  const [isUploadResultatModalVisible, setIsUploadResultatModalVisible] =
+    React.useState(false);
+
+  const [numPrescription, setNumPrescription] = React.useState(null);
+
+  const handleUploadResultatModal = (numPresc) => {
+    setIsUploadResultatModalVisible(true);
+    setNumPrescription(numPresc);
+  };
 
   const {
     data,
@@ -52,84 +102,105 @@ function DossierPatient({ serviceType }) {
     onRefresh: refreshConsultation,
     error,
   } = useObjectFetch(
-    `${endpoints.dossierMedical.DOSSIER}?numpat=${numPatient}`
+    `${endpoints.dossierMedical.DOSSIER}?numpat=${numPatient}`,
   );
 
   const patient = data?.patient;
-  const listConsultation = data?.listConsultation;
-  const listPrescription = data?.listPrescription;
+  const listConsultation = data?.listConsultation || [];
+  const listPrescription = data?.listPrescription || [];
 
   const doConsultation = (numRV) => {
     switch (serviceType) {
+      case ServiceType.MEDICAL:
+        navigate("/espace-medical/patients/dossier/consultation", {
+          state: { numRV: numRV, currentPatient: patient },
+        });
+        break;
       case ServiceType.DENTAIRE:
         navigate(
           `/espace-dentist/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
           { state: { patient } },
-          { state: { patient } }
         );
         break;
       case ServiceType.GYNECOLOGIE:
-        navigate(
-          `/espace-gynecologie/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
-          { state: { patient } }
-        );
+        navigate(`/espace-gynecologie/patients/${numPatient}/consultation`, {
+          state: {
+            patient,
+            numRV,
+            serviceType,
+          },
+        });
         break;
       case ServiceType.RADIOLOGIE:
         navigate(
           `/espace-radiologie/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
-          { state: { patient } }
+          { state: { patient } },
         );
         break;
       case ServiceType.ANALYSE:
         navigate(
           `/espace-analyse/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
-          { state: { patient } }
+          { state: { patient } },
         );
         break;
       case ServiceType.HOSPITALISATION:
         navigate(
           `/espace-hospitalisation/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
-          { state: { patient } }
+          { state: { patient } },
         );
         break;
       case ServiceType.INFIRMERIE:
         navigate(
           `/espace-infirmerie/consultation/${numPatient}/${numRV}?serviceType=${serviceType}`,
-          { state: { patient } }
+          { state: { patient } },
         );
         break;
       default:
         break;
     }
-    // navigate("/espace-medical/patients/dossier/consultation", {
-    //   state: { numRV: numRV, currentPatient: currentPatient },
-    // });
+  };
 
-    // getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${numRV}`)
-    // .then((response)=>{
-    //     if (response && response.data) {
-    //         //sessionStorage.setItem("initConsultation", JSON.stringify(response.data));
-
-    //         navigate("/espace-medical/patients/dossier/consultation" , {state : {consultationObject : response.data , currentPatient : currentPatient}});
-    //     }
-    // })
+  const openInfosClinique = () => {
+    switch (serviceType) {
+      case ServiceType.GYNECOLOGIE:
+        navigate(`/espace-gynecologie/patients/${numPatient}/infos-cliniques`);
+        break;
+      case ServiceType.DENTAIRE:
+        navigate(`/espace-dentist/patients/${numPatient}/infos-cliniques`);
+        break;
+      case ServiceType.MEDICAL:
+        navigate(`/espace-medical/patients/${numPatient}/infos-cliniques`);
+        break;
+      case ServiceType.RADIOLOGIE:
+        navigate(`/espace-radiologie/patients/${numPatient}/infos-cliniques`);
+        break;
+      case ServiceType.ANALYSE:
+        navigate(`/espace-analyse/patients/${numPatient}/infos-cliniques`);
+        break;
+      case ServiceType.HOSPITALISATION:
+        navigate(`/espace-hospitalisation/patients/${numPatient}/infos-cliniques`);
+        break;
+      case ServiceType.INFIRMERIE:
+        navigate(`/espace-infirmerie/patients/${numPatient}/infos-cliniques`);
+        break;
+      default:
+        break;
+    }
   };
 
   const onEditConsultation = (record) => {
     doConsultation(record.numrv);
   };
 
-  const onDeleteConsultation = (record) => {};
+  const onDeleteConsultation = (record) => { };
 
-  const onEditPrescription = (record, prescriptionType) => {
-    // navigate(`/espace-medical/patients/dossier/prescriptions/${prescriptionType}`);
-    // sessionStorage.setItem("editPrescription", JSON.stringify(record));
-  };
+  const onEditPrescription = (record, prescriptionType) => { };
+
   const onDeletePrescription = (record) => {
     deletePopup().then((result) => {
       if (result.isConfirmed) {
         deleteActions(
-          `${endpoints.prescriptions.DELETE}/${record?.numpresc}`
+          `${endpoints.prescriptions.DELETE}/${record?.numpresc}`,
         ).then((response) => {
           if (response.data.Deleted === true) {
             message.success("Ligne retirée avec succès");
@@ -140,599 +211,395 @@ function DossierPatient({ serviceType }) {
     });
   };
 
-  const handlePrescriptions = (codepres, item) => {
-    // navigate("/espace-medical/patients/dossier/prescriptions", { replace: false });
-    // sessionStorage.setItem("currentPatient", JSON.stringify(currentPatient));
-    // console.log(item);
-    // sessionStorage.setItem(
-    //   "prescription",
-    //   JSON.stringify({
-    //     codepresc: codepres,
-    //     numcons: item.numcons,
-    //     medecin: item.medecin,
-    //   })
-    // );
-  };
+  const handlePrescriptions = (codepres, item) => { };
 
   const openAnalyse = (numRV) => {
     console.log(numRV);
-    
-    // navigate("/espace-medical/patients/dossier/consultation", {
-    //   state: { numRV: numRV, currentPatient: patient },
-    // });
   };
 
-  const collapseItems = [
+  const viewResultat = (numPrescription) => {
+    printPDF(endpoints.files.GET_RESULTAT(numPrescription));
+  };
+
+  const deleteResultat = (numPrescription) => {
+    deletePopup().then((result) => {
+      if (result.isConfirmed) {
+        deleteActions(endpoints.files.DELETE_RESULTAT(numPrescription)).then(
+          (response) => {
+            if (response.data) {
+              message.success("Résultat supprimé avec succès");
+              refreshConsultation();
+            }
+          },
+        );
+      }
+    });
+  };
+
+  if (isLoading) return <Card loading />;
+  if (error || !data || !patient) return <Card><Empty description="Dossier introuvable" /></Card>;
+
+  const isFemme = patient.sexe_patient === "FE";
+  const prescriptionsByType = (code) => listPrescription.filter((element) => element.codepresc === code);
+  const derniereConsultation = listConsultation[0];
+
+  /* ---------------- Colonnes ---------------- */
+
+  const consultationColumns = [
     {
-      key: "1",
-      label: "Voir les infos patient",
-      children: (
-        <div>
-          <Descriptions
-            column={2}
-            layout="horizontal" /*layout={window.screen.height < 992 && 'vertical'}*/
-          >
-            <Descriptions.Item label="Nom">
-              {patient?.nom_patient || <NotSpecified />}
-            </Descriptions.Item>
-            <Descriptions.Item label="Prénom">
-              {patient?.prenom_patient || <NotSpecified />}
-            </Descriptions.Item>
-            <Descriptions.Item label="Sexe">
-              {patient?.sexe_patient || <NotSpecified />}
-            </Descriptions.Item>
-            <Descriptions.Item label="Date de naissance">
-              {(patient?.datenaiss_patient &&
-                formatDate(patient?.datenaiss_patient)) || <NotSpecified />}
-            </Descriptions.Item>
-            <Descriptions.Item label="Age">
-              {`${patient?.age_patient} an(s)` || <NotSpecified />}
-            </Descriptions.Item>
-            <Descriptions.Item label="Groupe sanguin">
-              {patient?.group_sanguin || <NotSpecified />}
-            </Descriptions.Item>
-            <Descriptions.Item label="Téléphone">
-              {patient?.tel_patient || <NotSpecified />}
-            </Descriptions.Item>
-            <Descriptions.Item label="Email">
-              {patient?.email_patient || <NotSpecified />}
-            </Descriptions.Item>
-          </Descriptions>
-        </div>
-      ),
+      title: "N° Cons.",
+      dataIndex: "numcons",
+      key: "numcons",
+      render: (value) => <Text strong>{value}</Text>,
     },
     {
-      key: "2",
-      label: "Observations particulières",
-      children: <EditObservationPatient observation={patient?.obs_part} />,
+      title: "Date",
+      dataIndex: "datecons",
+      key: "datecons",
+      ...getColumnSearchProps("datecons"),
+      render: (record) => formatDate(record),
+    },
+    {
+      title: "Médecin",
+      dataIndex: "medecin",
+      key: "medecin",
+      ...getColumnSearchProps("medecin"),
+      sorter: (a, b) => (a.medecin || "").localeCompare(b.medecin || ""),
+    },
+    { title: "Tension", dataIndex: "tension", key: "tension", render: (v) => v || "-" },
+    {
+      title: "Temp.",
+      dataIndex: "temp",
+      key: "temp",
+      sorter: (a, b) => a.temp - b.temp,
+      render: (v) => (v ? <Text type={v > 37.5 ? "danger" : undefined}>{v} °C</Text> : "-"),
+    },
+    { title: "Poids", dataIndex: "poids", key: "poids", sorter: (a, b) => a.poids - b.poids, render: (v) => (v ? `${v} kg` : "-") },
+    { title: "Taille", dataIndex: "taille", key: "taille", sorter: (a, b) => a.taille - b.taille, render: (v) => (v ? `${v} cm` : "-") },
+    {
+      fixed: "right",
+      render: (record) => (
+        <Space size={0}>
+          {record?.medecin !== null && (
+            <>
+              <Dropdown
+                trigger={["click"]}
+                menu={{
+                  items: [
+                    { key: "0", label: "Ordonnances", onClick: () => handlePrescriptions(codesPrescriptions.ORD, record) },
+                    { key: "1", label: "Analyses", onClick: () => handlePrescriptions(codesPrescriptions.ANA, record) },
+                    { key: "2", label: "Imageries", onClick: () => handlePrescriptions(codesPrescriptions.IMG, record) },
+                  ],
+                }}
+              >
+                <Tooltip title="Prescriptions">
+                  <Button type="text" icon={<UnorderedListOutlined />} />
+                </Tooltip>
+              </Dropdown>
+              <Dropdown
+                trigger={["click"]}
+                menu={{
+                  items: [
+                    { key: "1", label: "Certificat médical", onClick: () => printPDF(`/api/Print/smed/Consultation/${record.numcons}/certificat`) },
+                    { key: "2", label: "Bulletin de visite", disabled: true },
+                    { key: "3", label: "Certificat d'aptitude", disabled: true },
+                    { key: "4", label: "Certificat de reprise", disabled: true },
+                    { key: "5", label: "Fiche de référencement", disabled: true },
+                  ],
+                }}
+              >
+                <div><PrintButton /></div>
+              </Dropdown>
+            </>
+          )}
+          {record.medecin === userConnected?.username && (
+            <>
+              <EditButton onEdit={() => onEditConsultation(record)} />
+              <DeleteButton onDelete={() => onDeleteConsultation(record)} />
+            </>
+          )}
+        </Space>
+      ),
     },
   ];
 
-  return data === null ? (
-    <Card loading />
-  ) : (
-    <Card bordered={false} loading={isLoading}>
-      <Flex justify="flex-start" align="center">
-        <BackButton />
-      </Flex>
-      <br />
-      <Row gutter={[24, 24]}>
-        <Col sxs={24} sm={24} md={12} lg={12} xl={12}>
-          <Title level={4}>
-            Dossier Médical Patient N°{patient.num_patient} /{" "}
-            {patient.prenom_patient} {patient.nom_patient}{" "}
-          </Title>
-        </Col>
-        <Col xs={24} sm={24} md={12} lg={12} xl={12} offset={0}>
-          <Flex justify="flex-end" align="center" wrap="nowrap">
-            <Space>
-              <ReloadButton onRefresh={refreshConsultation} />
-              {serviceType === ServiceType.ANALYSE ? (
+  const prescriptionColumns = (code) => {
+    const config = PRESCRIPTION_TYPES[code];
+    return [
+      {
+        title: config.numLabel,
+        dataIndex: "numpresc",
+        key: "numpresc",
+        ...getColumnSearchProps("numpresc"),
+        render: (value) => <Text strong>{value}</Text>,
+      },
+      {
+        title: "Date",
+        dataIndex: "datepresc",
+        key: "datepresc",
+        render: (record) => formatDateTime(record),
+      },
+      {
+        title: "Prescripteur",
+        dataIndex: "prescripteur",
+        key: "prescripteur",
+        ...getColumnSearchProps("prescripteur"),
+        sorter: (a, b) => (a.prescripteur || "").localeCompare(b.prescripteur || ""),
+      },
+      ...(config.withResultat
+        ? [{
+          title: "Résultat",
+          key: "resultat",
+          render: (record) =>
+            record?.resultat ? (
+              <Dropdown
+                trigger={["click"]}
+                menu={{
+                  items: [
+                    { key: "view", label: "Visualiser", icon: <EyeOutlined />, onClick: () => viewResultat(record.numpresc) },
+                    { key: "delete", label: "Supprimer", icon: <DeleteOutlined />, danger: true, onClick: () => deleteResultat(record.numpresc) },
+                  ],
+                }}
+              >
+                <Tag color="success" style={{ cursor: "pointer" }}>Disponible</Tag>
+              </Dropdown>
+            ) : (
+              <Tag>En attente</Tag>
+            ),
+        }]
+        : []),
+      {
+        fixed: "right",
+        render: (record) => (
+          <Space size={0}>
+            {record?.medecin !== null && (
+              <Dropdown
+                trigger={["click"]}
+                menu={{
+                  items: [
+                    { key: "1", label: config.printLabel, onClick: () => printPDF(`/api/Print/smed/Prescription/${record.numpresc}/${config.print}`) },
+                    { key: "2", label: "Format ticket", onClick: () => printPDF(`/api/Print/smed/Prescription/${record.numpresc}/${config.print}_Ticket`) },
+                  ],
+                }}
+              >
+                <Tooltip title="Imprimer">
+                  <Button type="text" style={{ color: colorPrimary }} icon={<PrinterOutlined />} />
+                </Tooltip>
+              </Dropdown>
+            )}
+            <EditButton onEdit={() => onEditPrescription(record, config.print)} />
+            <DeleteButton onDelete={() => onDeletePrescription(record)} />
+            {config.withResultat && (
+              <Tooltip title="Charger le résultat">
+                <Button
+                  type="text"
+                  onClick={() => handleUploadResultatModal(record.numpresc)}
+                  icon={<UploadOutlined style={{ color: "orange" }} />}
+                />
+              </Tooltip>
+            )}
+          </Space>
+        ),
+      },
+    ];
+  };
+
+  /* ---------------- Onglets ---------------- */
+
+  const tabLabel = (icon, label, count) => (
+    <Space size={6}>
+      {icon}
+      <span>{label}</span>
+      <Badge count={count} showZero size="small" color={count ? colorPrimary : "#bfbfbf"} />
+    </Space>
+  );
+
+  const tabItems = [
+    {
+      key: "consultations",
+      label: tabLabel(<ProfileOutlined />, "Consultations", listConsultation.length),
+      children: (
+        <DataTable
+          compact
+          dataSourceCopy={listConsultation}
+          tableLoading={isLoading}
+          rowKey={(record) => record.numcons}
+          columns={consultationColumns}
+        />
+      ),
+    },
+    ...[codesPrescriptions.ORD, codesPrescriptions.ANA, codesPrescriptions.IMG].map((code) => {
+      const list = prescriptionsByType(code);
+      return {
+        key: code,
+        label: tabLabel(PRESCRIPTION_TYPES[code].icon, PRESCRIPTION_TYPES[code].label, list.length),
+        children: (
+          <DataTable
+            compact
+            dataSourceCopy={list}
+            tableLoading={isLoading}
+            rowKey={(record) => record.numpresc}
+            columns={prescriptionColumns(code)}
+          />
+        ),
+      };
+    }),
+  ];
+
+  /* ---------------- Rendu ---------------- */
+
+  return (
+    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+      {/* Bandeau patient */}
+      <Card styles={{ body: { padding: 20 } }}>
+        <Flex justify="space-between" align="flex-start" wrap gap={16}>
+          <Flex align="center" gap={16} wrap>
+            <BackButton />
+            <Avatar
+              size={64}
+              style={{
+                backgroundColor: isFemme ? "#eb2f96" : colorPrimary,
+                fontSize: 24,
+                fontWeight: 600,
+              }}
+            >
+              {getInitials(patient)}
+            </Avatar>
+            <div>
+              <Title level={3} style={{ margin: 0, color: LOGO_BROWN }}>
+                {patient.prenom_patient} {patient.nom_patient}
+              </Title>
+              <Space size={8} wrap style={{ marginTop: 6 }}>
+                <Text copyable={{ text: patient.num_patient, tooltips: ["Copier", "Copié"] }} strong style={{ fontSize: 15 }}>
+                  <IdcardOutlined /> {patient.num_patient}
+                </Text>
+                <Tag color={isFemme ? "magenta" : "blue"}>{isFemme ? "Féminin" : "Masculin"}</Tag>
+                {patient.age_patient !== null && patient.age_patient !== undefined && (
+                  <Tag>{patient.age_patient} ans</Tag>
+                )}
+                {patient.group_sanguin && <Tag color="red">Groupe {patient.group_sanguin}</Tag>}
+                {patient.type_patient && <Tag color="geekblue">{patient.type_patient}</Tag>}
+                {patient.suspension === "S" && <Tag color="error">Suspendu</Tag>}
+              </Space>
+            </div>
+          </Flex>
+
+          {/* Repère de l'écran courant */}
+          <Flex
+            align="center"
+            gap={10}
+            style={{
+              alignSelf: "center",
+              padding: "8px 20px",
+              borderRadius: 999,
+              background: colorPrimaryBg,
+              border: `1px solid ${colorPrimaryBorder}`,
+              color: colorPrimary,
+              fontSize: 18,
+              fontWeight: 600,
+              letterSpacing: 1.5,
+              textTransform: "uppercase",
+            }}
+          >
+            <FolderOpenOutlined style={{ fontSize: 22 }} />
+            Dossier médical
+          </Flex>
+
+          <Space wrap>
+            <ReloadButton onRefresh={refreshConsultation} />
+            <Button icon={<FileTextOutlined />} onClick={openInfosClinique}>
+              Infos cliniques
+            </Button>
+            {serviceType === ServiceType.ANALYSE ? (
+              <Button type="primary" onClick={() => openAnalyse(derniereConsultation?.numrv)}>
+                Analyse
+              </Button>
+            ) : (
+              <Tooltip title={!derniereConsultation ? "Aucun rendez-vous / consultation pour ce patient" : ""}>
                 <Button
                   type="primary"
-                  onClick={() => {
-                    openAnalyse(
-                      listConsultation[0].numrv
-                    );
-                  }}
-                >
-                  Analyse
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    /*getConsultationData(listConsultation[0].numrv) */ doConsultation(
-                      listConsultation[0].numrv
-                    );
-                  }}
-                  disabled={listConsultation.length === 0 ? true : false}
+                  icon={<MedicineBoxOutlined />}
+                  onClick={() => doConsultation(derniereConsultation.numrv)}
+                  disabled={!derniereConsultation}
                 >
                   Consultation
                 </Button>
-              )}
-              <Button
-                type="primary"
-                ghost
-                onClick={() => {
-                  navigate(
-                    "/espace-medical/patients/dossier/infos-cliniques"
-                  ); /*message.info("En cours de développement") */
-                }}
-              >
-                Infos cliniques
-              </Button>
-            </Space>
-          </Flex>
+              </Tooltip>
+            )}
+          </Space>
+        </Flex>
+      </Card>
+
+      {/* Identité + observations */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} xl={16}>
+          <Card title="Informations du patient" size="small" style={{ height: "100%" }}>
+            <Row gutter={[24, 16]}>
+              <Col xs={12} md={8}>
+                <InfoItem icon={<CalendarOutlined />} label="Date de naissance" value={patient.datenaiss_patient && formatDate(patient.datenaiss_patient)} />
+              </Col>
+              <Col xs={12} md={8}>
+                <InfoItem label="Lieu de naissance" value={patient.lieunaiss_patient} />
+              </Col>
+              <Col xs={12} md={8}>
+                <InfoItem label="Groupe sanguin" value={patient.group_sanguin} />
+              </Col>
+              <Col xs={12} md={8}>
+                <InfoItem icon={<PhoneOutlined />} label="Téléphone" value={patient.tel_patient} />
+              </Col>
+              <Col xs={12} md={8}>
+                <InfoItem icon={<MailOutlined />} label="Email" value={patient.email_patient} />
+              </Col>
+              <Col xs={12} md={8}>
+                <InfoItem label="Département / Service" value={patient.lib_dept || patient.code_dir} />
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+        <Col xs={24} xl={8}>
+          <Card title="Observations particulières" size="small" style={{ height: "100%" }}>
+            <EditObservationPatient observation={patient.obs_part} />
+          </Card>
         </Col>
       </Row>
-      <br />
 
-      <Collapse items={collapseItems} defaultActiveKey={["1"]} />
+      {/* Synthèse */}
+      <Row gutter={[16, 16]}>
+        {[
+          { label: "Dernière consultation", value: derniereConsultation ? formatDate(derniereConsultation.datecons) : "Aucune" },
+          { label: "Consultations", value: listConsultation.length },
+          { label: "Ordonnances", value: prescriptionsByType(codesPrescriptions.ORD).length },
+          { label: "Analyses", value: prescriptionsByType(codesPrescriptions.ANA).length },
+          { label: "Imageries", value: prescriptionsByType(codesPrescriptions.IMG).length },
+        ].map((item) => (
+          <Col key={item.label} xs={12} md={8} xl={item.label === "Dernière consultation" ? 8 : 4}>
+            <div
+              style={{
+                padding: "12px 16px",
+                borderRadius: 8,
+                background: colorFillAlter,
+                border: `1px solid ${colorBorderSecondary}`,
+              }}
+            >
+              <Text type="secondary" style={{ fontSize: 12 }}>{item.label}</Text>
+              <div style={{ fontSize: 20, fontWeight: 600 }}>{item.value}</div>
+            </div>
+          </Col>
+        ))}
+      </Row>
 
-      <br />
-      <Tabs
-        defaultActiveKey={"1"}
-        items={[
-          {
-            key: "1",
-            label: "Consultations",
-            children: (
-              <React.Fragment>
-                <Title level={4}>
-                  {" "}
-                  Liste des consultations de {patient.prenom_patient}{" "}
-                  {patient.nom_patient}{" "}
-                </Title>
-                <br />
-                <DataTable
-                  dataSourceCopy={listConsultation}
-                  tableLoading={isLoading}
-                  rowKey={(record) => record.numcons}
-                  columns={[
-                    {
-                      title: "N° Cons.",
-                      dataIndex: "numcons",
-                      key: "numcons",
-                    },
-                    {
-                      title: "Date cons",
-                      dataIndex: "datecons",
-                      key: "datecons",
-                      ...getColumnSearchProps("datecons"),
-                      render: (record) => (
-                        <div className="table-data">{formatDate(record)}</div>
-                      ),
-                    },
-                    {
-                      title: "Médécin",
-                      dataIndex: "medecin",
-                      key: "medecin",
-                      ...getColumnSearchProps("medecin"),
-                      sorter: (a, b) =>
-                        a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0),
-                      //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
-                    },
-                    {
-                      title: "Tension",
-                      dataIndex: "tension",
-                      key: "tension",
-                      sorter: (a, b) => a.tension - b.tension,
-                    },
-                    {
-                      title: "Temp (°C) ",
-                      dataIndex: "temp",
-                      key: "temp",
-                      sorter: (a, b) => a.temp - b.temp,
-                    },
-                    {
-                      title: "Poids (Kg) ",
-                      dataIndex: "poids",
-                      key: "poids",
-                      sorter: (a, b) => a.poids - b.poids,
-                    },
-                    {
-                      title: "Taille (cm) ",
-                      dataIndex: "taille",
-                      key: "taille",
-                      sorter: (a, b) => a.taille - b.taille,
-                    },
-                    //Table.EXPAND_COLUMN ,
-                    {
-                      width: "auto",
-                      render: (record) => (
-                        <Flex justify="flex-start" align="center">
-                          <Space>
-                            {record?.medecin !== null && (
-                              <>
-                                <Dropdown
-                                  menu={{
-                                    items: [
-                                      {
-                                        label: <span> Ordonnances </span>,
-                                        key: "0",
-                                        onClick: () => {
-                                          handlePrescriptions(
-                                            codesPrescriptions.ORD,
-                                            record
-                                          );
-                                        },
-                                      },
-                                      {
-                                        label: <span> Analyses </span>,
-                                        key: "1",
-                                        onClick: () => {
-                                          handlePrescriptions(
-                                            codesPrescriptions.ANA,
-                                            record
-                                          );
-                                        },
-                                      },
-                                      {
-                                        label: <span> Imageries </span>,
-                                        key: "2",
-                                        onClick: () => {
-                                          handlePrescriptions(
-                                            codesPrescriptions.IMG,
-                                            record
-                                          );
-                                        },
-                                      },
-                                    ],
-                                  }}
-                                  trigger={["click"]}
-                                >
-                                  <Tooltip title="Prescriptions">
-                                    <Button
-                                      type="text"
-                                      icon={<UnorderedListOutlined />}
-                                    />
-                                  </Tooltip>
-                                </Dropdown>
+      {/* Historique */}
+      <Card styles={{ body: { paddingTop: 4 } }}>
+        <Tabs defaultActiveKey="consultations" items={tabItems} />
+      </Card>
 
-                                <Dropdown
-                                  menu={{
-                                    items: [
-                                      {
-                                        key: "1",
-                                        label: (
-                                          <span
-                                            onClick={() => {
-                                              printPDF(
-                                                `/api/Print/smed/Consultation/${record.numcons}/certificat`
-                                              );
-                                            }}
-                                          >
-                                            Certificat Médical
-                                          </span>
-                                        ),
-                                      },
-                                      {
-                                        key: "2",
-                                        label: (
-                                          <span
-                                            onClick={() => {
-                                              console.log("Bulletin médical");
-                                            }}
-                                          >
-                                            Bulletin de visite
-                                          </span>
-                                        ),
-                                        disabled: true,
-                                      },
-                                      {
-                                        key: "3",
-                                        label: (
-                                          <span
-                                            onClick={() => {
-                                              console.log("Aptitude");
-                                            }}
-                                          >
-                                            Certificat d'aptitude
-                                          </span>
-                                        ),
-                                        disabled: true,
-                                      },
-                                      {
-                                        key: "4",
-                                        label: (
-                                          <span
-                                            onClick={() => {
-                                              console.log("Aptitude");
-                                            }}
-                                          >
-                                            Certificat de reprise
-                                          </span>
-                                        ),
-                                        disabled: true,
-                                      },
-                                      {
-                                        key: "5",
-                                        label: (
-                                          <span
-                                            onClick={() =>
-                                              console.log("Aptitude")
-                                            }
-                                          >
-                                            Fiche de référencement
-                                          </span>
-                                        ),
-                                        disabled: true,
-                                      },
-                                    ],
-                                  }}
-                                  trigger={["click"]}
-                                >
-                                  {/* <Tooltip title="Imprimer" >
-                                                                <Button type='text' icon={<PrinterOutlined/> }/>
-                                                            </Tooltip> */}
-                                  <div>
-                                    <PrintButton />
-                                  </div>
-                                </Dropdown>
-                              </>
-                            )}
-
-                            {
-                              record.medecin === userConnected.username && (
-                                <EditButton
-                                  onEdit={() => {
-                                    onEditConsultation(record);
-                                  }}
-                                />
-                              )
-                              // <Tooltip title="Editer">
-                              //     <Button type='link' icon={<EditOutlined/>} onClick={()=>{onEditConsultation(record)}} />
-                              // </Tooltip>
-                            }
-
-                            {record.medecin === userConnected.username && (
-                              <DeleteButton
-                                onDelete={() => {
-                                  onDeleteConsultation(record);
-                                }}
-                              />
-                            )}
-                          </Space>
-                        </Flex>
-                      ),
-                    },
-                  ]}
-                />
-              </React.Fragment>
-            ),
-          },
-          {
-            key: "2",
-            label: "Ordonnances",
-            children: (
-              <React.Fragment>
-                <Title level={4}>
-                  {" "}
-                  Liste des ordonnances de {patient.prenom_patient}{" "}
-                  {patient.nom_patient}{" "}
-                </Title>
-                <br />
-                <DataTable
-                  dataSourceCopy={
-                    listPrescription.filter(
-                      (element) => element.codepresc === codesPrescriptions.ORD
-                    ) || []
-                  }
-                  tableLoading={isLoading}
-                  rowKey={(record) => record.numpresc}
-                  columns={[
-                    {
-                      title: "N° ord.",
-                      dataIndex: "numpresc",
-                      key: "numpresc",
-                    },
-                    {
-                      title: "Date presc",
-                      dataIndex: "datepresc",
-                      key: "datepresc",
-                      // ...getColumnSearchProps("datepresc"),
-                      render: (record) => (
-                        <div className="table-data">{formatDate(record)}</div>
-                      ),
-                    },
-                    {
-                      title: "Prescripteur",
-                      dataIndex: "prescripteur",
-                      key: "prescripteur",
-                      // ...getColumnSearchProps("medecin"),
-                      sorter: (a, b) =>
-                        a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0),
-                      //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
-                    },
-                    {
-                      width: "auto",
-                      render: (record) => (
-                        <Flex justify="center" align="center">
-                          <Space>
-                            {record?.medecin !== null && (
-                              <PrintButton
-                                onPrint={() => {
-                                  printPDF(
-                                    `/api/Print/smed/Prescription/${record.numpresc}/ordonnance`
-                                  );
-                                }}
-                              />
-                            )}
-                            <EditButton
-                              onEdit={() => {
-                                onEditPrescription(record, "ordonnance");
-                              }}
-                            />
-                            <DeleteButton
-                              onDelete={() => {
-                                onDeletePrescription(record);
-                              }}
-                            />
-                          </Space>
-                        </Flex>
-                      ),
-                    },
-                  ]}
-                />
-              </React.Fragment>
-            ),
-          },
-          {
-            key: "3",
-            label: "Analyses",
-            children: (
-              <React.Fragment>
-                <Title level={4}>
-                  {" "}
-                  Liste des analyses de {patient.prenom_patient}{" "}
-                  {patient.nom_patient}{" "}
-                </Title>
-                <br />
-                <DataTable
-                  dataSourceCopy={
-                    listPrescription.filter(
-                      (element) => element.codepresc === codesPrescriptions.ANA
-                    ) || []
-                  }
-                  tableLoading={isLoading}
-                  rowKey={(record) => record.numpresc}
-                  columns={[
-                    {
-                      title: "N° analyse.",
-                      dataIndex: "numpresc",
-                      key: "numpresc",
-                    },
-                    {
-                      title: "Date presc",
-                      dataIndex: "datepresc",
-                      key: "datepresc",
-                      // ...getColumnSearchProps("datepresc"),
-                      render: (record) => (
-                        <div className="table-data">{formatDate(record)}</div>
-                      ),
-                    },
-                    {
-                      title: "Prescripteur",
-                      dataIndex: "prescripteur",
-                      key: "prescripteur",
-                      // ...getColumnSearchProps("medecin"),
-                      sorter: (a, b) =>
-                        a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0),
-                      //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
-                    },
-                    {
-                      width: "auto",
-                      render: (record) => (
-                        <Flex justify="center" align="center">
-                          <Space>
-                            {record?.medecin !== null && (
-                              <PrintButton
-                                onPrint={() => {
-                                  printPDF(
-                                    `/api/Print/smed/Prescription/${record.numpresc}/analyse`
-                                  );
-                                }}
-                              />
-                            )}
-                            <EditButton
-                              onEdit={() => {
-                                onEditPrescription(record, "analyse");
-                              }}
-                            />
-                            <DeleteButton
-                              onDelete={() => {
-                                onDeletePrescription(record);
-                              }}
-                            />
-                          </Space>
-                        </Flex>
-                      ),
-                    },
-                  ]}
-                />
-              </React.Fragment>
-            ),
-          },
-          {
-            key: "4",
-            label: "Imageries",
-            children: (
-              <React.Fragment>
-                <Title level={4}>
-                  {" "}
-                  Liste des imageries de {patient.prenom_patient}{" "}
-                  {patient.nom_patient}{" "}
-                </Title>
-                <br />
-                <DataTable
-                  dataSourceCopy={
-                    listPrescription.filter(
-                      (element) => element.codepresc === codesPrescriptions.IMG
-                    ) || []
-                  }
-                  tableLoading={isLoading}
-                  rowKey={(record) => record.numpresc}
-                  columns={[
-                    {
-                      title: "N° img.",
-                      dataIndex: "numpresc",
-                      key: "numpresc",
-                    },
-                    {
-                      title: "Date presc",
-                      dataIndex: "datepresc",
-                      key: "datepresc",
-                      // ...getColumnSearchProps("datepresc"),
-                      render: (record) => (
-                        <div className="table-data">{formatDate(record)}</div>
-                      ),
-                    },
-                    {
-                      title: "Prescripteur",
-                      dataIndex: "prescripteur",
-                      key: "prescripteur",
-                      // ...getColumnSearchProps("medecin"),
-                      sorter: (a, b) =>
-                        a.medecin?.charCodeAt(0) - b.medecin?.charCodeAt(0),
-                      //sortOrder: sortedInfo.columnKey === 'medecin' ? sortedInfo.order : null
-                    },
-                    {
-                      width: "auto",
-                      render: (record) => (
-                        <Flex justify="center" align="center">
-                          <Space>
-                            {record?.medecin !== null && (
-                              <PrintButton
-                                onPrint={() => {
-                                  printPDF(
-                                    `/api/Print/smed/Prescription/${record.numpresc}/imagerie`
-                                  );
-                                }}
-                              />
-                            )}
-                            <EditButton
-                              onEdit={() => {
-                                onEditPrescription(record, "imagerie");
-                              }}
-                            />
-                            <DeleteButton
-                              onDelete={() => {
-                                onDeletePrescription(record);
-                              }}
-                            />
-                          </Space>
-                        </Flex>
-                      ),
-                    },
-                  ]}
-                />
-              </React.Fragment>
-            ),
-          },
-        ]}
+      <UploadResultatModal
+        isModalVisible={isUploadResultatModalVisible}
+        setIsModalVisible={setIsUploadResultatModalVisible}
+        numPrescription={numPrescription}
+        refreshConsultation={refreshConsultation}
       />
-    </Card>
+    </Space>
   );
 }
 

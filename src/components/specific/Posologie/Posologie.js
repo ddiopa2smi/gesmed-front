@@ -1,63 +1,70 @@
-import { Col, Form, Input, Radio, Row, Select, Space, Card , Checkbox, InputNumber, message, Typography } from 'antd';
+import { Col, Form, Input, Radio, Row, Select, Space, Card, Checkbox, InputNumber, message, Typography, theme } from 'antd';
 import FormFooter from "../../common/FormFooter/FormFooter";
+import useFetch from "../../../utils/hooks/useFetch";
+import { endpoints } from "../../../constants/endpoints.constants";
 
 
-const {TextArea} = Input;
-const {Title} = Typography;
+const { TextArea } = Input;
+const { Title } = Typography;
 const { Option } = Select;
 
-const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentSelected, quantity , conditionnement, setIsModalVisible}) => {
-    
+const Posologie = ({ medicamentsPrescrites, setMedicamentsPrescrites, medicamentSelected, quantity, conditionnement, setIsModalVisible, onValidate }) => {
+
     const [form] = Form.useForm();
+    const { token: { colorPrimary } } = theme.useToken();
+    const { data: formesGaleniqueList, isLoading: formesGaleniqueListLoading } = useFetch(endpoints.forme_galenique.LIST);
 
     const onFinish = () => {
         form
-        .validateFields()
-        .then((values)=>{
-            let inc = 0; // increment
-            let index = 0;
-            const payload = {
-                codeacte : medicamentSelected.code_produit ,
-                libacte : medicamentSelected.libelle_produit ,
-                posologie : `${values.qte} ${values.forme_galenique} - ${values.qd} ${values.comment === "Aucun" ? "" : `- ${values.comment}`} - pendant ${values.duree} jour(s)` ,
-                qte : quantity ,
-                cond : conditionnement,
-                observation : values.observation
-            }
-
-            // Tester l'existence du médicament dans la table des medicaments si oui incrementer inc
-            for (let i = 0; i < medicamentsPrescrites.length; i++) {
-                if (medicamentsPrescrites[i].codeacte === medicamentSelected.code_produit ) {
-                    inc+=1;
-                    index = i ;
+            .validateFields()
+            .then((values) => {
+                let inc = 0; // increment
+                let index = 0;
+                const payload = {
+                    codeacte: medicamentSelected.code_produit,
+                    libacte: medicamentSelected.libelle_produit,
+                    posologie: `${values.qte} ${values.forme_galenique} - ${values.qd} ${values.comment === "Aucun" ? "" : `- ${values.comment}`} - pdt ${values.duree} j`,
+                    qte: quantity,
+                    cond: conditionnement,
+                    observation: values.observation
                 }
-            }
 
-            // Si le médicament existe alors modifier les valeurs du médicament courant sinon ajouter un autre médicament
-            if (inc === 1) {
-                const temp = {...medicamentsPrescrites[index],...payload};
-                medicamentsPrescrites[index].codeacte =temp.codeacte;
-                medicamentsPrescrites[index].libacte =temp.libacte;
-                medicamentsPrescrites[index].posologie =temp.posologie;
-                medicamentsPrescrites[index].qte =temp.qte;
-                medicamentsPrescrites[index].cond =temp.cond;
-                medicamentsPrescrites[index].observation =temp.observation;
-                setMedicamentsPrescrites(medicamentsPrescrites);
-                //message.info("Médicament déjà existant et modifié avec succès");
-            }else{
-                const temp = medicamentsPrescrites.push(payload);
-                setMedicamentsPrescrites([...medicamentsPrescrites] , temp);
-                //message.success("Médicament ajouté dans la liste avec succès");
-            }
-            form.resetFields();
-            setIsModalVisible(false);
-        })
-        .catch((info) => {
-            console.log('Validate Failed:', info);
-        });
+                // Tester l'existence du médicament dans la table des medicaments si oui incrementer inc
+                for (let i = 0; i < medicamentsPrescrites.length; i++) {
+                    if (medicamentsPrescrites[i].codeacte === medicamentSelected.code_produit) {
+                        inc += 1;
+                        index = i;
+                    }
+                }
+
+                // Si le médicament existe alors modifier les valeurs du médicament courant sinon ajouter un autre médicament
+                if (inc === 1) {
+                    const temp = { ...medicamentsPrescrites[index], ...payload };
+                    medicamentsPrescrites[index].codeacte = temp.codeacte;
+                    medicamentsPrescrites[index].libacte = temp.libacte;
+                    medicamentsPrescrites[index].posologie = temp.posologie;
+                    medicamentsPrescrites[index].qte = temp.qte;
+                    medicamentsPrescrites[index].cond = temp.cond;
+                    medicamentsPrescrites[index].observation = temp.observation;
+                    setMedicamentsPrescrites(medicamentsPrescrites);
+                    //message.info("Médicament déjà existant et modifié avec succès");
+                } else {
+                    const temp = medicamentsPrescrites.push(payload);
+                    setMedicamentsPrescrites([...medicamentsPrescrites], temp);
+                    //message.success("Médicament ajouté dans la liste avec succès");
+                }
+                form.resetFields();
+                setIsModalVisible(false);
+                if (onValidate) {
+                    onValidate();
+                }
+            })
+            .catch((info) => {
+                console.log('Validate Failed:', info);
+            });
     }
 
-    
+
     return (
         <Form
             form={form}
@@ -65,16 +72,16 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
             onFinish={onFinish}
             preserve={false}
         >
-            <Title level={5} > { medicamentSelected !== null ? medicamentSelected.libelle_produit : ""} </Title>
-            <Row gutter={[24,24]}>
+            <Title level={5} style={{ color: colorPrimary }}  > {medicamentSelected !== null ? medicamentSelected.libelle_produit : ""} </Title>
+            <Row gutter={[24, 24]}>
                 <Col xs={24} sm={12} md={12} lg={12} xl={12} >
-                    <Form.Item 
+                    <Form.Item
                         label="Quantité"
-                        name="qte" 
+                        name="qte"
                         rules={[
                             {
-                            required: true,
-                            message: 'Champ obligatoire',
+                                required: true,
+                                message: 'Champ obligatoire',
                             },
                         ]}
                         initialValue={1}
@@ -83,60 +90,55 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                     </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={12} lg={12} xl={12} >
-                    <Form.Item 
+                    <Form.Item
                         label="Forme"
-                        name="forme_galenique" 
+                        name="forme_galenique"
                         rules={[
                             {
-                            required: true,
-                            message: 'Champ obligatoire',
+                                required: true,
+                                message: 'Champ obligatoire',
                             },
                         ]}
-                        initialValue={"comprimes"}
+                        initialValue={"comprimé"}
                     >
-                       <Select
-                            style={{width:'100%',background:"transparent"}}
+                        <Select
+                            style={{ width: '100%', background: "transparent" }}
                             showSearch
                             placeholder="Forme"
-                            optionFilterProp="children" 
-                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                        >     
-                            <Option key={"comprimes"}  value={"comprimés"} > Comprimés </Option>
-                            <Option key={"cuilliere"}  value={"cuillièrées"} > Cuillièrées </Option>
-                            <Option key={"ovules"}  value={"ovules"} > Ovules </Option>
-                            <Option key={"application"}  value={"applications"} > Applications </Option>
-                            <Option key={"ampoules"}  value={"ampoules"} > Ampoules </Option>
-                            <Option key={"sachets"}  value={"sachets"} > Sachets </Option>
-                            <Option key={"injections"}  value={"injections"} > Injections </Option>
-                            <Option key={"gouttes"}  value={"gouttes"} > Gouttes </Option>
-                            <Option key={"gellules"}  value={"gellules"} > Gellules </Option>
-                            <Option key={"suppositoires"}  value={"suppositoires"} > Suppositoires </Option>
-
+                            optionFilterProp="children"
+                            loading={formesGaleniqueListLoading}
+                            allowClear
+                        >
+                            {(formesGaleniqueList || [])
+                                .filter((item) => item?.type === "UNITE_PRISE")
+                                .map((item) => (
+                                    <Option key={item?.code_forme} value={item?.libelle_forme?.toLowerCase()}>{item?.libelle_forme}</Option>
+                                ))}
                         </Select>
                     </Form.Item>
                 </Col>
             </Row>
-            <Row gutter={[24,24]}>
+            <Row gutter={[24, 24]}>
                 <Col xs={24} sm={12} md={12} lg={12} xl={12} >
-                  
-                    <Form.Item 
-                        name="qd" 
+
+                    <Form.Item
+                        name="qd"
                         label="Quand"
                         rules={[
                             {
-                            required: true,
-                            message: 'Champ obligatoire',
+                                required: true,
+                                message: 'Champ obligatoire',
                             },
                         ]}
                         initialValue={["Matin"]}
                     >
-                        <Checkbox.Group style={{ display:"flex",flexDirection:"column"}} options={["Matin","Midi","Soir","Au coucher"]}/>
+                        <Checkbox.Group style={{ display: "flex", flexDirection: "column" }} options={["Matin", "Midi", "Soir", "Au coucher"]} />
                     </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                     <Radio.Group>
-                        <Form.Item 
-                            name="comment" 
+                        <Form.Item
+                            name="comment"
                             label="Comment"
                             initialValue={"Aucun"}
                             rules={[
@@ -154,20 +156,20 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                                 <Radio value={"Milieu repas"}>Milieu repas</Radio>
                             </Space>
                         </Form.Item>
-                        
+
                     </Radio.Group>
-                    
+
                 </Col>
             </Row>
-            <Row gutter={[24,24]}>
-                <Col xs={24} sm={8} md={8} lg={8} xl={8} >
-                    <Form.Item 
+            <Row gutter={[24, 24]}>
+                <Col xs={24} sm={12} md={12} lg={12} xl={12} >
+                    <Form.Item
                         label="Durée traitement en jours"
-                        name="duree" 
+                        name="duree"
                         rules={[
                             {
-                            required: true,
-                            message: 'Champ obligatoire',
+                                required: true,
+                                message: 'Champ obligatoire',
                             },
                         ]}
                         initialValue={1}
@@ -175,23 +177,23 @@ const Posologie = ({medicamentsPrescrites ,setMedicamentsPrescrites, medicamentS
                         <InputNumber min={1} />
                     </Form.Item>
                 </Col>
-                <Col xs={24} sm={16} md={16} lg={16} xl={16} >
-                    <Form.Item 
+                <Col xs={24} sm={12} md={12} lg={12} xl={12} >
+                    <Form.Item
                         label="Observation"
-                        name="observation" 
+                        name="observation"
                     >
-                        <TextArea rows={4} /> 
+                        <TextArea rows={3} />
                     </Form.Item>
                 </Col>
             </Row>
-            
 
-            <FormFooter 
-                onCancel={()=>{setIsModalVisible(false)}}
+
+            <FormFooter
+                onCancel={() => { setIsModalVisible(false) }}
                 htmlType='submit'
                 validLabel={"Ajouter"}
             />
-            
+
         </Form>
     )
 }
