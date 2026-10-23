@@ -12,6 +12,22 @@ export const exportToExcel = (rows, fileName = "export") => {
   XLSX.writeFile(workbook, `${fileName}.xlsx`);
 };
 
+// Classeur Excel en plusieurs feuilles : sheets = [{ name, rows }]
+export const exportWorkbookToExcel = (sheets, fileName = "export") => {
+  const workbook = XLSX.utils.book_new();
+  sheets.forEach(({ name, rows }) => {
+    const worksheet = XLSX.utils.json_to_sheet(rows && rows.length ? rows : [{ Information: "Aucune donnée" }]);
+    // Largeur de colonne ajustée au contenu
+    const colonnes = Object.keys((rows && rows[0]) || { Information: "" });
+    worksheet["!cols"] = colonnes.map((col) => ({
+      wch: Math.min(60, Math.max(col.length, ...(rows || []).map((row) => String(row[col] ?? "").length)) + 2),
+    }));
+    // Nom de feuille : 31 caractères maximum, sans caractères interdits
+    XLSX.utils.book_append_sheet(workbook, worksheet, name.replace(/[\\/?*[\]:]/g, " ").slice(0, 31));
+  });
+  XLSX.writeFile(workbook, `${fileName}.xlsx`);
+};
+
 export const formatDate = (record) => {
   return record === null || record === ""
     ? ""

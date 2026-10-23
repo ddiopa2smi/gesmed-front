@@ -25,4 +25,5 @@ export enum TypePatient {
 export enum TypePrescription {
     ANALYSE = "ANALYSE",
     IMAGERIE = "IMAGERIE",
+    INFIRMERIE = "INFIRMERIE",
 }

@@ -1,9 +1,19 @@
-import { EditOutlined, OrderedListOutlined } from "@ant-design/icons";
 import {
+  AppstoreOutlined,
+  CloseOutlined,
+  DollarOutlined,
+  EditOutlined,
+  InboxOutlined,
+  MedicineBoxOutlined,
+  OrderedListOutlined,
+  SaveOutlined,
+  TagsOutlined,
+} from "@ant-design/icons";
+import {
+  Alert,
   Button,
   Card,
   Col,
-  Divider,
   Flex,
   Form,
   Input,
@@ -13,34 +23,85 @@ import {
   Row,
   Select,
   Space,
+  Switch,
+  Tag,
   Tooltip,
   Typography,
   message,
+  theme,
 } from "antd";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useFetch from "../../utils/hooks/useFetch";
 import { endpoints } from "../../constants/endpoints.constants";
-import { codesPrescriptions } from "../../constants/app.constants";
-import FormFooter from "../../components/common/FormFooter/FormFooter";
+import { codesPrescriptions, LOGO_BROWN } from "../../constants/app.constants";
 import GestionFamillesMedoc from "../../components/specific/GestionFamillesMedoc/GestionFamillesMedoc";
 import GestionConditionnements from "../../components/specific/GestionConditionnements/GestionConditionnements";
 import GestionFormesGaleniques from "../../components/specific/GestionFormesGaleniques/GestionFormesGaleniques";
 import { postActions, putActions } from "../../actions/actions";
 import BackButton from "../../components/common/BackButton/BackButton";
+import { formatMontant } from "../../utils/helpers";
+import { getPrixUnitaire } from "../../utils/tarifProduit";
 
-const { Title } = Typography;
-const { Option } = Select;
+const { Title, Text } = Typography;
+
+const UNITES_DISTRIBUTION = [
+  "Ampoules buvables", "Ampoules injectables", "Boîtes", "Comprimés", "Gélules",
+  "Matériel", "Ovules", "Pommade", "Sachets", "Unités",
+].map((value) => ({ value, label: value }));
+
+const UNITES_VENTE = [
+  { value: "Boite", label: "Boîte" },
+  { value: "Comprime", label: "Comprimés" },
+  { value: "Plaquette", label: "Plaquettes" },
+];
+
+// Section de la fiche : carte avec titre et icône
+const Section = ({ icon, title, children }) => {
+  const { token: { colorPrimary } } = theme.useToken();
+  return (
+    <Card
+      size="small"
+      title={<Space style={{ color: colorPrimary }}>{icon}<span>{title}</span></Space>}
+      style={{ marginBottom: 16, height: "calc(100% - 16px)" }}
+    >
+      {children}
+    </Card>
+  );
+};
+
+// Select d'un référentiel avec accès à sa fenêtre de gestion
+const ReferentielSelect = ({ label, name, options, loading, onManage, manageTitle }) => (
+  <Form.Item label={label}>
+    <Flex gap={6}>
+      <Form.Item name={name} noStyle>
+        <Select
+          showSearch
+          allowClear
+          placeholder="Choisir..."
+          optionFilterProp="label"
+          loading={loading}
+          options={options}
+        />
+      </Form.Item>
+      <Tooltip title={manageTitle}>
+        <Button icon={<EditOutlined />} onClick={onManage} />
+      </Tooltip>
+    </Flex>
+  </Form.Item>
+);
 
 function FicheProduit() {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { token: { colorPrimary, colorFillAlter, colorBgContainer, colorBorderSecondary } } = theme.useToken();
   const currentRecord = state?.currentRecord;
+  // Création si la page est ouverte sans produit (state absent ou currentRecord null)
+  const isNouveau = !currentRecord;
   const [form] = Form.useForm();
   const {
     data: listMedicaments,
     isLoading,
-    error,
   } = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
   const {
     data: familleMedocsList,
@@ -58,19 +119,26 @@ function FicheProduit() {
     onRefresh: formesGaleniqueListRefresh,
   } = useFetch(endpoints.forme_galenique.LIST);
 
-  const [open, setOpen] = useState(false);
-
   // Paramètre dont la fenêtre de gestion est ouverte : "FORME_GALENIQUE", "FAMILLE_MEDOC", "CONDITIONNEMENT" ou null
   const [gestionOuverte, setGestionOuverte] = useState(null);
-
   const [formLoading, setFormLoading] = useState(false);
+
+  // Valeurs suivies pour l'aperçu des prix
+  const libelle = Form.useWatch("libelle_produit", form);
+  const prixAchat = Form.useWatch("prix_achat", form);
+  const prixVente = Form.useWatch("prix_vente", form);
+  const qteEmb = Form.useWatch("qte_emb", form);
+  const uniteDistribution = Form.useWatch("unite_distribution", form);
+  const prixUnitaire = getPrixUnitaire({ prix_vente: prixVente, qte_emb: qteEmb, unite_distribution: uniteDistribution });
+  const vendueAuDetail = uniteDistribution && uniteDistribution !== "Boîtes";
+  const marge = prixAchat > 0 && prixVente > 0 ? Math.round(((prixVente - prixAchat) / prixAchat) * 100) : null;
 
   const save = () => {
     form
       .validateFields()
       .then((values) => {
         setFormLoading(true);
-        if (currentRecord === null) {
+        if (isNouveau) {
           postActions(endpoints.fiche_produit.ADD, values)
             .then((response) => {
               if (response?.data) {
@@ -83,13 +151,10 @@ function FicheProduit() {
               setFormLoading(false);
             });
         } else {
-          //console.log(values)
           putActions(`${endpoints.fiche_produit.UPDATE}`, values)
             .then((response) => {
               if (response?.data) {
-                message.success(
-                  "Informations du produit modifiées avec succès"
-                );
+                message.success("Informations du produit modifiées avec succès");
               }
             })
             .finally(() => {
@@ -102,420 +167,269 @@ function FicheProduit() {
       });
   };
 
-  const getMedocObjectByCodeActe = (id, list) => {
-    let obj = null;
-    for (let i = 0; i < list.length; i++) {
-      if (list[i].codeacte === id) {
-        obj = list[i];
-      }
-    }
-
-    return obj;
-  };
-
   return (
-    <Card className="FicheProduitWrapper">
-      <Flex justify="flex-start" align="center">
-        <BackButton />
-      </Flex>
-      <Flex justify="flex-end" align="center">
-        <Space>
-          <Tooltip title="Actualiser">
-            <Button
-              type="primary"
-              icon={<OrderedListOutlined />}
-              onClick={() => {
-                navigate("/espace-pharmacie/gestion-fiche-produits");
-              }}
-            >
-              Liste des produits
-            </Button>
-          </Tooltip>
-        </Space>
-      </Flex>
-      <Title level={3}>
-        {" "}
-        {currentRecord === null
-          ? "Fiche Produit"
-          : `Modification Fiche Produit ${currentRecord?.code_produit}`}{" "}
-      </Title>
-      <br />
+    <>
       <Form
         layout="vertical"
         form={form}
         onFinish={save}
         initialValues={currentRecord}
-        onValuesChange={(changedValues, allValues) => {
+        onValuesChange={(changedValues) => {
           if (changedValues.code_produit) {
-            const obj = getMedocObjectByCodeActe(
-              changedValues.code_produit,
-              listMedicaments
-            );
-            form.setFieldValue("code_cip", obj.codeacte);
-            form.setFieldValue("libelle_produit", obj.libacte);
-            // form.setFieldValue("reference",generateRandomCode())
+            const obj = (listMedicaments || []).find((item) => item.codeacte === changedValues.code_produit);
+            if (obj) {
+              form.setFieldValue("code_cip", obj.codeacte);
+              form.setFieldValue("libelle_produit", obj.libacte);
+            }
           }
         }}
       >
-        {currentRecord === null && (
-          <Row gutter={[24, 24]}>
-            {/* <Col xs={24} sm={12} md={8} lg={12} xl={12}>
-              <Form.Item
-                label="DCI (Dénomination commune internationale)"
-                name="dci"
-              >
-                <Select
-                  style={{ width: "100%", background: "transparent" }}
-                  showSearch
-                  placeholder="Choisir..."
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children[1]
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  loading={isLoading}
-                >
-                  {listMedicaments.map((item) => (
-                    <Option key={item.codeacte} value={item.codeacte}>
-                      {" "}
-                      {item.libacte}{" "}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col> */}
-            <Col xs={24} sm={12} md={8} lg={12} xl={12}>
-              <Form.Item label="DCI (Dénomination commune internationale)" name="code_produit">
-                <Select
-                  style={{ width: "100%", background: "transparent" }}
-                  showSearch
-                  placeholder="Choisir..."
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children[1].toLowerCase().includes(input.toLowerCase())
-                  }
-                  loading={isLoading}
-                >
-                  {listMedicaments.map((item) => (
-                    <Option key={item.codeacte} value={item.codeacte}>
-                      {" "}
-                      {item.libacte}{" "}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-        )}
-
-        <Divider orientation="left">Identification</Divider>
-
-        <Row gutter={[24, 24]}>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Désignation"
-              name="libelle_produit"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
-            >
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Code CIP"
-              name="code_cip"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
-            >
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Référence interne"
-              name="code_produit"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
-              style={{
-                display: "none",
-              }}
-            >
-              <Input disabled />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={[24, 24]}>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Flex align="center">
-              <Form.Item
-                label="Forme galénique"
-                name="forme"
-                style={{ width: "90%" }}
-              >
-                <Select
-                  style={{ width: "100%", background: "transparent" }}
-                  showSearch
-                  placeholder="Choisir..."
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children[1]
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  loading={formesGaleniqueListLoading}
-                  allowClear
-                >
-                  {formesGaleniqueList
-                    .filter((item) => item?.type === "UNITE_PRISE")
-                    .map((item, key) => (
-                      <Option key={key} value={item?.code_forme}>
-                        {" "}
-                        {item?.libelle_forme}{" "}
-                      </Option>
-                    ))}
-                </Select>
-              </Form.Item>
-              <Tooltip title="Gérer les formes galéniques">
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => setGestionOuverte("FORME_GALENIQUE")}
-                />
-              </Tooltip>
+        {/* En-tête */}
+        <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 20 } }}>
+          <Flex justify="space-between" align="center" wrap gap={16}>
+            <Flex align="center" gap={16} wrap>
+              <BackButton />
+              <div>
+                <Text style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: colorPrimary }}>
+                  <MedicineBoxOutlined /> {isNouveau ? "Nouvelle fiche produit" : "Modification de la fiche produit"}
+                </Text>
+                <Title level={3} style={{ margin: 0, color: LOGO_BROWN }}>
+                  {libelle || (isNouveau ? "Nouveau produit" : currentRecord?.libelle_produit)}
+                </Title>
+                {!isNouveau && <Tag color="processing">{currentRecord?.code_produit}</Tag>}
+              </div>
             </Flex>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Flex align="center" justify="flex-start">
-              <Form.Item
-                label="Famille"
-                name="famille"
-                style={{ width: "90%" }}
-              >
-                <Select
-                  style={{ width: "100%", background: "transparent" }}
-                  showSearch
-                  placeholder="Choisir..."
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children[1]
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  isLoading={familleMedocsListLoading}
-                  allowClear
+            <Button
+              icon={<OrderedListOutlined />}
+              onClick={() => navigate("/espace-pharmacie/gestion-fiche-produits")}
+            >
+              Liste des produits
+            </Button>
+          </Flex>
+        </Card>
+
+        <Row gutter={16}>
+          {/* Identification */}
+          <Col xs={24} xl={12}>
+            <Section icon={<TagsOutlined />} title="Identification">
+              {isNouveau && (
+                <Form.Item
+                  label="DCI (Dénomination commune internationale)"
+                  name="code_produit"
+                  rules={[{ required: true, message: "Choisir le médicament" }]}
+                  extra="La désignation et le code CIP sont repris automatiquement."
                 >
-                  {familleMedocsList.map((item, key) => (
-                    <Option key={key} value={item?.code_famille}>
-                      {" "}
-                      {item?.libelle_famille}{" "}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Tooltip title="Gérer les familles">
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => setGestionOuverte("FAMILLE_MEDOC")}
-                />
-              </Tooltip>
-            </Flex>
+                  <Select
+                    size="large"
+                    showSearch
+                    placeholder="Rechercher un médicament"
+                    optionFilterProp="label"
+                    loading={isLoading}
+                    options={(listMedicaments || []).map((item) => ({ value: item.codeacte, label: item.libacte }))}
+                  />
+                </Form.Item>
+              )}
+              <Row gutter={16}>
+                <Col xs={24} md={14}>
+                  <Form.Item label="Désignation" name="libelle_produit" rules={[{ required: true, message: "Champ obligatoire" }]}>
+                    <Input disabled />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={10}>
+                  <Form.Item label="Code CIP" name="code_cip" rules={[{ required: true, message: "Champ obligatoire" }]}>
+                    <Input disabled />
+                  </Form.Item>
+                </Col>
+              </Row>
+              {/* Référence interne, renseignée par le choix de la DCI */}
+              {!isNouveau && (
+                <Form.Item name="code_produit" hidden rules={[{ required: true }]}>
+                  <Input />
+                </Form.Item>
+              )}
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Descriptif" name="descriptif" initialValue="spec" style={{ marginBottom: 0 }}>
+                    <Radio.Group optionType="button" buttonStyle="solid">
+                      <Radio value="spec">Spécialité</Radio>
+                      <Radio value="gen">Générique</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Statut" name="statut" initialValue="payant" style={{ marginBottom: 0 }}>
+                    <Radio.Group optionType="button" buttonStyle="solid">
+                      <Radio value="payant">Payant</Radio>
+                      <Radio value="gratuit">Gratuit</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Section>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Flex align="center">
-              <Form.Item
-                label="Conditionnement"
-                name="cond"
-                style={{ width: "90%" }}
-              >
-                <Select
-                  style={{ width: "100%", background: "transparent" }}
-                  showSearch
-                  placeholder="Choisir..."
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children[1]
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  allowClear
-                  isLoading={conditionnementsListLoading}
-                >
-                  {conditionnementsList.map((item, index) => (
-                    <Option key={index} value={item?.cond_code}>
-                      {" "}
-                      {item?.cond_lib}{" "}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Tooltip title="Gérer les conditionnements">
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => setGestionOuverte("CONDITIONNEMENT")}
+
+          {/* Classification */}
+          <Col xs={24} xl={12}>
+            <Section icon={<AppstoreOutlined />} title="Classification">
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <ReferentielSelect
+                    label="Forme galénique"
+                    name="forme"
+                    loading={formesGaleniqueListLoading}
+                    options={(formesGaleniqueList || [])
+                      .filter((item) => item?.type === "UNITE_PRISE")
+                      .map((item) => ({ value: item.code_forme, label: item.libelle_forme }))}
+                    onManage={() => setGestionOuverte("FORME_GALENIQUE")}
+                    manageTitle="Gérer les formes galéniques"
+                  />
+                </Col>
+                <Col xs={24} md={12}>
+                  <ReferentielSelect
+                    label="Famille"
+                    name="famille"
+                    loading={familleMedocsListLoading}
+                    options={(familleMedocsList || []).map((item) => ({ value: item.code_famille, label: item.libelle_famille }))}
+                    onManage={() => setGestionOuverte("FAMILLE_MEDOC")}
+                    manageTitle="Gérer les familles"
+                  />
+                </Col>
+                <Col xs={24} md={12}>
+                  <ReferentielSelect
+                    label="Conditionnement"
+                    name="cond"
+                    loading={conditionnementsListLoading}
+                    options={(conditionnementsList || []).map((item) => ({ value: item.cond_code, label: item.cond_lib }))}
+                    onManage={() => setGestionOuverte("CONDITIONNEMENT")}
+                    manageTitle="Gérer les conditionnements"
+                  />
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Unité de distribution"
+                    name="unite_distribution"
+                    tooltip="Unité dans laquelle le produit est servi au patient (utilisée dans les ordonnances)"
+                  >
+                    <Select showSearch allowClear placeholder="Choisir..." optionFilterProp="label" options={UNITES_DISTRIBUTION} />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Section>
+          </Col>
+
+          {/* Tarif */}
+          <Col xs={24} xl={12}>
+            <Section icon={<DollarOutlined />} title="Tarif">
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Prix d'achat" name="prix_achat">
+                    <InputNumber min={0} style={{ width: "100%" }} addonAfter="FCFA" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Prix de vente" name="prix_vente">
+                    <InputNumber min={0} style={{ width: "100%" }} addonAfter="FCFA" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Unité de vente" name="unite_vente">
+                    <Select allowClear placeholder="Choisir..." options={UNITES_VENTE} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Quantité par emballage"
+                    name="qte_emb"
+                    tooltip="Nombre d'unités dans un emballage (ex : 30 comprimés par boîte). Sert au calcul du prix à l'unité."
+                  >
+                    <InputNumber min={0} style={{ width: "100%" }} addonAfter={uniteDistribution || "unités"} />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              {/* Aperçu des prix appliqués dans les ordonnances */}
+              <Flex wrap gap={16} style={{ padding: "10px 12px", borderRadius: 8, background: colorFillAlter }}>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Prix appliqué en ordonnance</Text>
+                  <div>
+                    <Text strong style={{ fontSize: 16 }}>
+                      {prixVente ? `${formatMontant(Math.round(prixUnitaire * 100) / 100)} FCFA` : "—"}
+                    </Text>
+                    <Text type="secondary"> / {vendueAuDetail ? (uniteDistribution || "unité").toLowerCase().replace(/s$/, "") : "boîte"}</Text>
+                  </div>
+                </div>
+                {marge !== null && (
+                  <div>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Marge</Text>
+                    <div><Text strong style={{ fontSize: 16 }} type={marge < 0 ? "danger" : undefined}>{marge} %</Text></div>
+                  </div>
+                )}
+              </Flex>
+              {vendueAuDetail && !(qteEmb > 0) && (
+                <Alert
+                  style={{ marginTop: 8 }}
+                  type="warning"
+                  showIcon
+                  message="Renseigner la quantité par emballage pour que les ordonnances facturent le prix à l'unité."
                 />
-              </Tooltip>
-            </Flex>
+              )}
+            </Section>
+          </Col>
+
+          {/* Stock et conservation */}
+          <Col xs={24} xl={12}>
+            <Section icon={<InboxOutlined />} title="Stock et conservation">
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Emplacement" name="emplacement">
+                    <Input placeholder="Ex : Étagère A3" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Réfrigéré" name="refrigere" initialValue={false} valuePropName="checked">
+                    <Switch checkedChildren="Oui" unCheckedChildren="Non" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Quantité de stock minimum" name="qte_stock_mini" initialValue={10} style={{ marginBottom: 0 }}>
+                    <InputNumber min={0} style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Délai de péremption" name="delai_peremtion" initialValue={10} style={{ marginBottom: 0 }}>
+                    <InputNumber min={0} style={{ width: "100%" }} addonAfter="jours" />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Section>
           </Col>
         </Row>
 
-        <Row gutter={30}>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item label="Descriptif" name="descriptif" initialValue="spec">
-              <Radio.Group>
-                <Radio value="spec">Spécialité</Radio>
-                <Radio value="gen">Générique</Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item label="Statut" name="statut" initialValue="payant">
-              <Radio.Group>
-                <Radio value="payant">Payant</Radio>
-                <Radio value="gratuit">Gratuit</Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item label="Unité de Distribution" name="unite_distribution">
-              <Select
-                style={{ width: "100%", background: "transparent" }}
-                showSearch
-                placeholder="Choisir..."
-                optionFilterProp="label"
-                allowClear
-                options={[
-                  { value: "Ampoules buvables", label: "Ampoules buvables" },
-                  { value: "Ampoules injectables", label: "Ampoules injectables" },
-                  { value: "Boîtes", label: "Boîtes" },
-                  { value: "Comprimés", label: "Comprimés" },
-                  { value: "Gélules", label: "Gélules" },
-                  { value: "Matériel", label: "Matériel" },
-                  { value: "Ovules", label: "Ovules" },
-                  { value: "Pommade", label: "Pommade" },
-                  { value: "Sachets", label: "Sachets" },
-                  { value: "Unités", label: "Unités" },
-                ]}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Divider orientation="left">Tarif</Divider>
-        <Row gutter={[24, 24]}>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item label="Prix d'achat" name="prix_achat">
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item label="Prix de vente" name="prix_vente">
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item label="Unité de vente" name="unite_vente">
-              <Select
-                style={{ width: "100%", background: "transparent" }}
-                showSearch
-                placeholder="Choisir..."
-                optionFilterProp="children"
-              //filterOption={(input, option) => option.children[1].toLowerCase().includes(input.toLowerCase())}
-              >
-                {/* {
-                                    pathologiesList.map((item , key)=>(
-                                        <Option key={key}  value={item.code_patho} > {item.libelle_patho} </Option>
-                                    ))
-                                } */}
-                <Option key={"1"} value="Boite">
-                  {" "}
-                  Boite{" "}
-                </Option>
-                <Option key={"2"} value="Comprime">
-                  {" "}
-                  Comprimés{" "}
-                </Option>
-                <Option key={"3"} value="Plaquette">
-                  {" "}
-                  Plaquettes{" "}
-                </Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Divider orientation="left">Autres</Divider>
-        <Row gutter={[24, 24]}>
-          <Col xs={24} sm={12} md={8} lg={6} xl={6}>
-            <Form.Item label="Emplacement" name="emplacement">
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6} xl={6}>
-            <Form.Item label="Refrigéré?" name="refrigere" initialValue={false}>
-              <Radio.Group>
-                <Radio value={true}>Oui</Radio>
-                <Radio value={false}>Non</Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6} xl={6}>
-            <Form.Item
-              label="Quantité stock mini"
-              name="qte_stock_mini"
-              initialValue={10}
-            >
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6} xl={6}>
-            <Form.Item
-              label="Délai péremption (jours)"
-              name="delai_peremtion"
-              initialValue={10}
-            >
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-        </Row>
-        <br />
-        <FormFooter loading={formLoading} htmlType="submit" />
+        {/* Barre d'actions */}
+        <Flex
+          justify="flex-end"
+          gap={8}
+          style={{
+            position: "sticky",
+            bottom: 0,
+            zIndex: 10,
+            padding: "12px 16px",
+            background: colorBgContainer,
+            borderTop: `1px solid ${colorBorderSecondary}`,
+            boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.06)",
+            borderRadius: 8,
+          }}
+        >
+          <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={formLoading}>
+            {isNouveau ? "Créer la fiche produit" : "Enregistrer les modifications"}
+          </Button>
+          <Button danger icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+            Annuler
+          </Button>
+        </Flex>
       </Form>
 
-      {/* <Modal 
-                // styles={{
-                //     header : {
-                //         background : "red"
-                //     }
-                // }}
-                width={1000}
-                title="Liste des produits" 
-                open={open} 
-                onCancel={()=>{
-                    setOpen(false);
-                    //setCurrentRecord(null);
-                }}
-                footer={null}
-                destroyOnClose
-            >
-                <ListProduits />
-            </Modal> */}
-
+      {/* Fenêtres de gestion des référentiels (hors du formulaire) */}
       <Modal
         title="Formes galéniques (unités de prise)"
         width={900}
@@ -560,7 +474,7 @@ function FicheProduit() {
           onRefresh={conditionnementsListRefresh}
         />
       </Modal>
-    </Card>
+    </>
   );
 }
 

@@ -1,6 +1,7 @@
 import {
   ApartmentOutlined,
   AppstoreOutlined,
+  BarChartOutlined,
   CalendarOutlined,
   CarOutlined,
   ClockCircleOutlined,
@@ -24,6 +25,7 @@ import { useNavigate } from "react-router";
 import { ServiceType } from "../types/types.ts";
 import { ItemType, MenuItemType } from "antd/es/menu/interface";
 import { RiStethoscopeLine } from "react-icons/ri";
+import { isMedecinOuAdmin } from "../profils";
 
 function useMenu({ serviceType }: { serviceType: ServiceType }) {
   const [sideBarMenu, setSideBarMenu] = useState<ItemType<MenuItemType>[]>([]);
@@ -133,6 +135,18 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-medical/dossier-accident-travail");
       },
     },
+    // Statistiques : visibles uniquement pour les médecins et les administrateurs
+    ...(isMedecinOuAdmin()
+      ? [{
+          key: "statistiques",
+          icon: <BarChartOutlined />,
+          label: "Statistiques",
+          title: "Statistiques médicales",
+          onClick: () => {
+            navigate("/espace-medical/statistiques");
+          },
+        }]
+      : []),
 
   ];
 

@@ -103,10 +103,10 @@ function DetailsPrescription({
     },
   ];
 
-  // Montant d'une ligne de médicament : quantité servie x tarif unitaire
+  // Montant d'une ligne de médicament : quantité servie x tarif unitaire, arrondi au franc supérieur
   // (un médicament indisponible n'est pas servi, son montant est donc nul)
   const getMontant = (record) =>
-    record?.dispo === "Non" ? 0 : (Number(record?.tarif) || 0) * (Number(record?.qte_servie) || 0);
+    record?.dispo === "Non" ? 0 : Math.ceil((Number(record?.tarif) || 0) * (Number(record?.qte_servie) || 0));
 
   const formatMontantFCFA = (montant) => `${formatMontant(montant)} FCFA`;
 

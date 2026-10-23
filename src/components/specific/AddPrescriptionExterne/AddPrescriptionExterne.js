@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Form, Select, InputNumber, Input, DatePicker, Row, Col, Button, Modal, Space, Tooltip, Typography, Table, message } from "antd";
+import { Form, Select, InputNumber, Input, DatePicker, Row, Col, Button, Flex, Modal, Space, Tag, Tooltip, Typography, Table, message } from "antd";
 import dayjs from "dayjs";
 import Swal from "sweetalert2";
 import useFetch from "../../../utils/hooks/useFetch";
@@ -11,6 +11,7 @@ import DataTable from "../../common/DataTable/DataTable";
 import DeleteButton from "../../common/DeleteButton/DeleteButton";
 import Posologie from "../Posologie/Posologie";
 import AddPatient from "../AddPatient/AddPatient";
+import { getMontantLigne, getPrixUnitaire } from "../../../utils/tarifProduit";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -30,17 +31,41 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
 
     const [medicamentSelected, setMedicamentSelected] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const [conditionnement] = useState("boite");
+    // Unité de distribution du médicament sélectionné (fiche produit)
+    const [conditionnement, setConditionnement] = useState(null);
+    const [qteStock, setQteStock] = useState(0);
     const [posologieButtonStatus, setPosologieButtonStatus] = useState(true);
     const [isPosologieModalVisible, setIsPosologieModalVisible] = useState(false);
     const [medicamentsPrescrits, setMedicamentsPrescrits] = useState([]);
 
-    const totalTarif = medicamentsPrescrits.reduce((acc, acte) => {
-        const produit = (listMedicaments || []).find(
-            (item) => item.code_produit === acte.codeacte,
-        );
-        return acc + (produit?.prix_vente || 0) * (acte.qte || 0);
-    }, 0);
+    const getProduit = (codeacte) => (listMedicaments || []).find((item) => item.code_produit === codeacte);
+
+    // Même règle que l'ordonnance interne : montant de ligne arrondi au franc supérieur
+    const getTarifLigne = (acte) => getMontantLigne(getProduit(acte.codeacte), acte.qte);
+
+    const totalTarif = medicamentsPrescrits.reduce((acc, acte) => acc + getTarifLigne(acte), 0);
+
+    const openPosologie = () => {
+        if (form.getFieldValue("qte_presc") > qteStock || qteStock === 0) {
+            Swal.fire({
+                title: "Avertissement!",
+                text: "Quantité en stock insuffisante",
+                icon: "warning",
+                iconColor: "var(--app-color)",
+                showCancelButton: true,
+                cancelButtonColor: "#d33",
+                cancelButtonText: "Annuler",
+                confirmButtonColor: "var(--app-color)",
+                confirmButtonText: "Poursuivre",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setIsPosologieModalVisible(true);
+                }
+            });
+        } else {
+            setIsPosologieModalVisible(true);
+        }
+    };
 
     const [matriculeToSearch, setMatriculeToSearch] = useState(null);
     const [listBeneficiaires, setListBeneficiaires] = useState([]);
@@ -170,15 +195,10 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
         }
 
         const values = form.getFieldsValue();
-        const listActes = medicamentsPrescrits.map((acte) => {
-            const produit = (listMedicaments || []).find(
-                (item) => item.code_produit === acte.codeacte,
-            );
-            return {
-                ...acte,
-                tarif: produit?.prix_vente,
-            };
-        });
+        const listActes = medicamentsPrescrits.map((acte) => ({
+            ...acte,
+            tarif: getPrixUnitaire(getProduit(acte.codeacte)),
+        }));
         const prescripteur = prescripteursFiltres.find(
             (item) => item.numFourn === values.prescripteur_externe,
         );
@@ -213,14 +233,26 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
     };
 
     return (
+        <>
         <Form
             form={form}
             layout="vertical"
             size="small"
             onFinish={onFinish}
             onValuesChange={(changedValues, values) => {
+                // L'unité de distribution est celle de la fiche du médicament sélectionné
+                const uniteDistribution = getProduit(values.medicament)?.unite_distribution;
+                if ("medicament" in changedValues) {
+                    setConditionnement(uniteDistribution ?? null);
+                    if (!changedValues.medicament) {
+                        setMedicamentSelected(null);
+                        setQteStock(0);
+                    }
+                }
+
                 const requiredFieldsFilled =
                     !!values.medicament &&
+                    !!uniteDistribution &&
                     values.qte_presc !== undefined &&
                     values.qte_presc !== null &&
                     values.qte_presc > 0;
@@ -231,6 +263,9 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                     listMedicaments.forEach((element) => {
                         if (element.code_produit === medicamentCode) {
                             setMedicamentSelected(element);
+                            getActions(`${endpoints.saisie_inventaire.STOCK}/${medicamentCode}`)
+                                .then((response) => setQteStock(response?.data || 0))
+                                .catch(() => setQteStock(0));
                         }
                     });
                 }
@@ -309,17 +344,12 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                         <Select
                             style={{ width: "100%", background: "transparent" }}
                             showSearch
-                            placeholder="Médicament"
-                            optionFilterProp="children"
-                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                            allowClear
+                            placeholder="Rechercher un médicament"
+                            optionFilterProp="label"
                             loading={medicamentsLoading}
-                        >
-                            {(listMedicaments || []).map((item) => (
-                                <Option key={item.code_produit} value={item.code_produit}>
-                                    {item.libelle_produit}
-                                </Option>
-                            ))}
-                        </Select>
+                            options={(listMedicaments || []).map((item) => ({ value: item.code_produit, label: item.libelle_produit }))}
+                        />
                     </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={7} lg={7} xl={7}>
@@ -328,49 +358,58 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                         name="qte_presc"
                         initialValue={1}
                     >
-                        <InputNumber min={1} style={{ width: "100%" }} />
+                        <InputNumber min={1} style={{ width: "100%" }} addonAfter={conditionnement || "unité"} />
                     </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={5} lg={5} xl={5}>
                     <Button
                         type="primary"
+                        block
                         disabled={posologieButtonStatus}
-                        onClick={() => setIsPosologieModalVisible(true)}
+                        onClick={openPosologie}
                     >
                         Posologie
                     </Button>
                 </Col>
             </Row>
+            {medicamentSelected && (
+                <Space wrap size={[12, 4]} style={{ marginBottom: 8 }}>
+                    <Tag color={qteStock <= 0 ? "error" : qteStock < quantity ? "warning" : "success"}>
+                        {qteStock} en stock
+                    </Tag>
+                    <Text type="secondary">Unité de distribution : <Text strong>{conditionnement || "non renseignée"}</Text></Text>
+                    <Text type="secondary">Prix de vente : <Text strong>{formatMontant(medicamentSelected.prix_vente) || "—"}</Text></Text>
+                    {!conditionnement && (
+                        <Text type="danger">Unité de distribution manquante dans la fiche produit : la posologie ne peut pas être ajoutée.</Text>
+                    )}
+                </Space>
+            )}
 
             <Title level={5} style={{ marginTop: 8 }}>Liste des médicaments</Title>
             <DataTable compact
                 dataSourceCopy={medicamentsPrescrits}
                 rowKey={(record) => record.codeacte}
-                scroll={null}
+                // Défilement horizontal seulement si la fenêtre est trop étroite
+                scroll={{ x: 620 }}
                 columns={[
-                    {
-                        title: "Code",
-                        dataIndex: "codeacte",
-                        key: "codeacte",
-                        width: 100,
-                    },
                     {
                         title: "Médicament",
                         dataIndex: "libacte",
                         key: "libacte",
+                        render: (value) => <Text strong style={{ whiteSpace: "normal" }}>{value}</Text>,
                     },
                     {
                         title: "Quantité",
                         dataIndex: "qte",
                         key: "qte",
                         align: "center",
-                        width: 100,
                         render: (value, record) => (
+                            <Flex vertical align="center" gap={2}>
                             <InputNumber
                                 min={1}
                                 size="small"
                                 value={value}
-                                style={{ width: "100%" }}
+                                style={{ width: 72 }}
                                 onChange={(newValue) => {
                                     if (newValue === null) {
                                         return;
@@ -383,30 +422,32 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                                     setMedicamentsPrescrits(newData);
                                 }}
                             />
+                            {record.cond && <Text type="secondary" style={{ fontSize: 12 }}>{record.cond}</Text>}
+                            </Flex>
                         ),
                     },
                     {
                         title: "Posologie",
                         dataIndex: "posologie",
                         key: "posologie",
-                        ellipsis: true,
-                        width: 200,
+                        render: (value) => value
+                            ? <Text style={{ whiteSpace: "normal", fontSize: 12 }}>{value}</Text>
+                            : <Text type="secondary">-</Text>,
                     },
                     {
                         title: "Tarif",
-                        dataIndex: "codeacte",
-                        key: "tarif",
-                        width: 100,
+                        key: "prix_vente",
                         align: "right",
-                        render: (codeacte) => {
-                            const produit = (listMedicaments || []).find(
-                                (item) => item.code_produit === codeacte,
-                            );
-                            return formatMontant(produit?.prix_vente);
-                        },
+                        render: (record) => formatMontant(getProduit(record.codeacte)?.prix_vente),
                     },
                     {
-                        width: 50,
+                        title: "Montant",
+                        key: "montant",
+                        align: "right",
+                        render: (record) => <Text strong>{formatMontant(getTarifLigne(record))}</Text>,
+                    },
+                    {
+                        width: 48,
                         render: (record) => (
                             <Space>
                                 <Tooltip title="Supprimer">
@@ -430,11 +471,12 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                 summary={() => (
                     <Table.Summary fixed>
                         <Table.Summary.Row>
-                            <Table.Summary.Cell index={0} colSpan={4}>
+                            {/* Colonnes : Médicament, Quantité, Posologie, Tarif, Montant, Actions */}
+                            <Table.Summary.Cell index={0} colSpan={4} align="right">
                                 <Text strong>Total</Text>
                             </Table.Summary.Cell>
                             <Table.Summary.Cell index={4} align="right">
-                                <Text strong>{formatMontant(totalTarif)}</Text>
+                                <Text strong style={{ whiteSpace: "nowrap" }}>{formatMontant(totalTarif)} FCFA</Text>
                             </Table.Summary.Cell>
                             <Table.Summary.Cell index={5} />
                         </Table.Summary.Row>
@@ -451,7 +493,9 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                     disabled={medicamentsPrescrits.length === 0 || !numPatient}
                 />
             </div>
+        </Form>
 
+            {/* Modales hors du formulaire : leur validation ne doit pas soumettre la prescription */}
             <Modal
                 style={{ top: 20 }}
                 title="Ajouter la posologie"
@@ -471,6 +515,8 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                     onValidate={() => {
                         form.resetFields(["medicament", "qte_presc"]);
                         setMedicamentSelected(null);
+                        setConditionnement(null);
+                        setQteStock(0);
                         setQuantity(1);
                         setPosologieButtonStatus(true);
                     }}
@@ -494,7 +540,7 @@ const AddPrescriptionExterne = ({ setIsModalVisible, onRefresh }) => {
                     onCreated={applyCreatedPatient}
                 />
             </Modal>
-        </Form>
+        </>
     );
 };
 

@@ -26,6 +26,7 @@ import { FaTruckMedical } from "react-icons/fa6";
 import { FaVirus } from "react-icons/fa";
 import { TbGenderAndrogyne } from "react-icons/tb";
 import { IoMdQrScanner } from "react-icons/io";
+import { PROFILS } from "../../utils/profils";
 
 const { Title } = Typography;
 
@@ -36,6 +37,8 @@ function Home() {
       id: 7,
       label: "Service d'accueil",
       code: codeServices.ACCUEIL,
+      // En plus du personnel de l'accueil : médecins, assistant(e)s et infirmiers
+      profilsAutorises: [PROFILS.MEDECIN, PROFILS.ASSISTANT, PROFILS.INFIRMIER],
       cover: administration_image,
       onClick: () => {
         navigate("/espace-accueil");
@@ -227,7 +230,9 @@ function Home() {
             }}
           />
           <Title level={1} style={{ textAlign: "center" }}>
-            Bienvenue dans votre espace santé
+            Bienvenue{userConnected?.username ? (
+              <> <span style={{ color: "var(--app-color)" }}>{userConnected.username}</span>,</>
+            ) : null} dans votre espace santé
             {/* &nbsp;
             <span style={{ color: "var(--app-color)" }}>
               <Typewriter
@@ -289,7 +294,8 @@ function Home() {
               onClick={item.onClick}
               canAccess={
                 userConnected.code_serv === item.code ||
-                userConnected.role_name === "Admin"
+                userConnected.role_name === "Admin" ||
+                (item.profilsAutorises || []).includes(userConnected.profil)
               }
             />
           ))}

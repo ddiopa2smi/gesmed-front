@@ -26,6 +26,7 @@ import Home from "./pages/Home/Home";
 import Consultations from "./pages/Consultations/Consultations";
 import Visites from "./pages/Visites/Visites";
 import DossierAT from "./pages/DossierAT/DossierAT";
+import StatistiquesMedicales from "./pages/StatistiquesMedicales/StatistiquesMedicales";
 import Privileges from "./pages/Privileges/Privileges";
 import Privilege from "./pages/Privilege/Privilege";
 import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation";
@@ -291,6 +292,11 @@ export const router = createHashRouter(
                 {
                     path: "dossier-accident-travail",
                     element: <DossierAT />
+                },
+                {
+                    // Réservé aux médecins et administrateurs (contrôle dans la page)
+                    path: "statistiques",
+                    element: <StatistiquesMedicales />
                 },
                 {
                     path: "*",

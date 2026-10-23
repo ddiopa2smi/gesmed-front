@@ -1,73 +1,71 @@
 import {
-  Breadcrumb,
+  Avatar,
   Button,
+  Card,
   Col,
+  DatePicker,
+  Dropdown,
+  Empty,
+  Flex,
   Form,
   Input,
-  Radio,
-  Flex,
-  Tooltip,
+  InputNumber,
+  Modal,
   Row,
   Select,
-  Typography,
-  Upload,
   Space,
-  DatePicker,
-  Card,
-  Calendar,
-  InputNumber,
-  Checkbox,
-  message,
-  Divider,
-  Modal,
-  TreeSelect,
-  Tag,
-  Dropdown,
   Table,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
+  theme,
 } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  DownOutlined,
+  MedicineBoxOutlined,
+  PlusOutlined,
+  PrinterOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router";
-import { HomeOutlined } from "@ant-design/icons";
 import { getActions, postActions } from "../../actions/actions";
 import { endpoints } from "../../constants/endpoints.constants";
-import {
-  codesPrescriptions,
-  operationTypes,
-} from "../../constants/app.constants";
-import { Link } from "react-router-dom";
-import FormFooter from "../../components/common/FormFooter/FormFooter";
+import { LOGO_BROWN } from "../../constants/app.constants";
 import DataTable from "../../components/common/DataTable/DataTable";
 import useFetch from "../../utils/hooks/useFetch";
 import Posologie from "../../components/specific/Posologie/Posologie";
 import { deletePopup, printPDF, formatMontant } from "../../utils/helpers";
 import BackButton from "../../components/common/BackButton/BackButton";
-import PrintButton from "../../components/common/PrintButton/PrintButton";
 import DeleteButton from "../../components/common/DeleteButton/DeleteButton";
 import Swal from "sweetalert2";
-import { render } from "@testing-library/react";
-const { Search } = Input;
-const { TextArea } = Input;
-const { Option } = Select;
-const { Dragger } = Upload;
+import { getMontantLigne, getPrixUnitaire } from "../../utils/tarifProduit";
+
 const { Title, Text } = Typography;
+
+// Anciennes prescriptions : code de conditionnement ; nouvelles : unité de distribution du médicament
+const conditionnements = [
+  { value: "boite", libelle: "Boîte(s)" },
+  { value: "plaquette", libelle: "Plaquette(s)" },
+  { value: "comprime", libelle: "Comprimé(s)" },
+  { value: "unite", libelle: "Unité(s)" },
+];
 
 const Ordonnance = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const { token: { colorPrimary, colorFillAlter, colorBgContainer, colorBorderSecondary } } = theme.useToken();
   const currentPatient = JSON.parse(sessionStorage.getItem("currentPatient"));
   const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
-  //const initConsultation  = JSON.parse(sessionStorage.getItem("initConsultation"));
   const prescription = JSON.parse(sessionStorage.getItem("prescription"));
   const editPrescription = JSON.parse(
     sessionStorage.getItem("editPrescription"),
   );
-  // console.log(prescription)
-  // console.log(editPrescription)
   const [formLoading, setFormLoading] = useState(false);
-  const [operationType, setOperationType] = useState("add");
-  //const [listMedicaments , setListMedicaments] = useState([]);
+  const [operationType] = useState("add");
   const [medicamentSelected, setMedicamentSelected] = useState(null);
   const [medicamentsPrescrites, setMedicamentsPrescrites] = useState(
     editPrescription?.listActes || [],
@@ -78,28 +76,22 @@ const Ordonnance = () => {
   const [conditionnement, setConditionnement] = useState(null);
   const [isPrintDisabled, setIsPrintDisabled] = useState(true);
   const [numCons, setNumCons] = useState(null);
-  //const [selectMedicamentsListLoading , setSelectMedicamentsListLoading ] = useState(false);
-
-  const conditionnements = [
-    {
-      value: "boite",
-      libelle: "Boîte(s)",
-    },
-    {
-      value: "plaquette",
-      libelle: "Plaquette(s)",
-    },
-    {
-      value: "comprime",
-      libelle: "Comprimé(s)",
-    },
-    {
-      value: "unite",
-      libelle: "Unité(s)",
-    },
-
-  ];
   const [qteStock, setQteStock] = useState(0);
+
+  const medicamentsFetched = useFetch(endpoints.fiche_produit.LIST);
+  const listMedicaments = medicamentsFetched.data;
+  const selectMedicamentsListLoading = medicamentsFetched.isLoading;
+
+  const getProduit = (codeacte) => listMedicaments.find((item) => item.code_produit === codeacte);
+
+  // Montant d'une ligne arrondi au franc supérieur (règle commune, cf. utils/tarifProduit)
+  const getTarifLigne = (acte) => getMontantLigne(getProduit(acte.codeacte), acte.qte);
+
+  const totalTarif = medicamentsPrescrites.reduce(
+    (acc, acte) => acc + getTarifLigne(acte),
+    0,
+  );
+
   const save = () => {
     form
       .validateFields(["datepresc"])
@@ -107,15 +99,10 @@ const Ordonnance = () => {
         const values = form.getFieldsValue();
         switch (operationType) {
           case "add":
-            const listActes = medicamentsPrescrites.map((acte) => {
-              const produit = listMedicaments.find(
-                (item) => item.code_produit === acte.codeacte,
-              );
-              return {
-                ...acte,
-                tarif: getPrixUnitaire(produit),
-              };
-            });
+            const listActes = medicamentsPrescrites.map((acte) => ({
+              ...acte,
+              tarif: getPrixUnitaire(getProduit(acte.codeacte)),
+            }));
             const payload = {
               datepresc:
                 editPrescription?.datepresc ||
@@ -144,17 +131,12 @@ const Ordonnance = () => {
                 .finally(() => {
                   setFormLoading(false);
                   form.resetFields();
-                  //navigate(-1);
                 });
-              //setMedicamentsPrescrites([]);
             } else {
               message.warning(
                 "Veuillez svp renseigner la posologie de ce médicament, cliquer le boutton posologie ci-dessous pour l'ajouter",
               );
             }
-
-            break;
-          case "update":
             break;
           default:
             break;
@@ -165,50 +147,14 @@ const Ordonnance = () => {
       });
   };
 
-  // const getListMedicaments = () => {
-  //     setSelectMedicamentsListLoading(true);
-  //     getActions(`${endpoints.actes.list}?codeacte=06`)
-  //     .then((response)=>{
-  //         setListMedicaments(response.data);
-  //         setSelectMedicamentsListLoading(false);
-  //     })
-  // }
-
-  //const medicamentsFetched = useFetch(`${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ORD}`);
-  const medicamentsFetched = useFetch(endpoints.fiche_produit.LIST);
-  const listMedicaments = medicamentsFetched.data;
-  const selectMedicamentsListLoading = medicamentsFetched.isLoading;
-
-  // Prix unitaire d'un produit : le prix de vente pour les produits distribués en boîtes,
-  // sinon (prix de vente / quantité d'emballage) arrondi au franc supérieur.
-  // Sans quantité d'emballage renseignée, on retombe sur le prix de vente.
-  const getPrixUnitaire = (produit) => {
-    const prixVente = produit?.prix_vente || 0;
-    if (produit?.unite_distribution !== "Boîtes" && produit?.qte_emb > 0) {
-      return Math.ceil(prixVente / produit.qte_emb);
-    }
-    return prixVente;
-  };
-
-  const getTarifLigne = (acte) => {
-    const produit = listMedicaments.find(
-      (item) => item.code_produit === acte.codeacte,
-    );
-    return getPrixUnitaire(produit) * (acte.qte || 0);
-  };
-
-  const totalTarif = medicamentsPrescrites.reduce(
-    (acc, acte) => acc + getTarifLigne(acte),
-    0,
-  );
-
   useEffect(() => {
     if (editPrescription === null) {
       setIsPrintDisabled(true);
     } else if (editPrescription?.listActes?.length !== 0) {
       setIsPrintDisabled(false);
     }
-  }, [editPrescription]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getQteStock = async (id) => {
     const response = await getActions(
@@ -219,373 +165,348 @@ const Ordonnance = () => {
 
   useEffect(() => {
     form.setFieldValue("qte_pres", qteStock);
-  }, [qteStock]);
-  return (
-    <Card>
-      <Flex align="flex-start" justify="space-between">
-        <BackButton />
-      </Flex>
-      <br />
+  }, [qteStock, form]);
 
-      <Flex align="center" justify="space-between">
-        <Title level={4}>
-          Prescription ordonnance du patient N° {currentPatient.num_patient} /{" "}
-          {currentPatient.prenom_patient} {currentPatient.nom_patient}{" "}
-        </Title>
+  const openPosologie = () => {
+    if (
+      form.getFieldValue("qte_presc") > form.getFieldValue("qte_pres") ||
+      form.getFieldValue("qte_pres") === 0
+    ) {
+      Swal.fire({
+        title: "Avertissement!",
+        text: "Quantité en stock insuffisante",
+        icon: "warning",
+        iconColor: "var(--app-color)",
+        showCancelButton: true,
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Annuler",
+        confirmButtonColor: "var(--app-color)",
+        confirmButtonText: "Poursuivre",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setIsModalVisible(true);
+        }
+      });
+    } else {
+      setIsModalVisible(true);
+    }
+  };
 
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: "1",
-                label: (
-                  <span
-                    onClick={() => {
-                      printPDF(
-                        `/api/Print/smed/Prescription/${numCons}/ordonnance`,
-                      );
-                    }}
-                  >
-                    Imprimer ordonnance
-                  </span>
-                ),
-              },
-              {
-                key: "2",
-                label: (
-                  <span
-                    onClick={() => {
-                      printPDF(
-                        `/api/Print/smed/Prescription/${numCons}/ordonnance_Ticket`,
-                      );
-                    }}
-                  >
-                    Format ticket
-                  </span>
-                ),
-              },
-            ],
-          }}
-          trigger={["click"]}
-        >
-          <Button type="primary" disabled={isPrintDisabled}>
-            Imprimer
-          </Button>
-        </Dropdown>
-      </Flex>
+  const stockColor = !medicamentSelected ? "default" : qteStock <= 0 ? "error" : qteStock < quantity ? "warning" : "success";
+  const initials = `${currentPatient?.prenom_patient?.[0] || ""}${currentPatient?.nom_patient?.[0] || ""}`.toUpperCase();
 
-      <br />
-
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={save}
-        onValuesChange={(changedValues, values) => {
-          // L'unité de distribution est celle de la fiche du médicament sélectionné
-          const uniteDistribution = (listMedicaments || []).find(
-            (element) => element.code_produit === values.medicament,
-          )?.unite_distribution;
-          if ("medicament" in changedValues) {
-            form.setFieldValue("cond", uniteDistribution);
-            setConditionnement(uniteDistribution ?? null);
-          }
-
-          const requiredFieldsFilled =
-            !!values.datepresc &&
-            !!values.medicament &&
-            !!uniteDistribution &&
-            values.qte_presc !== undefined &&
-            values.qte_presc !== null &&
-            values.qte_presc > 0;
-          setPosologieButtonStatus(!requiredFieldsFilled);
-
-          if (changedValues.medicament) {
-            const medicamentCode = changedValues.medicament;
-            listMedicaments.forEach((element) => {
-              if (element.code_produit === medicamentCode) {
-                setMedicamentSelected(element);
-                getQteStock(medicamentCode).then((response) => {
-                  setQteStock(response?.data);
-                });
-              }
-            });
-          }
-
-          if (changedValues.medicament_suggere) {
-            const medicamentCode = changedValues.medicament_suggere;
-            form.setFieldValue("medicament", medicamentCode);
-          }
-
-          if (changedValues.qte_presc) {
-            setQuantity(changedValues.qte_presc);
-          }
-        }}
-      >
-        <Row gutter={[24, 24]} align={"middle"}>
-          <Col xs={24} sm={24} md={8} lg={4} xl={4}>
-            <Form.Item
-              label="Date Ordonnance"
-              name="datepresc"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
-              initialValue={dayjs(new Date())}
-            >
-              <DatePicker format="DD/MM/YYYY" />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Médicament"
-              name="medicament"
-            >
-              <Select
-                style={{ width: "100%", background: "transparent" }}
-                showSearch
-                placeholder="Médicament"
-                optionFilterProp="children"
-                filterOption={(input, option) => {
-                  return option.children
-                    .toLowerCase()
-                    .includes(input.toLowerCase());
-                }}
-                loading={selectMedicamentsListLoading}
-              >
-                {listMedicaments.map((item, index) => (
-                  <Option key={index} value={item.code_produit}>
-                    {item.libelle_produit}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          {/* {medicamentSelected && qteStock === 0 ? (
-            <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-              <Form.Item
-                label={`Suggestion famille des ${medicamentSelected.libelle_famille}`}
-                name="medicament_suggere"
-                rules={[
-                  {
-                    required: true,
-                    message: "Champ obligatoire",
-                  },
-                ]}
-              >
-                <Select
-                  style={{ width: "100%", background: "transparent" }}
-                  showSearch
-                  placeholder="Médicament"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children[1]
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                >
-                  {listMedicaments
-                    .filter((item) => {
-                      return (
-                        item.famille === medicamentSelected.famille &&
-                        item.code_produit !== medicamentSelected.code_produit
-                        // && item.qte_stock_th > 0
-                      );
-                    })
-                    .map((item) => (
-                      <Option
-                        key={item.code_produit}
-                        value={item.code_produit}
-                        disabled={item.qte_stock_th === 0}
-                      >
-                        {item.libelle_produit}{" "}
-                        <Tag
-                          color={item.qte_stock_th > 0 ? "success" : "error"}
-                        >
-                          {item.qte_stock_th}
-                        </Tag>
-                      </Option>
-                    ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          ) : null} */}
-
-          {/* <Col xs={24} sm={24} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Quantité en stock"
-              name="qte_stock"
-              rules={[
-                {
-                  required: true,
-                  message: "Champ obligatoire",
-                },
-              ]}
-              initialValue={1}
-            >
-              <InputNumber min={1} /> 
-            </Form.Item>
-          </Col> */}
-          <Col xs={24} sm={24} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Qte stock"
-              name="qte_pres"
-              initialValue={0}
-            >
-              <InputNumber min={0} disabled />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={[24, 24]} align={"middle"}>
-          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Unité de Distribution  "
-              name="cond"
-            >
-              <Input readOnly placeholder="Unité de Distribution" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Qte à prescrire"
-              name="qte_presc"
-              initialValue={editPrescription?.qte_presc || 1}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={4} lg={4} xl={4}>
-            <Button
-              type="primary"
-              disabled={posologieButtonStatus}
-              onClick={() => {
-                //console.log(form.getFieldValue("qte_pres"));
-
-                if (
-                  form.getFieldValue("qte_presc") >
-                  form.getFieldValue("qte_pres") ||
-                  form.getFieldValue("qte_pres") === 0
-                ) {
-                  Swal.fire({
-                    title: "Avertissement!",
-                    text: "Quantité en stock insuffisante",
-                    icon: "warning",
-                    iconColor: "var(--app-color)",
-                    showCancelButton: true,
-                    cancelButtonColor: "#d33",
-                    cancelButtonText: "Annuler",
-                    confirmButtonColor: "var(--app-color)",
-                    confirmButtonText: "Poursuivre",
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-                      setIsModalVisible(true);
-                    }
-                  });
-                } else {
-                  setIsModalVisible(true);
+  const columns = [
+    {
+      title: "Médicament",
+      dataIndex: "libacte",
+      key: "libacte",
+      render: (value) => <Text strong style={{ whiteSpace: "normal" }}>{value}</Text>,
+    },
+    {
+      title: "Quantité",
+      key: "qte",
+      align: "center",
+      render: (record) => (
+        <Text strong>
+          {record.qte}{" "}
+          <Text type="secondary" style={{ fontWeight: 400 }}>
+            {conditionnements.find((item) => item.value === record.cond)?.libelle ?? record.cond}
+          </Text>
+        </Text>
+      ),
+    },
+    {
+      title: "Posologie",
+      dataIndex: "posologie",
+      key: "posologie",
+      render: (value) => value || <Text type="secondary">-</Text>,
+    },
+    {
+      title: "Tarif Produit",
+      key: "prix_vente",
+      align: "right",
+      render: (record) => formatMontant(getProduit(record.codeacte)?.prix_vente),
+    },
+    {
+      title: "Montant",
+      key: "tarif",
+      align: "right",
+      render: (record) => <Text strong>{formatMontant(getTarifLigne(record))}</Text>,
+    },
+    {
+      width: 60,
+      align: "center",
+      render: (record) => (
+        <Tooltip title="Retirer">
+          <DeleteButton
+            onDelete={() => {
+              deletePopup().then((response) => {
+                if (response?.isConfirmed) {
+                  setMedicamentsPrescrites(
+                    medicamentsPrescrites.filter((element) => element.codeacte !== record.codeacte),
+                  );
                 }
+              });
+            }}
+          />
+        </Tooltip>
+      ),
+    },
+  ];
+  // Position de la colonne Montant, pour placer le total juste en dessous
+  const montantIndex = columns.findIndex((column) => column.key === "tarif");
+
+  return (
+    <>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={save}
+      onValuesChange={(changedValues, values) => {
+        // L'unité de distribution est celle de la fiche du médicament sélectionné
+        const uniteDistribution = (listMedicaments || []).find(
+          (element) => element.code_produit === values.medicament,
+        )?.unite_distribution;
+        if ("medicament" in changedValues) {
+          form.setFieldValue("cond", uniteDistribution);
+          setConditionnement(uniteDistribution ?? null);
+        }
+
+        const requiredFieldsFilled =
+          !!values.datepresc &&
+          !!values.medicament &&
+          !!uniteDistribution &&
+          values.qte_presc !== undefined &&
+          values.qte_presc !== null &&
+          values.qte_presc > 0;
+        setPosologieButtonStatus(!requiredFieldsFilled);
+
+        if (changedValues.medicament) {
+          const medicamentCode = changedValues.medicament;
+          listMedicaments.forEach((element) => {
+            if (element.code_produit === medicamentCode) {
+              setMedicamentSelected(element);
+              getQteStock(medicamentCode).then((response) => {
+                setQteStock(response?.data);
+              });
+            }
+          });
+        } else if ("medicament" in changedValues) {
+          setMedicamentSelected(null);
+          setQteStock(0);
+        }
+
+        if (changedValues.qte_presc) {
+          setQuantity(changedValues.qte_presc);
+        }
+      }}
+    >
+      {/* En-tête : patient + date + impression */}
+      <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 20 } }}>
+        <Flex justify="space-between" align="center" wrap gap={16}>
+          <Flex align="center" gap={16} wrap>
+            <BackButton />
+            <Avatar size={56} style={{ backgroundColor: colorPrimary, fontSize: 20, fontWeight: 600 }}>
+              {initials}
+            </Avatar>
+            <div>
+              <Text style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: colorPrimary }}>
+                <MedicineBoxOutlined /> Prescription ordonnance
+              </Text>
+              <Title level={4} style={{ margin: 0, color: LOGO_BROWN }}>
+                {currentPatient?.prenom_patient} {currentPatient?.nom_patient}
+              </Title>
+              <Space size={8} wrap>
+                <Text strong>N° {currentPatient?.num_patient}</Text>
+                {(editPrescription?.numcons || prescription?.numcons) && (
+                  <Tag color="processing">Consultation {editPrescription?.numcons || prescription?.numcons}</Tag>
+                )}
+              </Space>
+            </div>
+          </Flex>
+
+          <Flex align="flex-end" gap={12} wrap>
+            <Form.Item
+              label="Date de l'ordonnance"
+              name="datepresc"
+              rules={[{ required: true, message: "Champ obligatoire" }]}
+              initialValue={dayjs(new Date())}
+              style={{ marginBottom: 0 }}
+            >
+              <DatePicker format="DD/MM/YYYY" allowClear={false} />
+            </Form.Item>
+            <Dropdown
+              disabled={isPrintDisabled}
+              trigger={["click"]}
+              menu={{
+                items: [
+                  { key: "1", label: "Imprimer l'ordonnance", onClick: () => printPDF(`/api/Print/smed/Prescription/${numCons}/ordonnance`) },
+                  { key: "2", label: "Format ticket", onClick: () => printPDF(`/api/Print/smed/Prescription/${numCons}/ordonnance_Ticket`) },
+                ],
               }}
             >
-              Posologie
-            </Button>
+              <Tooltip title={isPrintDisabled ? "Disponible après l'enregistrement de l'ordonnance" : ""}>
+                <Button icon={<PrinterOutlined />} disabled={isPrintDisabled}>
+                  Imprimer <DownOutlined style={{ fontSize: 10 }} />
+                </Button>
+              </Tooltip>
+            </Dropdown>
+          </Flex>
+        </Flex>
+      </Card>
+
+      {/* Ajout d'un médicament */}
+      <Card
+        size="small"
+        title={<Space style={{ color: colorPrimary }}><PlusOutlined /><span>Ajouter un médicament</span></Space>}
+        style={{ marginBottom: 16 }}
+      >
+        <Row gutter={16} align="bottom">
+          <Col xs={24} lg={11}>
+            <Form.Item label="Médicament" name="medicament">
+              <Select
+                showSearch
+                allowClear
+                size="large"
+                placeholder="Rechercher un médicament"
+                optionFilterProp="label"
+                loading={selectMedicamentsListLoading}
+                options={listMedicaments.map((item) => ({ value: item.code_produit, label: item.libelle_produit }))}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={12} lg={5}>
+            <Form.Item label="Quantité à prescrire" name="qte_presc" initialValue={editPrescription?.qte_presc || 1}>
+              <InputNumber
+                min={1}
+                size="large"
+                style={{ width: "100%" }}
+                addonAfter={conditionnement || "unité"}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={12} lg={4}>
+            <Form.Item label="Stock disponible">
+              <Tag color={stockColor} style={{ fontSize: 14, padding: "6px 12px", margin: 0 }}>
+                {medicamentSelected ? `${qteStock} en stock` : "—"}
+              </Tag>
+            </Form.Item>
+          </Col>
+          <Col xs={24} lg={4}>
+            <Form.Item>
+              <Button
+                type="primary"
+                size="large"
+                block
+                icon={<PlusOutlined />}
+                disabled={posologieButtonStatus}
+                onClick={openPosologie}
+              >
+                Posologie
+              </Button>
+            </Form.Item>
           </Col>
         </Row>
-        <br />
 
-        <Title level={5}>Liste des médicaments</Title>
-        <DataTable compact
-          dataSourceCopy={medicamentsPrescrites}
-          rowKey={(record) => record.codeacte}
-          columns={[
-            {
-              title: "Code",
-              dataIndex: "codeacte",
-              key: "codeacte",
-            },
-            {
-              title: "Médicament",
-              dataIndex: "libacte",
-              key: "libacte",
-            },
-            {
-              title: "Quantité",
-              dataIndex: "qte",
-              key: "qte",
-              align: "center",
-            },
-            {
-              title: "Unité de distribution",
-              dataIndex: "cond",
-              key: "cond",
-              render: (text, record) => {
-                // Anciennes prescriptions : code de conditionnement ; nouvelles : unité de distribution du médicament
-                return (
-                  conditionnements.find((item) => item.value === record.cond)?.libelle ?? record.cond
-                );
-              },
-            },
-            {
-              title: "Posologie",
-              dataIndex: "posologie",
-              key: "posologie",
-            },
-            {
-              title: "Montant",
-              key: "tarif",
-              align: "right",
-              render: (record) => formatMontant(getTarifLigne(record)),
-            },
-            {
-              width: "auto",
-              render: (record) => (
-                <Space>
-                  <Tooltip title="Supprimer">
-                    <DeleteButton
-                      onDelete={() => {
-                        deletePopup().then((response) => {
-                          if (response?.isConfirmed) {
-                            const temp = medicamentsPrescrites.filter(
-                              (element) => element.codeacte !== record.codeacte,
-                            );
-                            setMedicamentsPrescrites(temp);
-                          }
-                        });
-                      }}
-                    />
-                  </Tooltip>
-                </Space>
-              ),
-            },
-          ]}
-          summary={() => (
-            <Table.Summary fixed>
-              <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={5}>
-                  <Text strong>Total</Text>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={5} align="right">
-                  <Text strong>{formatMontant(totalTarif)}</Text>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={6} />
-              </Table.Summary.Row>
-            </Table.Summary>
-          )}
-        />
+        {medicamentSelected && (
+          <Flex gap={16} wrap style={{ padding: "8px 12px", borderRadius: 8, background: colorFillAlter }}>
+            <Text type="secondary">Unité de distribution : <Text strong>{conditionnement || "non renseignée"}</Text></Text>
+            <Text type="secondary">Prix de vente : <Text strong>{formatMontant(medicamentSelected.prix_vente) || "—"}</Text></Text>
+            {medicamentSelected.libelle_famille && (
+              <Text type="secondary">Famille : <Text strong>{medicamentSelected.libelle_famille}</Text></Text>
+            )}
+            {!conditionnement && (
+              <Text type="danger">Unité de distribution manquante dans la fiche produit : la posologie ne peut pas être ajoutée.</Text>
+            )}
+          </Flex>
+        )}
 
-        <br />
+        {/* Champs techniques conservés pour le calcul et l'enregistrement */}
+        <Form.Item name="cond" hidden><Input /></Form.Item>
+        <Form.Item name="qte_pres" initialValue={0} hidden><InputNumber /></Form.Item>
+      </Card>
 
-        <FormFooter
-          onCancel={() => {
-            navigate(-1);
-          }}
-          htmlType={"submit"}
-          loading={formLoading}
-          disabled={medicamentsPrescrites.length === 0}
-        />
-      </Form>
+      {/* Médicaments prescrits */}
+      <Card
+        size="small"
+        title={
+          <Space style={{ color: colorPrimary }}>
+            <MedicineBoxOutlined />
+            <span>Médicaments prescrits</span>
+            <Tag style={{ marginInlineEnd: 0 }}>{medicamentsPrescrites.length}</Tag>
+          </Space>
+        }
+        style={{ marginBottom: 16 }}
+      >
+        {medicamentsPrescrites.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="Aucun médicament : choisissez un médicament puis renseignez sa posologie."
+          />
+        ) : (
+          <DataTable
+            compact
+            hideTotal
+            dataSourceCopy={medicamentsPrescrites}
+            rowKey={(record) => record.codeacte}
+            columns={columns}
+            pagination={false}
+            summary={() => (
+              <Table.Summary fixed>
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0} colSpan={montantIndex} align="right">
+                    <Text strong>Total</Text>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={montantIndex} align="right">
+                    <Text strong style={{ fontSize: 15 }}>{formatMontant(totalTarif)}</Text>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={montantIndex + 1} />
+                </Table.Summary.Row>
+              </Table.Summary>
+            )}
+          />
+        )}
+      </Card>
 
+      {/* Barre d'actions */}
+      <Flex
+        justify="space-between"
+        align="center"
+        wrap
+        gap={12}
+        style={{
+          position: "sticky",
+          bottom: 0,
+          zIndex: 10,
+          padding: "12px 16px",
+          background: colorBgContainer,
+          borderTop: `1px solid ${colorBorderSecondary}`,
+          boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.06)",
+          borderRadius: 8,
+        }}
+      >
+        <Text>
+          Total de l'ordonnance : <Text strong style={{ fontSize: 18, color: LOGO_BROWN }}>{formatMontant(totalTarif) || 0} FCFA</Text>
+        </Text>
+        <Space>
+          <Button
+            type="primary"
+            htmlType="submit"
+            icon={<SaveOutlined />}
+            loading={formLoading}
+            disabled={medicamentsPrescrites.length === 0}
+          >
+            Enregistrer l'ordonnance
+          </Button>
+          <Button danger icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+            Annuler
+          </Button>
+        </Space>
+      </Flex>
+    </Form>
+
+      {/* Hors du formulaire principal : la soumission du formulaire de posologie
+          ne doit pas déclencher l'enregistrement de l'ordonnance */}
       <Modal
         style={{ top: 20 }}
         title="Ajouter la posologie"
@@ -614,7 +535,7 @@ const Ordonnance = () => {
           }}
         />
       </Modal>
-    </Card>
+    </>
   );
 };
 

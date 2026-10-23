@@ -1,75 +1,112 @@
 import { useState } from "react";
 import {
-    Modal,
+    Alert,
+    Avatar,
     Button,
     Card,
+    Checkbox,
     Col,
     DatePicker,
+    Empty,
+    Flex,
     Form,
+    Input,
+    Modal,
     Row,
+    Space,
+    Tag,
+    Tooltip,
     Typography,
     message,
-    Space,
-    Tooltip,
-    Spin,
-    Flex,
-    Tree,
-    Checkbox,
-    Descriptions,
-    Collapse,
+    theme,
 } from "antd";
+import {
+    CloseOutlined,
+    ExperimentOutlined,
+    FileSearchOutlined,
+    MedicineBoxOutlined,
+    SaveOutlined,
+    SearchOutlined,
+    SettingOutlined,
+    UndoOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router";
 import { postActions } from "../../../actions/actions";
 import { endpoints } from "../../../constants/endpoints.constants";
 import useFetch from "../../../utils/hooks/useFetch";
-import { codesPrescriptions } from "../../../constants/app.constants";
-import FormFooter from "../../common/FormFooter/FormFooter";
-import { deletePopup } from "../../../utils/helpers";
-import { DeleteOutlined } from "@ant-design/icons";
-import DataTable from "../../common/DataTable/DataTable";
-import AddAnalyse from "../AddAnalyse/AddAnalyse";
+import { codesPrescriptions, LOGO_BROWN } from "../../../constants/app.constants";
 import BackButton from "../../common/BackButton/BackButton";
-import SearchBar from "../../common/SearchBar/SearchBar";
-import NotSpecified from "../../common/NotSpecified/NotSpecified";
 import GestionActes from "../GestionActes/GestionActes";
 import { TypePrescription } from "../../../utils/types/types.ts";
-import AddImagerie from "../AddImagerie/AddImagerie";
 
 const { Title, Text } = Typography;
+
+// Paramètres propres à chaque type de prescription
+const CONFIG_PAR_TYPE = {
+    [TypePrescription.ANALYSE]: {
+        codepresc: codesPrescriptions.ANA,
+        catalogueUrl: `${endpoints.actes.LIST}?codeacte=${codesPrescriptions.ANA}`,
+        singulier: "analyse", pluriel: "analyses", titre: "Prescription d'analyses",
+        selectionTitre: "Analyses sélectionnées", categorieParDefaut: "Autres",
+        icon: <ExperimentOutlined />, gestionActes: true, feminin: true,
+    },
+    [TypePrescription.IMAGERIE]: {
+        codepresc: codesPrescriptions.IMG,
+        catalogueUrl: `${endpoints.actes.LIST}?codeacte=${codesPrescriptions.IMG}`,
+        singulier: "imagerie", pluriel: "imageries", titre: "Prescription d'imagerie",
+        selectionTitre: "Imageries sélectionnées", categorieParDefaut: "Autres",
+        icon: <FileSearchOutlined />, gestionActes: true, feminin: true,
+    },
+    [TypePrescription.INFIRMERIE]: {
+        codepresc: codesPrescriptions.INF,
+        catalogueUrl: endpoints.prescriptionsActes.LIST,
+        singulier: "soin", pluriel: "soins", titre: "Prescription de soins infirmiers",
+        selectionTitre: "Soins sélectionnés", categorieParDefaut: "Soins infirmiers",
+        icon: <MedicineBoxOutlined />, gestionActes: false, feminin: false,
+    },
+};
+
+const normalize = (value) =>
+    String(value || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 function Prescription({
     typePrescription
 }) {
     const navigate = useNavigate();
+    const { token: { colorPrimary, colorPrimaryBg, colorPrimaryBorder, colorFillAlter, colorBgContainer, colorBorderSecondary } } = theme.useToken();
     const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
     const prescription = JSON.parse(sessionStorage.getItem("prescription"));
     const editPrescription = JSON.parse(
         sessionStorage.getItem("editPrescription")
     );
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const currentPatient = JSON.parse(sessionStorage.getItem("currentPatient"));
+    const config = CONFIG_PAR_TYPE[typePrescription] || CONFIG_PAR_TYPE[TypePrescription.ANALYSE];
+    const libelle = config;
+
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
-    const [operationType, setOperationType] = useState("add");
-
-    const [checkKeys, setCheckKeys] = useState(
-        (editPrescription?.listActes || []).map((item) => item?.codeacte)
-    );
+    const [recherche, setRecherche] = useState("");
+    const [categorieActive, setCategorieActive] = useState(null);
+    const [isGestionActesModalOpen, setIsGestionActesModalOpen] = useState(false);
 
     const [actesPrescrites, setActesPrescrites] = useState(
         editPrescription?.listActes || []
     );
-    const currentPatient = JSON.parse(sessionStorage.getItem("currentPatient"));
+    const checkKeys = actesPrescrites.map((item) => item?.codeacte);
 
-    const [isGestionActesModalOpen, setIsGestionActesModalOpen] = useState(false);
-
+    const { data, onRefresh: refreshCatalogue } = useFetch(config.catalogueUrl);
 
     const save = () => {
         form
             .validateFields()
             .then((values) => {
+                if (actesPrescrites.length === 0) {
+                    message.warning(`Veuillez sélectionner les ${libelle.pluriel} à prescrire`);
+                    return;
+                }
                 const payload = {
-                    codepresc: editPrescription?.codepresc || (typePrescription === TypePrescription.ANALYSE ? codesPrescriptions.ANA : codesPrescriptions.IMG),
+                    codepresc: editPrescription?.codepresc || config.codepresc,
                     datepresc:
                         editPrescription?.datepresc ||
                         new Date(values.datepresc).toISOString(),
@@ -81,354 +118,311 @@ function Prescription({
                     numcons: editPrescription?.numcons || prescription?.numcons,
                     numpresc: editPrescription?.numpresc || null,
                 };
-                if (actesPrescrites.length !== 0) {
-                    postActions(endpoints.prescriptions.ADD, payload).then(() => {
-                        setLoading(false);
-                        message.success("Opération effectuée avec succès");
+                setLoading(true);
+                postActions(endpoints.prescriptions.ADD, payload)
+                    .then(() => {
+                        message.success("Prescription enregistrée avec succès");
                         setActesPrescrites([]);
+                        form.resetFields();
+                        navigate(-1);
+                    })
+                    .finally(() => {
+                        setLoading(false);
                     });
-                } else {
-                    message.warning(
-                        "Veuillez  sélectionner les actes à prescrire"
-                    );
-                }
-                form.resetFields();
-                navigate(-1);
             })
             .catch((info) => {
                 console.log("Validate Failed:", info);
-            })
-            .finally(() => {
-                setLoading(false);
             });
     };
 
-    const { data, dataCopy, setDataCopy, isLoading, onRefresh } = useFetch(
-        `${endpoints.actes.LIST}?codeacte=${typePrescription === TypePrescription.ANALYSE ? codesPrescriptions.ANA : codesPrescriptions.IMG}`
+    // Catalogue regroupé par catégorie, filtré par la recherche et la catégorie choisie
+    const catalogue = (data || []).filter((item) =>
+        !recherche || normalize(`${item.libacte} ${item.codeacte} ${item.categorie || ""} ${item.description || ""}`).includes(normalize(recherche))
     );
+    const categories = Object.entries(
+        (data || []).reduce((acc, item) => {
+            const categorie = item?.categorie || config.categorieParDefaut;
+            acc[categorie] = (acc[categorie] || 0) + 1;
+            return acc;
+        }, {})
+    ).sort(([a], [b]) => (a.toUpperCase() === "AUTRES" ? 1 : b.toUpperCase() === "AUTRES" ? -1 : a.localeCompare(b)));
 
-    const prescriptionsParCategorie = (dataCopy || []).reduce((acc, item) => {
-        const categorie = item?.categorie || "Autres";
-        if (!acc[categorie]) {
-            acc[categorie] = [];
-        }
-        acc[categorie].push(item);
-        return acc;
-    }, {});
+    const groupes = Object.entries(
+        catalogue.reduce((acc, item) => {
+            const categorie = item?.categorie || config.categorieParDefaut;
+            if (!categorieActive || categorie === categorieActive) {
+                (acc[categorie] = acc[categorie] || []).push(item);
+            }
+            return acc;
+        }, {})
+    ).sort(([a], [b]) => (a.toUpperCase() === "AUTRES" ? 1 : b.toUpperCase() === "AUTRES" ? -1 : a.localeCompare(b)));
 
-    const infosPatient = [
-        {
-            key: "1",
-            label: "Infos patient",
-            children: (
-                <div>
-                    <Descriptions
-                        column={3}
-                        layout="horizontal"
-                    >
-                        <Descriptions.Item label="Matricule">
-                            {currentPatient?.num_patient || <NotSpecified />}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Nom">
-                            {currentPatient?.nom_patient || <NotSpecified />}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Prénom">
-                            {currentPatient?.prenom_patient || <NotSpecified />}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Sexe">
-                            {currentPatient?.sexe_patient || <NotSpecified />}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Age">
-                            {`${currentPatient?.age_patient} an(s)` || <NotSpecified />}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Groupe sanguin">
-                            {currentPatient?.group_sanguin || <NotSpecified />}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Diagnostic">
-                            {prescription?.diagnostic || <NotSpecified />}
-                        </Descriptions.Item>
-                    </Descriptions>
-                </div>
-            ),
-        },
-    ];
+    const toggleActe = (acte, checked) => {
+        setActesPrescrites((prev) =>
+            checked
+                ? (prev.some((item) => item.codeacte === acte.codeacte) ? prev : [...prev, acte])
+                : prev.filter((item) => item.codeacte !== acte.codeacte)
+        );
+    };
 
-    const analysesColumns = [
-        {
-            title: "Code",
-            dataIndex: "codeacte",
-            key: "codeacte",
-        },
-        {
-            title: "Analyse",
-            dataIndex: "libacte",
-            key: "libacte",
-        },
-        {
-            title: "Quantité",
-            dataIndex: "qte",
-            key: "qte",
-        },
-        {
-            title: "Motif",
-            dataIndex: "observation",
-            key: "observation",
-        },
-        {
-            width: "auto",
-            render: (record) => (
-                <Space>
-                    <Tooltip title="Supprimer">
-                        <Button
-                            type="link"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => {
-                                deletePopup().then((response) => {
-                                    if (response.isConfirmed) {
-                                        const temp = actesPrescrites.filter(
-                                            (element) => element.codeacte !== record.codeacte
-                                        );
-                                        setActesPrescrites(temp);
-                                        setCheckKeys((prev) => prev.filter((key) => key !== record.codeacte));
-                                    }
-                                });
-                            }}
-                        />
-                    </Tooltip>
-                </Space>
-            ),
-        },
-    ];
+    const nbSelectionnesDans = (items) => items.filter((item) => checkKeys.includes(item.codeacte)).length;
 
-    const imageriesColumns = [
-        {
-            title: "Code",
-            dataIndex: "codeacte",
-            key: "codeacte",
-        },
-        {
-            title: "Imagerie",
-            dataIndex: "libacte",
-            key: "libacte",
-        },
-        {
-            title: "Quantité",
-            dataIndex: "qte",
-            key: "qte",
-        },
-        {
-            title: "Motif",
-            dataIndex: "motifImagerie",
-            key: "motifImagerie",
-        },
-        {
-            width: "auto",
-            render: (record) => (
-                <Space>
-                    <Tooltip title="Supprimer">
-                        <Button
-                            type="link"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => {
-                                deletePopup().then((response) => {
-                                    if (response.isConfirmed) {
-                                        const temp = actesPrescrites.filter(
-                                            (element) => element.codeacte !== record.codeacte
-                                        );
-                                        setActesPrescrites(temp);
-                                        setCheckKeys((prev) => prev.filter((key) => key !== record.codeacte));
-                                    }
-                                });
-                            }}
-                        />
-                    </Tooltip>
-                </Space>
-            ),
-        },
-    ];
+    const initials = `${currentPatient?.prenom_patient?.[0] || ""}${currentPatient?.nom_patient?.[0] || ""}`.toUpperCase();
+    const isFemme = currentPatient?.sexe_patient === "FE";
+    const diagnostic = editPrescription?.diagnostic || prescription?.diagnostic;
 
     return (
-        <Card >
-            <Flex align="flex-start" justify="space-between">
-                <BackButton />
-            </Flex>
-            <br />
-
-            <Title level={4}>
-                Prescription {typePrescription === TypePrescription.ANALYSE ? "Analyse" : "Imagerie"}
-            </Title>
-
-            <Collapse items={infosPatient} defaultActiveKey={["1"]} />
-
-
-            <Form form={form} layout="vertical" onFinish={save}>
-                <Row gutter={[24, 24]} align={"stretch"} style={{ display: "none" }} >
-                    <Col xs={24} sm={24} md={6} lg={6} xl={6}>
-                        <Form.Item
-                            label={typePrescription === TypePrescription.ANALYSE ? "Date Analyse" : "Date Imagerie"}
-                            name="datepresc"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Champ obligatoire",
-                                },
-                            ]}
-                            initialValue={dayjs(new Date())}
-                        >
-                            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <br />
-                <Card title="Sélectionner les actes à prescrire"
-                    extra={
-                        <Space>
-                            <SearchBar
-                                data={data}
-                                setDataCopy={setDataCopy}
-                                listKeys={["codeacte", "libacte", "categorie"]}
-                            />
-                            <Button
-                                type="primary"
-                                onClick={() => {
-                                    setIsGestionActesModalOpen(true);
-                                }}
-                            >
-                                Gérer
-                            </Button>
-                        </Space>
-                    }
-                    actions={[
-                        <Flex style={{ width: "100%", padding: "0 16px" }} justify="flex-end" >
-                            <Space>
-                                <Button
-                                    type="primary"
-                                    danger
-                                    onClick={() => {
-                                        setCheckKeys([]);
-                                        setActesPrescrites([]);
-                                    }}
-                                    disabled={checkKeys.length === 0}
-                                >
-                                    Réinitialiser
-                                </Button>
+        <>
+        <Form form={form} layout="vertical" onFinish={save}>
+            {/* En-tête : patient + diagnostic */}
+            <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 20 } }}>
+                <Flex justify="space-between" align="center" wrap gap={16}>
+                    <Flex align="center" gap={16} wrap>
+                        <BackButton />
+                        <Avatar size={56} style={{ backgroundColor: isFemme ? "#eb2f96" : colorPrimary, fontSize: 20, fontWeight: 600 }}>
+                            {initials}
+                        </Avatar>
+                        <div>
+                            <Text style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: colorPrimary }}>
+                                {libelle.icon} {libelle.titre}
+                            </Text>
+                            <Title level={4} style={{ margin: 0, color: LOGO_BROWN }}>
+                                {currentPatient?.prenom_patient} {currentPatient?.nom_patient}
+                            </Title>
+                            <Space size={8} wrap>
+                                <Text strong>N° {currentPatient?.num_patient}</Text>
+                                {currentPatient?.sexe_patient && (
+                                    <Tag color={isFemme ? "magenta" : "blue"}>{isFemme ? "Féminin" : "Masculin"}</Tag>
+                                )}
+                                {currentPatient?.age_patient !== undefined && currentPatient?.age_patient !== null && (
+                                    <Tag>{currentPatient.age_patient} ans</Tag>
+                                )}
+                                {currentPatient?.group_sanguin && <Tag color="red">Groupe {currentPatient.group_sanguin}</Tag>}
+                                {(editPrescription?.numcons || prescription?.numcons) && (
+                                    <Tag color="processing">Consultation {editPrescription?.numcons || prescription?.numcons}</Tag>
+                                )}
                             </Space>
-                        </Flex>
-                    ]}
-                >
-
-                    <Row gutter={[24, 24]} align={"stretch"}>
-                        {Object.entries(prescriptionsParCategorie)
-                            .sort(([a], [b]) => {
-                                if (a === "Autres") return 1;
-                                if (b === "Autres") return -1;
-                                return 0;
-                            })
-                            .map(([categorie, items]) => {
-                                const codesCategorie = items.map((item) => item?.codeacte);
-                                return (
-                                    <Col xs={24} sm={12} md={6} lg={6} xl={6} key={categorie}>
-                                        <Text strong>{categorie}</Text>
-                                        <br />
-                                        <br />
-                                        <Checkbox.Group
-                                            style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px" }}
-                                            value={checkKeys.filter((key) => codesCategorie.includes(key))}
-                                            options={items.map((item) => {
-                                                return {
-                                                    value: item?.codeacte,
-                                                    label: item?.libacte,
-                                                };
-                                            })}
-                                            onChange={(values) => {
-                                                const previousInCategorie = checkKeys.filter((key) => codesCategorie.includes(key));
-                                                const added = values.filter((key) => !previousInCategorie.includes(key));
-                                                const removed = previousInCategorie.filter((key) => !values.includes(key));
-
-                                                setCheckKeys((prev) => [
-                                                    ...prev.filter((key) => !codesCategorie.includes(key)),
-                                                    ...values,
-                                                ]);
-
-                                                setActesPrescrites((prev) => {
-                                                    const updated = prev.filter((item) => !removed.includes(item.codeacte));
-                                                    added.forEach((code) => {
-                                                        const acte = items.find((item) => item.codeacte === code);
-                                                        if (acte && !updated.some((item) => item.codeacte === code)) {
-                                                            updated.push(acte);
-                                                        }
-                                                    });
-                                                    return updated;
-                                                });
-                                            }}
-                                        />
-                                    </Col>
-                                );
-                            })}
-                    </Row>
-
-                </Card>
-                <br />
-                <Title level={5}>Liste des {typePrescription === TypePrescription.ANALYSE ? "analyses" : "imageries"}</Title>
-                <DataTable compact
-                    dataSourceCopy={actesPrescrites}
-                    columns={typePrescription === TypePrescription.ANALYSE ? analysesColumns : imageriesColumns}
+                        </div>
+                    </Flex>
+                    {/* Date de prescription : renseignée automatiquement */}
+                    <Form.Item
+                        name="datepresc"
+                        rules={[{ required: true, message: "Champ obligatoire" }]}
+                        initialValue={dayjs(new Date())}
+                        hidden
+                    >
+                        <DatePicker />
+                    </Form.Item>
+                </Flex>
+                <Alert
+                    style={{ marginTop: 16 }}
+                    type={diagnostic ? "info" : "warning"}
+                    showIcon
+                    message={
+                        diagnostic
+                            ? <span>Diagnostic : <Text strong>{diagnostic}</Text></span>
+                            : "Aucun diagnostic renseigné pour cette consultation"
+                    }
                 />
+            </Card>
 
-                <FormFooter
-                    loading={loading}
-                    onCancel={() => {
-                        navigate(-1);
-                    }}
-                    htmlType="submit"
-                />
-            </Form>
+            <Row gutter={16}>
+                {/* Catalogue des actes */}
+                <Col xs={24} xl={16}>
+                    <Card
+                        size="small"
+                        title={<Space style={{ color: colorPrimary }}>{libelle.icon}<span>Choisir les {libelle.pluriel}</span></Space>}
+                        extra={config.gestionActes && (
+                            <Tooltip title="Gérer le catalogue des actes">
+                                <Button icon={<SettingOutlined />} onClick={() => setIsGestionActesModalOpen(true)}>
+                                    Gérer
+                                </Button>
+                            </Tooltip>
+                        )}
+                        style={{ marginBottom: 16 }}
+                    >
+                        <Input
+                            size="large"
+                            allowClear
+                            prefix={<SearchOutlined />}
+                            placeholder={`Rechercher ${libelle.feminin ? "une" : "un"} ${libelle.singulier} (nom, code${categories.length > 1 ? ", catégorie" : ""})`}
+                            value={recherche}
+                            onChange={(e) => setRecherche(e.target.value)}
+                            style={{ marginBottom: 12 }}
+                        />
 
-            <Modal
-                title={"Ajouter une nouvelle prescription"}
-                footer={null}
-                open={isModalVisible}
-                onCancel={() => {
-                    setIsModalVisible(false);
+                        {/* Filtre rapide par catégorie (inutile s'il n'y a qu'une catégorie) */}
+                        {categories.length > 1 && <Flex wrap gap={6} style={{ marginBottom: 16 }}>
+                            <Tag.CheckableTag checked={!categorieActive} onChange={() => setCategorieActive(null)}>
+                                Toutes ({(data || []).length})
+                            </Tag.CheckableTag>
+                            {categories.map(([categorie, count]) => (
+                                <Tag.CheckableTag
+                                    key={categorie}
+                                    checked={categorieActive === categorie}
+                                    onChange={(checked) => setCategorieActive(checked ? categorie : null)}
+                                >
+                                    {categorie} ({count})
+                                </Tag.CheckableTag>
+                            ))}
+                        </Flex>}
+
+                        {groupes.length === 0 ? (
+                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Aucun acte ne correspond à la recherche" />
+                        ) : (
+                            <Row gutter={[16, 16]}>
+                                {groupes.map(([categorie, items]) => {
+                                    const nbSelection = nbSelectionnesDans(items);
+                                    return (
+                                        <Col xs={24} md={groupes.length === 1 ? 24 : 12} xxl={groupes.length === 1 ? 24 : 8} key={categorie}>
+                                            <div style={{ border: `1px solid ${colorBorderSecondary}`, borderRadius: 8, height: "100%" }}>
+                                                <Flex
+                                                    justify="space-between"
+                                                    align="center"
+                                                    style={{ padding: "8px 12px", background: colorFillAlter, borderRadius: "8px 8px 0 0" }}
+                                                >
+                                                    <Text strong style={{ fontSize: 12, letterSpacing: 0.3 }}>{categorie}</Text>
+                                                    {nbSelection > 0 && <Tag color="processing" style={{ marginInlineEnd: 0 }}>{nbSelection}</Tag>}
+                                                </Flex>
+                                                <Flex vertical gap={2} style={{ padding: 8 }}>
+                                                    {items.map((item) => {
+                                                        const checked = checkKeys.includes(item.codeacte);
+                                                        return (
+                                                            <Checkbox
+                                                                key={item.codeacte}
+                                                                checked={checked}
+                                                                onChange={(e) => toggleActe(item, e.target.checked)}
+                                                                style={{
+                                                                    padding: "4px 6px",
+                                                                    borderRadius: 6,
+                                                                    background: checked ? colorPrimaryBg : undefined,
+                                                                    marginInlineStart: 0,
+                                                                }}
+                                                            >
+                                                                <span style={{ fontWeight: checked ? 600 : 400 }}>{item.libacte}</span>
+                                                                {item.description && !item.libacte?.includes(item.description) && (
+                                                                    <div><Text type="secondary" style={{ fontSize: 12 }}>{item.description}</Text></div>
+                                                                )}
+                                                            </Checkbox>
+                                                        );
+                                                    })}
+                                                </Flex>
+                                            </div>
+                                        </Col>
+                                    );
+                                })}
+                            </Row>
+                        )}
+                    </Card>
+                </Col>
+
+                {/* Sélection en cours */}
+                <Col xs={24} xl={8}>
+                    <Card
+                        size="small"
+                        title={
+                            <Space style={{ color: colorPrimary }}>
+                                <span>{config.selectionTitre}</span>
+                                <Tag color={actesPrescrites.length ? "processing" : "default"} style={{ marginInlineEnd: 0 }}>
+                                    {actesPrescrites.length}
+                                </Tag>
+                            </Space>
+                        }
+                        extra={
+                            <Button
+                                size="small"
+                                type="text"
+                                danger
+                                icon={<UndoOutlined />}
+                                disabled={actesPrescrites.length === 0}
+                                onClick={() => setActesPrescrites([])}
+                            >
+                                Tout retirer
+                            </Button>
+                        }
+                        style={{ position: "sticky", top: 16, marginBottom: 16, borderColor: actesPrescrites.length ? colorPrimaryBorder : undefined }}
+                    >
+                        {actesPrescrites.length === 0 ? (
+                            <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description={`Cochez les ${libelle.pluriel} dans le catalogue`}
+                            />
+                        ) : (
+                            <Flex vertical gap={6}>
+                                {actesPrescrites.map((acte) => (
+                                    <Flex
+                                        key={acte.codeacte}
+                                        justify="space-between"
+                                        align="center"
+                                        style={{ padding: "6px 10px", borderRadius: 6, background: colorFillAlter }}
+                                    >
+                                        <div style={{ lineHeight: 1.3, minWidth: 0 }}>
+                                            <Text strong ellipsis={{ tooltip: acte.libacte }}>{acte.libacte}</Text>
+                                            <div>
+                                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                                    {acte.codeacte}
+                                                    {(acte.observation || acte.motifImagerie) && ` · ${acte.observation || acte.motifImagerie}`}
+                                                </Text>
+                                            </div>
+                                        </div>
+                                        <Tooltip title="Retirer">
+                                            <Button size="small" type="text" danger icon={<CloseOutlined />} onClick={() => toggleActe(acte, false)} />
+                                        </Tooltip>
+                                    </Flex>
+                                ))}
+                            </Flex>
+                        )}
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Barre d'actions */}
+            <Flex
+                justify="space-between"
+                align="center"
+                wrap
+                gap={12}
+                style={{
+                    position: "sticky",
+                    bottom: 0,
+                    zIndex: 10,
+                    padding: "12px 16px",
+                    background: colorBgContainer,
+                    borderTop: `1px solid ${colorBorderSecondary}`,
+                    boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.06)",
+                    borderRadius: 8,
                 }}
-                destroyOnClose
             >
-                {typePrescription === TypePrescription.ANALYSE ?
-                    <AddAnalyse
-                        setIsModalVisible={setIsModalVisible}
-                        analysesPrescrites={actesPrescrites}
-                        setAnalysesPrescrites={setActesPrescrites}
-                        listAnalyses={dataCopy}
-                    /> :
-                    <AddImagerie
-                        setIsModalVisible={setIsModalVisible}
-                        imageriesPrescrites={actesPrescrites}
-                        setImageriesPrescrites={setActesPrescrites}
-                        listImageries={dataCopy}
-                    />}
-            </Modal>
+                <Text>
+                    <Text strong style={{ fontSize: 16 }}>{actesPrescrites.length}</Text>{" "}
+                    {actesPrescrites.length > 1 ? libelle.pluriel : libelle.singulier}{" "}
+                    {libelle.feminin ? "sélectionnée" : "sélectionné"}{actesPrescrites.length > 1 ? "s" : ""}
+                </Text>
+                <Space>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        icon={<SaveOutlined />}
+                        loading={loading}
+                        disabled={actesPrescrites.length === 0}
+                    >
+                        Enregistrer la prescription
+                    </Button>
+                    <Button danger icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+                        Annuler
+                    </Button>
+                </Space>
+            </Flex>
+        </Form>
 
-
+            {/* Hors du formulaire principal pour ne pas déclencher l'enregistrement de la prescription */}
             <Modal
                 title="Gestion des actes"
-
                 style={{ top: 20 }}
                 styles={{
-                    header: { padding: "12px 24px", },
-                    footer: { padding: "12px 24px" },
-                    content: {
-                        margin: 0,
-                        padding: 0,
-                        borderRadius: "8px 8px 8px 8px",
-                        overflow: "hidden"
-                    },
                     body: {
                         overflow: "auto",
-                        minHeight: "50vh",
                         maxHeight: "80vh",
-                        padding: "12px 24px",
                     },
                 }}
                 width={1000}
@@ -436,6 +430,8 @@ function Prescription({
                 open={isGestionActesModalOpen}
                 onCancel={() => {
                     setIsGestionActesModalOpen(false);
+                    // Le catalogue a pu changer (ajout, modification, suppression d'actes)
+                    refreshCatalogue();
                 }}
                 destroyOnClose
             >
@@ -443,9 +439,7 @@ function Prescription({
                     typePrescription={typePrescription}
                 />
             </Modal>
-
-
-        </Card>
+        </>
     );
 }
 
