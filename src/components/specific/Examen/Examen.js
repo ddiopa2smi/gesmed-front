@@ -34,6 +34,7 @@ import { postActions } from "../../../actions/actions";
 import { endpoints } from "../../../constants/endpoints.constants";
 import FormFooter from "../../common/FormFooter/FormFooter";
 import { aspectsUrinesOptions } from "../../../constants/app.constants";
+import { RESULTATS_TDR, tdrInitialValues } from "../../../utils/tdr";
 
 const { Text } = Typography;
 
@@ -135,7 +136,7 @@ function Examen({ setOpen, currentRecord, defaultExamPayload, onRefresh }) {
       zone_oedemes: zones.values,
       zone_oedemes_autre: zones.autre,
       date_regle: payload.date_regle ? dayjs(payload.date_regle) : undefined,
-      test_tdr: payload.test_tdr || "negatif",
+      ...tdrInitialValues(payload),
     };
   }, [defaultExamPayload]);
 
@@ -150,6 +151,7 @@ function Examen({ setOpen, currentRecord, defaultExamPayload, onRefresh }) {
   const regles = Form.useWatch("regles", form);
   const reglesDouloureuses = Form.useWatch("regles_douloureuses", form);
   const obesite = Form.useWatch("obesite", form);
+  const testTdr = Form.useWatch("test_tdr", form);
 
   const imc = computeImc(poids, taille);
   const imcCategory = imc ? getImcCategory(imc) : null;
@@ -174,6 +176,13 @@ function Examen({ setOpen, currentRecord, defaultExamPayload, onRefresh }) {
           muqueuse: serializeMultiChoice(values.muqueuse, muqueuse_autre),
           zone_oedemes: values.oedemes === true ? serializeMultiChoice(values.zone_oedemes, zone_oedemes_autre) : null,
           date_regle: values.date_regle ? dayjs(values.date_regle).toISOString() : null,
+          // TDR : "Oui"/"Non" + résultat seulement si le test a été réalisé (ancien format converti)
+          ...(hasFievre
+            ? {
+              test_tdr: values.test_tdr || "Non",
+              resultat_test_tdr: values.test_tdr === "Oui" ? values.resultat_test_tdr : null,
+            }
+            : tdrInitialValues(defaultExamPayload)),
         };
 
         postActions(endpoints.consultations.SAVE, payload)
@@ -284,18 +293,29 @@ function Examen({ setOpen, currentRecord, defaultExamPayload, onRefresh }) {
             showIcon
             message={`Température ${temp} °C supérieure à ${SEUIL_FIEVRE} °C : un TDR est à réaliser`}
             description={
-              <Form.Item
-                label="Résultat du TDR"
-                name="test_tdr"
-                rules={[{ required: true, message: "Veuillez choisir un résultat" }]}
-                style={{ marginTop: 8, marginBottom: 0 }}
-              >
-                <Radio.Group optionType="button" buttonStyle="solid">
-                  <Radio value="positif">Positif</Radio>
-                  <Radio value="negatif">Négatif</Radio>
-                  <Radio value="invalide">Invalide (à refaire)</Radio>
-                </Radio.Group>
-              </Form.Item>
+              <Flex wrap gap={24} style={{ marginTop: 8 }}>
+                <Form.Item
+                  label="TDR réalisé ?"
+                  name="test_tdr"
+                  initialValue="Non"
+                  style={{ marginBottom: 0 }}
+                >
+                  <Radio.Group>
+                    <Radio value="Oui">Oui</Radio>
+                    <Radio value="Non">Non</Radio>
+                  </Radio.Group>
+                </Form.Item>
+                {testTdr === "Oui" && (
+                  <Form.Item
+                    label="Résultat du TDR"
+                    name="resultat_test_tdr"
+                    rules={[{ required: true, message: "Veuillez choisir un résultat" }]}
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Radio.Group optionType="button" buttonStyle="solid" options={RESULTATS_TDR.map(({ value, label }) => ({ value, label }))} />
+                  </Form.Item>
+                )}
+              </Flex>
             }
           />
         )}

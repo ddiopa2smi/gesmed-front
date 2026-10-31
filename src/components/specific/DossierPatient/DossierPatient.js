@@ -11,6 +11,7 @@ import {
   Dropdown,
   Empty,
   Flex,
+  Modal,
   Row,
   Space,
   Tabs,
@@ -38,6 +39,7 @@ import {
   FileTextOutlined,
   FolderOpenOutlined,
   IdcardOutlined,
+  LockOutlined,
   MailOutlined,
   MedicineBoxOutlined,
   PhoneOutlined,
@@ -51,6 +53,9 @@ import { codesPrescriptions, LOGO_BROWN } from "../../../constants/app.constants
 import EditObservationPatient from "../EditObservationPatient/EditObservationPatient";
 import { ServiceType } from "../../../utils/types/types.ts";
 import UploadResultatModal from "../../common/UploadResultatModal/UploadResultatModal.js";
+import PrescriptionApercu, { getTypePrescription } from "../PrescriptionApercu/PrescriptionApercu";
+import { DELAI_CLOTURE_AUTO_HEURES, estClotureAuto, estConsultationCloturee, heuresAvantClotureAuto } from "../../../utils/clotureConsultation";
+import { ouvrirCertificatMedical } from '../CertificatMedical/CertificatMedical';
 
 const { Title, Text } = Typography;
 
@@ -78,7 +83,7 @@ const InfoItem = ({ icon, label, value }) => (
 
 function DossierPatient({ serviceType }) {
   const userConnected = JSON.parse(sessionStorage.getItem("userConnected"));
-  const { token: { colorPrimary, colorPrimaryBg, colorPrimaryBorder, colorFillAlter, colorBorderSecondary } } = theme.useToken();
+  const { token: { colorPrimary, colorPrimaryBg, colorPrimaryBorder, colorTextQuaternary } } = theme.useToken();
 
   const { getColumnSearchProps } = useSearch();
   const navigate = useNavigate();
@@ -90,6 +95,12 @@ function DossierPatient({ serviceType }) {
     React.useState(false);
 
   const [numPrescription, setNumPrescription] = React.useState(null);
+
+  // Prescription affichée dans la modale d'aperçu
+  const [prescriptionOuverte, setPrescriptionOuverte] = React.useState(null);
+
+  // Onglet de l'historique (piloté aussi par les tuiles de synthèse)
+  const [ongletActif, setOngletActif] = React.useState("consultations");
 
   const handleUploadResultatModal = (numPresc) => {
     setIsUploadResultatModalVisible(true);
@@ -194,7 +205,22 @@ function DossierPatient({ serviceType }) {
 
   const onDeleteConsultation = (record) => { };
 
-  const onEditPrescription = (record, prescriptionType) => { };
+  const onEditPrescription = (record) => {
+    setPrescriptionOuverte(record);
+  };
+
+  // Modification d'une prescription non servie (ajout d'un médicament oublié...) : réouvre l'écran
+  // de prescription en mode édition (editPrescription), qui renvoie le numpresc existant à l'API
+  const onModifierPrescription = (record, route) => {
+    sessionStorage.setItem("editPrescription", JSON.stringify(record));
+    sessionStorage.setItem("prescription", JSON.stringify({
+      codepresc: record.codepresc,
+      numcons: record.numcons,
+      diagnostic: record.diagnostic,
+    }));
+    sessionStorage.setItem("currentPatient", JSON.stringify(patient));
+    navigate(`/espace-medical/patients/dossier/prescriptions/${route}`);
+  };
 
   const onDeletePrescription = (record) => {
     deletePopup().then((result) => {
@@ -243,6 +269,70 @@ function DossierPatient({ serviceType }) {
   const prescriptionsByType = (code) => listPrescription.filter((element) => element.codepresc === code);
   const derniereConsultation = listConsultation[0];
 
+  // Ancienneté de la dernière consultation, en jours
+  const joursDepuis = derniereConsultation?.datecons
+    ? Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(derniereConsultation.datecons).setHours(0, 0, 0, 0)) / 86400000)
+    : null;
+  const libelleAnciennete = joursDepuis === null ? null
+    : joursDepuis <= 0 ? "Aujourd'hui"
+      : joursDepuis === 1 ? "Hier"
+        : `Il y a ${joursDepuis} jours`;
+
+  // Nombre de prescriptions d'un type encore en attente
+  const enAttente = (code) => prescriptionsByType(code).filter((p) => p.isdone !== "Oui").length;
+  const detailPrescriptions = (code, libelle) => {
+    const total = prescriptionsByType(code).length;
+    if (!total) return `Aucune ${libelle}`;
+    const attente = enAttente(code);
+    return attente ? `${attente} en attente` : "Toutes traitées";
+  };
+
+  const syntheses = [
+    {
+      label: "Dernière consultation",
+      value: derniereConsultation ? formatDate(derniereConsultation.datecons) : "Aucune",
+      detail: derniereConsultation
+        ? [libelleAnciennete, derniereConsultation.medecin].filter(Boolean).join(" · ")
+        : "Aucune consultation enregistrée",
+      icon: <CalendarOutlined />,
+      color: LOGO_BROWN,
+      onglet: "consultations",
+      large: true,
+    },
+    {
+      label: "Consultations",
+      value: listConsultation.length,
+      detail: `${listConsultation.filter((c) => c.medecin).length} validée(s)`,
+      icon: <ProfileOutlined />,
+      color: colorPrimary,
+      onglet: "consultations",
+    },
+    {
+      label: "Ordonnances",
+      value: prescriptionsByType(codesPrescriptions.ORD).length,
+      detail: detailPrescriptions(codesPrescriptions.ORD, "ordonnance"),
+      icon: <MedicineBoxOutlined />,
+      color: "#52c41a",
+      onglet: codesPrescriptions.ORD,
+    },
+    {
+      label: "Analyses",
+      value: prescriptionsByType(codesPrescriptions.ANA).length,
+      detail: detailPrescriptions(codesPrescriptions.ANA, "analyse"),
+      icon: <ExperimentOutlined />,
+      color: "#722ed1",
+      onglet: codesPrescriptions.ANA,
+    },
+    {
+      label: "Imageries",
+      value: prescriptionsByType(codesPrescriptions.IMG).length,
+      detail: detailPrescriptions(codesPrescriptions.IMG, "imagerie"),
+      icon: <FileSearchOutlined />,
+      color: "#fa8c16",
+      onglet: codesPrescriptions.IMG,
+    },
+  ];
+
   /* ---------------- Colonnes ---------------- */
 
   const consultationColumns = [
@@ -277,6 +367,34 @@ function DossierPatient({ serviceType }) {
     { title: "Poids", dataIndex: "poids", key: "poids", sorter: (a, b) => a.poids - b.poids, render: (v) => (v ? `${v} kg` : "-") },
     { title: "Taille", dataIndex: "taille", key: "taille", sorter: (a, b) => a.taille - b.taille, render: (v) => (v ? `${v} cm` : "-") },
     {
+      title: "Statut",
+      key: "statut",
+      align: "center",
+      render: (record) => {
+        if (estConsultationCloturee(record)) {
+          const auto = estClotureAuto(record);
+          return (
+            <Tooltip title={auto
+              ? `Clôturée automatiquement ${DELAI_CLOTURE_AUTO_HEURES} h après la consultation`
+              : record.date_cloture ? `Clôturée le ${formatDateTime(record.date_cloture)}` : "Clôturée par le médecin"}>
+              <Tag icon={<LockOutlined />} color="success" style={{ marginInlineEnd: 0 }}>
+                {auto ? "Clôturée (auto)" : "Clôturée"}
+              </Tag>
+            </Tooltip>
+          );
+        }
+        if (record.medecin) {
+          const heures = heuresAvantClotureAuto(record);
+          return (
+            <Tooltip title={heures !== null ? `Clôture automatique dans ${heures} h si elle n'est pas clôturée avant` : ""}>
+              <Tag color="processing" style={{ marginInlineEnd: 0 }}>En cours</Tag>
+            </Tooltip>
+          );
+        }
+        return <Tag color="warning" style={{ marginInlineEnd: 0 }}>Non démarrée</Tag>;
+      },
+    },
+    {
       fixed: "right",
       render: (record) => (
         <Space size={0}>
@@ -300,7 +418,7 @@ function DossierPatient({ serviceType }) {
                 trigger={["click"]}
                 menu={{
                   items: [
-                    { key: "1", label: "Certificat médical", onClick: () => printPDF(`/api/Print/smed/Consultation/${record.numcons}/certificat`) },
+                    { key: "1", label: "Certificat médical", onClick: () => ouvrirCertificatMedical(record.numcons) },
                     { key: "2", label: "Bulletin de visite", disabled: true },
                     { key: "3", label: "Certificat d'aptitude", disabled: true },
                     { key: "4", label: "Certificat de reprise", disabled: true },
@@ -312,7 +430,8 @@ function DossierPatient({ serviceType }) {
               </Dropdown>
             </>
           )}
-          {record.medecin === userConnected?.username && (
+          {/* Modifiable par son médecin tant qu'elle n'est pas clôturée */}
+          {record.medecin === userConnected?.username && !estConsultationCloturee(record) && (
             <>
               <EditButton onEdit={() => onEditConsultation(record)} />
               <DeleteButton onDelete={() => onDeleteConsultation(record)} />
@@ -372,7 +491,8 @@ function DossierPatient({ serviceType }) {
         fixed: "right",
         render: (record) => (
           <Space size={0}>
-            {record?.medecin !== null && (
+            {/* Une prescription déjà servie / réalisée ne se réimprime pas */}
+            {record?.medecin !== null && record?.isdone !== "Oui" && (
               <Dropdown
                 trigger={["click"]}
                 menu={{
@@ -387,7 +507,13 @@ function DossierPatient({ serviceType }) {
                 </Tooltip>
               </Dropdown>
             )}
-            <EditButton onEdit={() => onEditPrescription(record, config.print)} />
+            <Tooltip title="Voir la prescription">
+              <Button type="text" style={{ color: colorPrimary }} icon={<EyeOutlined />} onClick={() => onEditPrescription(record)} />
+            </Tooltip>
+            {/* Modifiable tant qu'elle n'est pas servie / réalisée (contrôlé aussi par l'API) */}
+            {record?.isdone !== "Oui" && (
+              <EditButton onEdit={() => onModifierPrescription(record, config.print)} />
+            )}
             <DeleteButton onDelete={() => onDeletePrescription(record)} />
             {config.withResultat && (
               <Tooltip title="Charger le résultat">
@@ -563,35 +689,63 @@ function DossierPatient({ serviceType }) {
         </Col>
       </Row>
 
-      {/* Synthèse */}
+      {/* Synthèse : un clic sur une tuile ouvre l'onglet correspondant de l'historique */}
       <Row gutter={[16, 16]}>
-        {[
-          { label: "Dernière consultation", value: derniereConsultation ? formatDate(derniereConsultation.datecons) : "Aucune" },
-          { label: "Consultations", value: listConsultation.length },
-          { label: "Ordonnances", value: prescriptionsByType(codesPrescriptions.ORD).length },
-          { label: "Analyses", value: prescriptionsByType(codesPrescriptions.ANA).length },
-          { label: "Imageries", value: prescriptionsByType(codesPrescriptions.IMG).length },
-        ].map((item) => (
-          <Col key={item.label} xs={12} md={8} xl={item.label === "Dernière consultation" ? 8 : 4}>
-            <div
-              style={{
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: colorFillAlter,
-                border: `1px solid ${colorBorderSecondary}`,
-              }}
-            >
-              <Text type="secondary" style={{ fontSize: 12 }}>{item.label}</Text>
-              <div style={{ fontSize: 20, fontWeight: 600 }}>{item.value}</div>
-            </div>
-          </Col>
-        ))}
+        {syntheses.map((item) => {
+          const actif = item.onglet && ongletActif === item.onglet;
+          return (
+            <Col key={item.label} xs={24} sm={12} md={8} xl={item.large ? 8 : 4}>
+              <Card
+                hoverable={!!item.onglet}
+                onClick={item.onglet ? () => setOngletActif(item.onglet) : undefined}
+                styles={{ body: { padding: "14px 16px" } }}
+                style={{
+                  height: "100%",
+                  borderTop: `3px solid ${item.color}`,
+                  background: actif ? `${item.color}14` : undefined,
+                  borderColor: actif ? item.color : undefined,
+                }}
+              >
+                <Flex align="center" gap={12}>
+                  <Avatar size={46} icon={item.icon} style={{ backgroundColor: `${item.color}22`, color: item.color, flexShrink: 0 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <Text type="secondary" style={{ fontSize: 13 }}>{item.label}</Text>
+                    <div style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.2, color: item.value === 0 ? colorTextQuaternary : item.color }}>
+                      {item.value}
+                    </div>
+                    {item.detail && <Text type="secondary" ellipsis style={{ fontSize: 12, display: "block" }}>{item.detail}</Text>}
+                  </div>
+                </Flex>
+              </Card>
+            </Col>
+          );
+        })}
       </Row>
 
       {/* Historique */}
       <Card styles={{ body: { paddingTop: 4 } }}>
-        <Tabs defaultActiveKey="consultations" items={tabItems} />
+        <Tabs activeKey={ongletActif} onChange={setOngletActif} items={tabItems} />
       </Card>
+
+      <Modal
+        open={!!prescriptionOuverte}
+        onCancel={() => setPrescriptionOuverte(null)}
+        footer={null}
+        width={960}
+        destroyOnClose
+        title={
+          prescriptionOuverte && (
+            <Space size={8}>
+              <span style={{ color: colorPrimary }}>{getTypePrescription(prescriptionOuverte)?.icon}</span>
+              <span>{getTypePrescription(prescriptionOuverte)?.libelle || "Prescription"} {prescriptionOuverte.numpresc}</span>
+            </Space>
+          )
+        }
+      >
+        {prescriptionOuverte && (
+          <PrescriptionApercu prescription={prescriptionOuverte} onClose={() => setPrescriptionOuverte(null)} />
+        )}
+      </Modal>
 
       <UploadResultatModal
         isModalVisible={isUploadResultatModalVisible}

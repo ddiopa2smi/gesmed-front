@@ -90,6 +90,19 @@ export const aspectsUrinesOptions = [
     }
 ]
 
+// Avis d'aptitude rendu à l'issue d'une visite médicale (codes contrôlés aussi côté API et en base)
+export const RESULTATS_VISITE_MEDICALE = [
+    { value: "APTE", label: "Apte", description: "Apte au poste, sans réserve", color: "success" },
+    { value: "APTE_RESTRICTIONS", label: "Apte avec restrictions", description: "Certaines tâches ou expositions sont contre-indiquées", color: "lime" },
+    { value: "APTE_AMENAGEMENT", label: "Apte avec aménagement de poste", description: "Adaptation du poste ou des horaires nécessaire", color: "cyan" },
+    { value: "AJOURNE", label: "Avis différé", description: "En attente d'examens complémentaires ou d'un avis spécialisé", color: "processing" },
+    { value: "INAPTE_TEMPORAIRE", label: "Inapte temporaire", description: "Inaptitude limitée dans le temps, à réévaluer", color: "warning" },
+    { value: "INAPTE_DEFINITIF", label: "Inapte définitif au poste", description: "Reclassement sur un autre poste à envisager", color: "error" },
+    { value: "INAPTE_TOUT_POSTE", label: "Inapte à tout poste", description: "Aucun poste compatible dans l'entreprise", color: "magenta" },
+];
+
+export const getResultatVisite = (code) => RESULTATS_VISITE_MEDICALE.find((r) => r.value === code);
+
 export const typesVisiteMedicaleOptions = [
     {
         label: "Visite médicale",

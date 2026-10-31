@@ -9,6 +9,8 @@ import Consultations from "./Consultations/Consultations";
 import DossierMedical from "./DossierMedical/DossierMedical";
 import ConsultationPage from "../ConsultationPage/ConsultationPage";
 import InfosCliniques from "./InfosCliniques/InfosCliniques";
+import StatistiquesExamens from "../../components/specific/StatistiquesExamens/StatistiquesExamens";
+import AccesReserve from "../../components/common/AccesReserve/AccesReserve";
 
 export const radiologieRouter: RouteObject = {
     path: "espace-radiologie",
@@ -64,6 +66,14 @@ export const radiologieRouter: RouteObject = {
         {
             path: "consultation/:numPatient/:numRv",
             element: <ConsultationPage />
+        },
+        {
+            path: "statistiques",
+            element: (
+                <AccesReserve espace="imagerie" message="Les statistiques de radiologie sont accessibles uniquement aux médecins et aux administrateurs.">
+                    <StatistiquesExamens type="imagerie" />
+                </AccesReserve>
+            )
         },
     ]
 }

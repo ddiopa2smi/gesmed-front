@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { codesPrescriptions } from "../../../constants/app.constants";
+import { getResultatTdr, isTdrRealise } from "../../../utils/tdr";
 
 /**
  * Calculs des statistiques médicales (sans affichage).
@@ -98,8 +99,8 @@ export const calculerKpis = ({ consultations, rendezVous, prescriptions }) => {
     const hta = consultations.filter((c) => isHta(c.tension)).length;
     const repos = consultations.filter((c) => c.nb_jours_rm > 0);
     const joursRepos = repos.reduce((acc, c) => acc + (c.nb_jours_rm || 0), 0);
-    const tdrPositifs = consultations.filter((c) => c.test_tdr === "positif").length;
-    const tdrRealises = consultations.filter((c) => c.test_tdr).length;
+    const tdrPositifs = consultations.filter((c) => getResultatTdr(c) === "positif").length;
+    const tdrRealises = consultations.filter(isTdrRealise).length;
     const consultationsAvecPrescription = new Set(prescriptions.filter((p) => p.numcons).map((p) => p.numcons)).size;
     const jours = new Set(consultations.map((c) => dayjs(c.datecons).format("YYYY-MM-DD"))).size;
 
@@ -179,7 +180,9 @@ export const repartitionSexe = (consultations) => {
 export const repartitionAge = (consultations) =>
     TRANCHES_AGE.map((tranche) => ({
         tranche: tranche.label,
-        Patients: consultations.filter((c) => c.age_patient >= tranche.min && c.age_patient <= tranche.max).length,
+        // Âge inconnu (null) exclu : en JS, null >= 0 est vrai et tomberait dans la première tranche
+        Patients: consultations.filter((c) => c.age_patient !== null && c.age_patient !== undefined
+            && c.age_patient >= tranche.min && c.age_patient <= tranche.max).length,
     }));
 
 export const repartitionType = (consultations) =>

@@ -10,7 +10,8 @@ const AddMotif = ({
     setOpen,
     currentRecord,
     onRefresh,
-
+    // Code du service courant (ex : "MED") enregistré dans code_spe
+    codeSpe,
 }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
@@ -21,6 +22,7 @@ const AddMotif = ({
                 setLoading(true);
                 switch (operationType) {
                     case "add":
+                        values.code_spe = codeSpe;
                         postActions(endpoints.motifs.ADD, values)
                             .then((response) => {
                                 if (response.data.Added === true) {
@@ -35,6 +37,8 @@ const AddMotif = ({
                         break;
                     case "update":
                         values.code_motifcons = currentRecord?.code_motifcons;
+                        // L'UPDATE réécrit code_spe : on conserve celui du motif (sinon il serait vidé)
+                        values.code_spe = currentRecord?.code_spe || codeSpe;
                         putActions(endpoints.motifs.UPDATE, values)
                             .then((response) => {
                                 if (response.data.Updated === true) {

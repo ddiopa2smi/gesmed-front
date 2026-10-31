@@ -5,9 +5,10 @@ import { endpoints } from "../../../constants/endpoints.constants";
 /**
  * Liste des pathologies avec les actions d'ajout, de modification et de suppression.
  */
-function GestionPathologies({ data, isLoading, onRefresh }) {
+function GestionPathologies({ data, isLoading, onRefresh, codeSpe, onSelect }) {
     return (
         <GestionParametres
+            onSelect={onSelect}
             data={data}
             isLoading={isLoading}
             onRefresh={onRefresh}
@@ -15,7 +16,7 @@ function GestionPathologies({ data, isLoading, onRefresh }) {
             getDeleteUrl={(record) => `${endpoints.pathologie.DELETE}/${record?.code_patho}`}
             addTitle="Nouvelle pathologie"
             updateTitle="Modifier la pathologie"
-            renderForm={(props) => <AddPathologie {...props} />}
+            renderForm={(props) => <AddPathologie {...props} codeService={codeSpe} />}
             columns={[
                 {
                     title: "Code",

@@ -23,9 +23,12 @@ const AddPathologie = ({
         .then((values) => {
             setLoading(true);
 
+            // Service de l'écran courant en priorité (ex : "MED" en consultation médicale) ; à défaut,
+            // service de l'utilisateur. Sinon une pathologie créée par un infirmier ou un admin depuis
+            // la consultation médicale recevait un autre code et disparaissait de la liste "MED".
             const payload = {
                 ...values,
-                code_spe : JSON.parse(sessionStorage.getItem("userConnected"))?.code_serv
+                code_spe : codeService || JSON.parse(sessionStorage.getItem("userConnected"))?.code_serv
             }
 
             switch (operationType) {

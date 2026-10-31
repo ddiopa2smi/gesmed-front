@@ -82,6 +82,8 @@ function Prescription({
     );
     const currentPatient = JSON.parse(sessionStorage.getItem("currentPatient"));
     const config = CONFIG_PAR_TYPE[typePrescription] || CONFIG_PAR_TYPE[TypePrescription.ANALYSE];
+    // Prescription existante rouverte pour modification (numpresc connu)
+    const estModification = !!editPrescription?.numpresc;
     const libelle = config;
 
     const [loading, setLoading] = useState(false);
@@ -120,8 +122,17 @@ function Prescription({
                 };
                 setLoading(true);
                 postActions(endpoints.prescriptions.ADD, payload)
-                    .then(() => {
-                        message.success("Prescription enregistrée avec succès");
+                    .then((response) => {
+                        if (response?.data?.Erreur) {
+                            // Refus de l'API : prescription servie / réalisée entre-temps
+                            message.error(response.data.Erreur);
+                            return;
+                        }
+                        if (!response?.data?.Saved) return;
+                        message.success(estModification
+                            ? `Prescription ${editPrescription.numpresc} modifiée avec succès`
+                            : "Prescription enregistrée avec succès");
+                        sessionStorage.removeItem("editPrescription");
                         setActesPrescrites([]);
                         form.resetFields();
                         navigate(-1);
@@ -184,13 +195,14 @@ function Prescription({
                         </Avatar>
                         <div>
                             <Text style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: colorPrimary }}>
-                                {libelle.icon} {libelle.titre}
+                                {libelle.icon} {estModification ? `Modification — ${libelle.titre.toLowerCase()}` : libelle.titre}
                             </Text>
                             <Title level={4} style={{ margin: 0, color: LOGO_BROWN }}>
                                 {currentPatient?.prenom_patient} {currentPatient?.nom_patient}
                             </Title>
                             <Space size={8} wrap>
                                 <Text strong>N° {currentPatient?.num_patient}</Text>
+                                {estModification && <Tag color="orange">{editPrescription.numpresc}</Tag>}
                                 {currentPatient?.sexe_patient && (
                                     <Tag color={isFemme ? "magenta" : "blue"}>{isFemme ? "Féminin" : "Masculin"}</Tag>
                                 )}
@@ -406,9 +418,9 @@ function Prescription({
                         loading={loading}
                         disabled={actesPrescrites.length === 0}
                     >
-                        Enregistrer la prescription
+                        {estModification ? "Enregistrer les modifications" : "Enregistrer la prescription"}
                     </Button>
-                    <Button danger icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+                    <Button danger icon={<CloseOutlined />} onClick={() => { sessionStorage.removeItem("editPrescription"); navigate(-1); }}>
                         Annuler
                     </Button>
                 </Space>

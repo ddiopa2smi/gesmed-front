@@ -20,6 +20,8 @@ export const endpoints = {
         LIST_BY_DATE: (dateDeb, dateFin) => `/api/smed/Consultation/list/${dateDeb}/${dateFin}`,
         FIND_CONSULTATIONS: "/api/smed/Consultation/FindCons",
         DELETE: "/api/smed/Consultation/delete",
+        CLOTURER: (numCons) => `/api/smed/Consultation/cloturer/${numCons}`,
+        CERTIFICAT: (numCons) => `/api/smed/Consultation/certificat/${numCons}`,
         LIST_VALEURS_VISITES_MEDICALES: "/api/smed/Consultation/listValeursVisiteMedical"
     },
     users: {
@@ -38,6 +40,7 @@ export const endpoints = {
         GET_DETAILS: "/api/smed/Prescription/getDetails",
         LIST: (periode, etat) => `/api/smed/Prescription/getAllPrescriptions/${periode}/${etat}`,
         LIST_BY_DATE: (dateDebut, dateFin, etat) => `/api/smed/Prescription/getAllPrescriptions/date/${dateDebut}/${dateFin}/${etat}`,
+        LIST_BY_CONSULTATION: (numCons) => `/api/smed/Prescription/getByConsultation/${numCons}`,
         LIST_PRESCRIPTEURS_EXT: "/api/Fournisseur/Ext/list",
 
     },
@@ -66,6 +69,10 @@ export const endpoints = {
         UPDATE: "/api/smed/DossierAT/update",
         LIST: "/api/smed/DossierAT/list",
         DELETE: "/api/smed/DossierAT/delete"
+    },
+    dentaire: {
+        DOSSIER: (numPat, numCons) => `/api/smed/Dentaire/dossier?numPat=${encodeURIComponent(numPat)}&numCons=${encodeURIComponent(numCons)}`,
+        SAVE: "/api/smed/Dentaire/save",
     },
     motifs: {
         ADD: "/api/smed/DonneesBases/MotifCons/add",
@@ -106,6 +113,7 @@ export const endpoints = {
     visitesLieux: {
         ADD: "/api/smed/VisiteLieux/add",
         UPDATE: "/api/smed/VisiteLieux/update",
+        DELETE: "/api/smed/VisiteLieux/delete",
         LIST: "/api/smed/VisiteLieux/List"
     },
     actes: {

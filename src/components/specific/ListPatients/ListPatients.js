@@ -21,9 +21,13 @@ import {
   Space,
   Tag,
   theme,
+  Tooltip,
   Typography,
 } from "antd";
-import { MoreOutlined, PlusOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined, FolderOpenOutlined, MoreOutlined,
+  PhoneOutlined, PlusOutlined, SearchOutlined, StopOutlined, UserAddOutlined,
+} from "@ant-design/icons";
 import AdvancedSearchButton from "../../common/AdvancedSearchButton/AdvancedSearchButton";
 import ReloadButton from "../../common/ReloadButton/ReloadButton";
 import ExcellExportButton from "../../common/ExcellExportButton/ExcellExportButton";
@@ -36,25 +40,14 @@ import { deleteActions } from "../../../actions/actions";
 import { ServiceType } from "../../../utils/types/types.ts";
 import { LOGO_BROWN } from "../../../constants/app.constants.js";
 import dayjs from "dayjs";
-import TotalTag from "../../common/TotalTag/TotalTag.js";
+import { getTypeColor } from "../../../utils/typePatient";
 
 const { Title, Text } = Typography;
 
-// Couleur stable par type de patient (basée sur un hash du libellé, pour rester cohérente
-// quel que soit le libellé exact renvoyé par le back-end).
-const TYPE_TAG_COLORS = ["blue", "green", "gold", "volcano", "purple", "geekblue", "magenta", "cyan", "orange", "lime"];
-const getTypeColor = (value) => {
-  if (!value) return "default";
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    hash = value.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return TYPE_TAG_COLORS[Math.abs(hash) % TYPE_TAG_COLORS.length];
-};
 
 function ListPatients({ serviceType }) {
 
-  const { token: { colorBgElevated, colorBorder, } } = theme.useToken();
+  const { token: { colorBgElevated, colorBorder, colorPrimary } } = theme.useToken();
   const navigate = useNavigate();
   const { getColumnFilterProps } = useSearch();
 
@@ -289,35 +282,34 @@ function ListPatients({ serviceType }) {
 
   return (
     <Card>
-      <Title level={3} style={{ color: LOGO_BROWN }}>Liste des patients</Title>
-
-      <Text type="secondary" >
-        Gérer l'ajout, la modification , la prise de rendez-vous et la suppression des patients. Vous pouvez également
-        consulter les dossiers médicaux des patients.
-      </Text>
-
-      <br />
-      <br />
-
-      <Flex justify="space-between" align="center">
-        <Space>
-          <Input
-            style={{ width: "300px" }}
-            placeholder="Entrer votre recherche"
-            prefix={<SearchOutlined />}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            allowClear
-          />
-          <TotalTag value={totalElements} />
-        </Space>
-        <Space>
+      {/* En-tête */}
+      <Flex justify="space-between" align="flex-start" wrap gap={12}>
+        <div>
+          <Title level={3} style={{ color: LOGO_BROWN, margin: 0 }}>Liste des patients</Title>
+          <Text type="secondary">
+            Ajout, modification, prise de rendez-vous et accès aux dossiers médicaux des patients.
+          </Text>
+        </div>
+        <Space wrap>
           <ReloadButton onRefresh={onRefresh} />
           <AdvancedSearchButton onClick={onDisplayAdvancedSearch} />
           <ExcellExportButton onClick={onExport} />
           <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-            Ajouter
+            Nouveau patient
           </Button>
         </Space>
+      </Flex>
+
+      {/* Recherche rapide (le nombre de résultats est affiché par le tableau) */}
+      <Flex align="center" wrap gap={12} style={{ marginTop: 16 }}>
+        <Input
+          size="large"
+          style={{ maxWidth: 420 }}
+          placeholder="Rechercher : prénom et nom (ex. « sarr abdou »), matricule, téléphone..."
+          prefix={<SearchOutlined />}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          allowClear
+        />
       </Flex>
 
       {Object.entries(advancedFilters).some(([_, val]) => val !== undefined && val !== null && val !== "" && (!Array.isArray(val) || (val.length > 0 && val[0] && val[1]))) && (
@@ -388,69 +380,79 @@ function ListPatients({ serviceType }) {
         }}
         columns={[
           {
-            title: "",
-            dataIndex: "image_patient",
-            render: (record) => (
-              <Flex justify="center" align="center" className="table-data">
-                <Avatar icon={<UserOutlined />} />
-              </Flex>
-            ),
-          },
-          {
-            title: "Matricule",
-            dataIndex: "num_patient",
-            key: "num_patient",
-            render: (record) => (
-              <Text copyable={{ toolTip: "Copier" }} ellipsis >{record}</Text>
-            ),
-          },
-          {
-            title: "Nom",
+            // Tri serveur : le champ trié reste nom_patient
+            title: "Patient",
             dataIndex: "nom_patient",
             key: "nom_patient",
             sorter: true,
-          },
-          {
-            title: "Prénom",
-            dataIndex: "prenom_patient",
-            key: "prenom_patient",
-          },
-          {
-            title: "Téléphone",
-            dataIndex: "tel_patient",
-            key: "tel_patient",
-          },
-          {
-            title: "Age",
-            dataIndex: "age_patient",
-            key: "age_patient",
-            sorter: true,
-            render: (record) => (
-              <div className="table-data">
-                <span style={{ textOverflow: "ellipsis" }}>
-                  {`${record} ${record > 1 ? "ans" : "an"}`}
-                </span>
-              </div>
-            ),
+            render: (_, record) => {
+              const isFemme = record.sexe_patient === "FE";
+              return (
+                <Flex align="center" gap={10}>
+                  <Avatar size={34} style={{ backgroundColor: isFemme ? "#eb2f96" : colorPrimary, flexShrink: 0, fontWeight: 600 }}>
+                    {`${record.prenom_patient?.[0] || ""}${record.nom_patient?.[0] || ""}`.toUpperCase()}
+                  </Avatar>
+                  <div style={{ lineHeight: 1.3, minWidth: 0 }}>
+                    <Text strong>{record.prenom_patient} {record.nom_patient}</Text>
+                    <div style={{ marginTop: 2 }}>
+                      {/* Matricule en pastille, couleur du titre de la page pour le distinguer du nom */}
+                      <Text
+                        copyable={{ text: record.num_patient, tooltips: ["Copier le matricule", "Copié"] }}
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          fontVariantNumeric: "tabular-nums",
+                          letterSpacing: 0.4,
+                          color: LOGO_BROWN,
+                          background: `${LOGO_BROWN}14`,
+                          padding: "1px 8px",
+                          borderRadius: 4,
+                        }}
+                      >
+                        {record.num_patient}
+                      </Text>
+                    </div>
+                  </div>
+                </Flex>
+              );
+            },
           },
           {
             title: "Sexe",
             dataIndex: "sexe_patient",
             key: "sexe_patient",
-            filters: isGynecologie ? undefined : ["MA", "FE"].map((item) => {
-              return {
-                text: item,
-                value: item,
-              };
-            }),
+            align: "center",
+            filters: isGynecologie ? undefined : [
+              { text: "Masculin", value: "MA" },
+              { text: "Féminin", value: "FE" },
+            ],
             filterMultiple: false,
+            render: (value) => value
+              ? <Tag color={value === "FE" ? "magenta" : "blue"} style={{ marginInlineEnd: 0 }}>{value === "FE" ? "F" : "M"}</Tag>
+              : "-",
+          },
+          {
+            title: "Âge",
+            dataIndex: "age_patient",
+            key: "age_patient",
+            align: "center",
+            sorter: true,
+            render: (value) => (value !== null && value !== undefined ? `${value} ${value > 1 ? "ans" : "an"}` : "-"),
+          },
+          {
+            title: "Téléphone",
+            dataIndex: "tel_patient",
+            key: "tel_patient",
+            render: (value) => value
+              ? <Text><PhoneOutlined style={{ color: colorPrimary, marginRight: 6 }} />{value}</Text>
+              : <Text type="secondary">-</Text>,
           },
           {
             title: "Type",
             dataIndex: "type_patient",
             key: "type_patient",
             ...getColumnFilterProps("type_patient", patientsList),
-            render: (value) => <Tag color={getTypeColor(value)}> {value} </Tag>,
+            render: (value) => value ? <Tag color={getTypeColor(value)}>{value}</Tag> : "-",
           },
           {
             title: "Département",
@@ -462,76 +464,56 @@ function ListPatients({ serviceType }) {
             })),
             filterMultiple: false,
             filterSearch: true,
+            render: (value) => value
+              ? <Text ellipsis={{ tooltip: value }} style={{ maxWidth: 200, display: "inline-block" }}>{value}</Text>
+              : <Text type="secondary">-</Text>,
           },
           {
-            title: "Date de création",
+            title: "Créé le",
             dataIndex: "date_creation",
             key: "date_creation",
-            render: (record) => (
-              <div className="table-data">
-                <span style={{ textOverflow: "ellipsis" }}>
-                  {" "}
-                  {formatDate(record)}{" "}
-                </span>
-              </div>
-            ),
+            render: (value) => value
+              ? <Text type="secondary"><CalendarOutlined style={{ marginRight: 6 }} />{formatDate(value)}</Text>
+              : "-",
           },
           {
             fixed: "right",
-            title: "Etat",
+            title: "État",
             dataIndex: "suspension",
             key: "suspension",
-            render: (record) => (
-              <Tag color={record === "A" ? "success" : "error"}>
-                {record === "A" ? "Actif" : "Suspendu"}
-              </Tag>
-            ),
+            align: "center",
+            render: (value) => value === "A"
+              ? <Tag icon={<CheckCircleOutlined />} color="success" style={{ marginInlineEnd: 0 }}>Actif</Tag>
+              : <Tag icon={<StopOutlined />} color="error" style={{ marginInlineEnd: 0 }}>Suspendu</Tag>,
             filters: [{ text: "Actif", value: "A" }, { text: "Suspendu", value: "S" }],
             filterMultiple: false,
           },
           {
             fixed: "right",
             render: (record) => (
-              <Flex align="center">
+              <Space size={0}>
+                {/* Actions principales directement accessibles */}
+                {serviceType !== ServiceType.ACCUEIL && (
+                  <Tooltip title="Ouvrir le dossier médical">
+                    <Button type="text" style={{ color: colorPrimary }} icon={<FolderOpenOutlined />} onClick={() => onOpenMedicalFolder(record)} />
+                  </Tooltip>
+                )}
+                <Tooltip title="Créer un rendez-vous">
+                  <Button type="text" style={{ color: colorPrimary }} icon={<CalendarOutlined />} onClick={() => onCreateRV(record)} />
+                </Tooltip>
                 <Dropdown
+                  trigger={["click"]}
                   menu={{
                     items: [
-                      serviceType !== ServiceType.ACCUEIL && {
-                        label: "Ouvrir Dossier Médical",
-                        key: "0",
-                        onClick: () => {
-                          onOpenMedicalFolder(record);
-                        },
-                      },
-                      {
-                        label: "Créer RV",
-                        key: "1",
-                        onClick: () => {
-                          onCreateRV(record);
-                        },
-                      },
-                      {
-                        label: "Modifier",
-                        key: "2",
-                        onClick: () => {
-                          onEdit(record);
-                        },
-                      },
-                      {
-                        label: "Supprimer",
-                        key: "3",
-                        onClick: () => {
-                          onDelete(record);
-                        },
-                        danger: true
-                      },
+                      { key: "edit", label: "Modifier", icon: <EditOutlined />, onClick: () => onEdit(record) },
+                      { type: "divider" },
+                      { key: "delete", label: "Supprimer", icon: <DeleteOutlined />, danger: true, onClick: () => onDelete(record) },
                     ],
                   }}
-                  trigger={["click"]}
                 >
                   <Button type="text" icon={<MoreOutlined />} />
                 </Dropdown>
-              </Flex>
+              </Space>
             ),
           },
         ]}
@@ -545,17 +527,19 @@ function ListPatients({ serviceType }) {
           content: { margin: 0, padding: 0 },
           body: {
             overflow: "auto",
-            minHeight: "50vh",
+            // Hauteur minimale réservée aux formulaires longs (fiche patient)
+            minHeight: operationType === "add" || operationType === "update" ? "50vh" : undefined,
             maxHeight: "80vh",
             padding: "12px 24px",
           },
         }}
-        width={1000}
+        // Largeur adaptée au contenu de chaque fenêtre
+        width={operationType === "rv" ? 720 : operationType === "ads" ? 900 : 1000}
         title={
-          (operationType === "add" && "Nouveau patient") ||
-          (operationType === "update" && "Mettre à jour les données") ||
-          (operationType === "rv" && "Créer un Rendez-vous") ||
-          (operationType === "ads" && "Recherche avancée") ||
+          (operationType === "add" && <span><UserAddOutlined style={{ color: colorPrimary, marginRight: 8 }} />Nouveau patient</span>) ||
+          (operationType === "update" && <span><EditOutlined style={{ color: colorPrimary, marginRight: 8 }} />Modifier le patient {currentRecord?.num_patient}</span>) ||
+          (operationType === "rv" && <span><CalendarOutlined style={{ color: colorPrimary, marginRight: 8 }} />Nouveau rendez-vous</span>) ||
+          (operationType === "ads" && <span><SearchOutlined style={{ color: colorPrimary, marginRight: 8 }} />Recherche avancée de patients</span>) ||
           (operationType === "exp" && "Exporter le document")
         }
         open={open}

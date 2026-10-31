@@ -13,9 +13,10 @@ import AddRegion from '../../../components/specific/AddRegion/AddRegion';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import BackButton from '../../../components/common/BackButton/BackButton';
 import ReloadButton from '../../../components/common/ReloadButton/ReloadButton';
-import { deletePopup, printPDF } from '../../../utils/helpers';
+import { deletePopup } from '../../../utils/helpers';
 import { codeServices, codesPrescriptions } from '../../../constants/app.constants';
 import useObjectFetch from '../../../utils/hooks/useObjectFetch';
+import { ouvrirCertificatMedical } from '../CertificatMedical/CertificatMedical';
 const {Title , Text} = Typography;
 const { TextArea } = Input;
 const {Option} = Select;
@@ -32,6 +33,8 @@ const getInitCons = (initCons) => {
 function ConsultationInfirmerie({numPatient , numRV , serviceType}) { 
     const navigate = useNavigate();
     const [form] = Form.useForm();
+    // Repos saisi sur le certificat : repris par le formulaire, pour ne pas être écrasé au prochain enregistrement
+    const appliquerRepos = (repos) => form.setFieldsValue(repos);
     const {state} = useLocation();
     // const currentPatient = state?.currentPatient;
     // const consultationObject = state?.consultationObject;
@@ -241,7 +244,7 @@ function ConsultationInfirmerie({numPatient , numRV , serviceType}) {
                                 {
                                     key: '1',
                                     label: (
-                                        <span onClick={()=>{printPDF(`/api/Print/smed/Consultation/${initConsultation.numcons}/certificat`)}} >
+                                        <span onClick={()=>{ouvrirCertificatMedical(initConsultation.numcons, appliquerRepos)}} >
                                         Certificat Médical
                                         </span>
                                     ),

@@ -5,9 +5,10 @@ import { endpoints } from "../../../constants/endpoints.constants";
 /**
  * Liste des régions concernées avec les actions d'ajout, de modification et de suppression.
  */
-function GestionRegions({ data, isLoading, onRefresh }) {
+function GestionRegions({ data, isLoading, onRefresh, onSelect }) {
     return (
         <GestionParametres
+            onSelect={onSelect}
             data={data}
             isLoading={isLoading}
             onRefresh={onRefresh}

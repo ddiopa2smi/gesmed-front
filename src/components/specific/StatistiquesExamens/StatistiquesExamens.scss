@@ -1,0 +1,25 @@
+// Tableaux des statistiques : ligne survolée bien visible, ligne cliquée conservée en surbrillance.
+// Les couleurs viennent du thème antd (variables posées sur le tableau, cf. StatistiquesExamens.js).
+.stats-table {
+  .ant-table-tbody > tr.ant-table-row {
+    cursor: pointer;
+
+    > td {
+      transition: background-color 0.15s;
+    }
+
+    &:hover > td {
+      background: var(--stats-ligne-survol) !important;
+    }
+
+    &.stats-ligne-selectionnee > td {
+      background: var(--stats-ligne-selection) !important;
+      font-weight: 500;
+    }
+
+    // Liseré sur la première cellule de la ligne sélectionnée
+    &.stats-ligne-selectionnee > td:first-child {
+      box-shadow: inset 4px 0 0 var(--stats-ligne-liseret);
+    }
+  }
+}

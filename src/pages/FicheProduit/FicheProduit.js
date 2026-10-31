@@ -50,12 +50,6 @@ const UNITES_DISTRIBUTION = [
   "Matériel", "Ovules", "Pommade", "Sachets", "Unités",
 ].map((value) => ({ value, label: value }));
 
-const UNITES_VENTE = [
-  { value: "Boite", label: "Boîte" },
-  { value: "Comprime", label: "Comprimés" },
-  { value: "Plaquette", label: "Plaquettes" },
-];
-
 // Section de la fiche : carte avec titre et icône
 const Section = ({ icon, title, children }) => {
   const { token: { colorPrimary } } = theme.useToken();
@@ -133,6 +127,15 @@ function FicheProduit() {
   const vendueAuDetail = uniteDistribution && uniteDistribution !== "Boîtes";
   const marge = prixAchat > 0 && prixVente > 0 ? Math.round(((prixVente - prixAchat) / prixAchat) * 100) : null;
 
+  // Retour à la page précédente de l'application ; à défaut (page ouverte directement), retour à la liste des produits
+  const retourPagePrecedente = () => {
+    if ((window.history.state?.idx ?? 0) > 0) {
+      navigate(-1);
+    } else {
+      navigate("/espace-pharmacie/gestion-fiche-produits", { replace: true });
+    }
+  };
+
   const save = () => {
     form
       .validateFields()
@@ -141,10 +144,11 @@ function FicheProduit() {
         if (isNouveau) {
           postActions(endpoints.fiche_produit.ADD, values)
             .then((response) => {
-              if (response?.data) {
+              // postActions renvoie undefined en cas d'erreur (message déjà affiché)
+              if (response && response.status >= 200 && response.status < 300) {
                 message.success("Nouvelle fiche produit ajoutée avec succès");
                 form.resetFields();
-                navigate(-1);
+                retourPagePrecedente();
               }
             })
             .finally(() => {
@@ -153,8 +157,11 @@ function FicheProduit() {
         } else {
           putActions(`${endpoints.fiche_produit.UPDATE}`, values)
             .then((response) => {
-              if (response?.data) {
+              if (response?.data?.Updated === true) {
                 message.success("Informations du produit modifiées avec succès");
+                retourPagePrecedente();
+              } else if (response) {
+                message.error("La modification du produit n'a pas pu être enregistrée");
               }
             })
             .finally(() => {
@@ -304,15 +311,6 @@ function FicheProduit() {
                     manageTitle="Gérer les conditionnements"
                   />
                 </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    label="Unité de distribution"
-                    name="unite_distribution"
-                    tooltip="Unité dans laquelle le produit est servi au patient (utilisée dans les ordonnances)"
-                  >
-                    <Select showSearch allowClear placeholder="Choisir..." optionFilterProp="label" options={UNITES_DISTRIBUTION} />
-                  </Form.Item>
-                </Col>
               </Row>
             </Section>
           </Col>
@@ -331,9 +329,19 @@ function FicheProduit() {
                     <InputNumber min={0} style={{ width: "100%" }} addonAfter="FCFA" />
                   </Form.Item>
                 </Col>
+                {/* Champ retiré de l'écran mais conservé caché : l'API réécrit unite_vente à chaque
+                    modification, la valeur existante serait sinon effacée */}
+                <Form.Item name="unite_vente" hidden>
+                  <Input />
+                </Form.Item>
                 <Col xs={24} md={12}>
-                  <Form.Item label="Unité de vente" name="unite_vente">
-                    <Select allowClear placeholder="Choisir..." options={UNITES_VENTE} />
+                  <Form.Item
+                    label="Unité de distribution"
+                    name="unite_distribution"
+                    tooltip="Unité dans laquelle le produit est servi au patient (utilisée dans les ordonnances)"
+                    rules={[{ required: true, message: "Choisir l'unité de distribution" }]}
+                  >
+                    <Select showSearch allowClear placeholder="Choisir..." optionFilterProp="label" options={UNITES_DISTRIBUTION} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
@@ -341,8 +349,13 @@ function FicheProduit() {
                     label="Quantité par emballage"
                     name="qte_emb"
                     tooltip="Nombre d'unités dans un emballage (ex : 30 comprimés par boîte). Sert au calcul du prix à l'unité."
+                    rules={[
+                      { required: true, message: "Saisir la quantité par emballage" },
+                      // 0 fausserait le prix à l'unité (prix de vente / quantité)
+                      { type: "number", min: 1, message: "La quantité doit être d'au moins 1" },
+                    ]}
                   >
-                    <InputNumber min={0} style={{ width: "100%" }} addonAfter={uniteDistribution || "unités"} />
+                    <InputNumber min={1} precision={0} style={{ width: "100%" }} addonAfter={uniteDistribution || "unités"} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -423,7 +436,7 @@ function FicheProduit() {
           <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={formLoading}>
             {isNouveau ? "Créer la fiche produit" : "Enregistrer les modifications"}
           </Button>
-          <Button danger icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+          <Button danger icon={<CloseOutlined />} onClick={retourPagePrecedente}>
             Annuler
           </Button>
         </Flex>

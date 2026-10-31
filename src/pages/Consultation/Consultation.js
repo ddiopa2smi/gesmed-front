@@ -1,4 +1,4 @@
-import { Modal, Card, Row, Col, Form, Input, InputNumber, Typography, Select, Button, DatePicker, message, Flex, Space, Dropdown, Tooltip, Avatar, Tag, Skeleton, theme } from 'antd'
+import { Alert, ConfigProvider, Modal, Card, Row, Col, Form, Input, InputNumber, Typography, Select, Button, DatePicker, message, Flex, Space, Dropdown, Tooltip, Avatar, Tag, Skeleton, theme } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
@@ -10,12 +10,13 @@ import GestionMotifs from '../../components/specific/GestionMotifs/GestionMotifs
 import GestionRegions from '../../components/specific/GestionRegions/GestionRegions';
 import {
     CalendarOutlined, CheckCircleOutlined, DashboardOutlined, EditOutlined, FileTextOutlined,
-    HeartOutlined, MedicineBoxOutlined, PrinterOutlined, SaveOutlined, SendOutlined, SolutionOutlined,
+    HeartOutlined, LockOutlined, MedicineBoxOutlined, PrinterOutlined, SaveOutlined, SendOutlined, SolutionOutlined,
 } from '@ant-design/icons';
 import BackButton from '../../components/common/BackButton/BackButton';
 import ReloadButton from '../../components/common/ReloadButton/ReloadButton';
-import { deletePopup, printPDF } from '../../utils/helpers';
-import { codeServices, codesPrescriptions, typesVisiteMedicaleOptions, LOGO_BROWN } from '../../constants/app.constants';
+import { DELAI_CLOTURE_AUTO_HEURES, estClotureAuto, estConsultationCloturee, heuresAvantClotureAuto } from '../../utils/clotureConsultation';
+import { codeServices, codesPrescriptions, typesVisiteMedicaleOptions, RESULTATS_VISITE_MEDICALE, LOGO_BROWN } from '../../constants/app.constants';
+import { ouvrirCertificatMedical } from '../../components/specific/CertificatMedical/CertificatMedical';
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -86,6 +87,8 @@ const ReferentielSelect = ({ name, label, list, valueKey, labelKey, loading, onM
 function Consultation() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
+    // Repos saisi sur le certificat : repris par le formulaire, pour ne pas être écrasé au prochain enregistrement
+    const appliquerRepos = (repos) => form.setFieldsValue(repos);
     const { state } = useLocation();
     const { token } = theme.useToken();
     const { colorPrimary, colorBgContainer, colorBorderSecondary, colorFillAlter } = token;
@@ -134,8 +137,6 @@ function Consultation() {
 
     const { data: regions, isLoading: regionsLoading, onRefresh: regionsRefreshList } = useFetch(endpoints.regions.LIST);
 
-    const { data: valeursVisiteMedicales, isLoading: valeursVisiteMedicalesLoading } = useFetch(endpoints.consultations.LIST_VALEURS_VISITES_MEDICALES);
-
     // Valeurs suivies en direct
     const codeMotif = Form.useWatch("code_motifcons", form);
     const temp = Form.useWatch("temp", form);
@@ -144,14 +145,27 @@ function Consultation() {
 
     const motifSelected = motifs.find((motif) => motif.code_motifcons === codeMotif);
     const isVisiteMedicale = motifSelected?.libelle_motifcons?.trim().toLowerCase().startsWith("visite");
+    const isVisiteEmbauche = isVisiteMedicale && /embauche/i.test(motifSelected?.libelle_motifcons);
     const imc = computeImc(poids, taille);
     const imcCategory = imc ? getImcCategory(imc) : null;
     const hasFievre = temp > SEUIL_FIEVRE;
     const isConsultationOuverte = initConsultation?.medecin !== null && initConsultation?.medecin !== undefined;
+    // Clôturée (par le médecin, ou automatiquement 24 h après) : lecture seule (contrôlé aussi par l'API)
+    const estCloturee = estConsultationCloturee(initConsultation);
+    const clotureAuto = estClotureAuto(initConsultation);
+    const heuresRestantes = heuresAvantClotureAuto(initConsultation);
 
     useEffect(() => {
         form.setFieldValue("imc", imc);
     }, [imc, form]);
+
+    // Motif "visite d'embauche" : le type de visite est connu, le médecin n'a plus qu'à saisir le résultat
+    useEffect(() => {
+        if (isVisiteEmbauche && !estCloturee && !form.getFieldValue("type_visite")) {
+            form.setFieldValue("type_visite", "VISITE_EMBAUCHE");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isVisiteEmbauche]);
 
     const save = () => {
         setLoading(true);
@@ -167,11 +181,18 @@ function Consultation() {
                     debut_rm: values.debut_rm ? dayjs(values.debut_rm).toISOString() : null,
                     fin_rm: values.fin_rm ? dayjs(values.fin_rm).toISOString() : null,
                     date_ref: values.date_ref ? dayjs(values.date_ref).toISOString() : null,
+                    // Type et résultat de visite n'ont de sens que pour un motif "visite"
+                    type_visite: isVisiteMedicale ? values.type_visite || null : null,
+                    resultat_visite: isVisiteMedicale ? values.resultat_visite || null : null,
                 };
                 putActions(endpoints.consultations.UPDATE, payload)
                     .then((response) => {
                         if (response?.data?.Updated) {
                             message.success("Consultation enregistrée avec succès");
+                            refreshConsultation()
+                        }
+                        else if (response?.data?.Cloturee) {
+                            message.warning("Cette consultation est clôturée : elle ne peut plus être modifiée");
                             refreshConsultation()
                         }
                         else {
@@ -188,13 +209,31 @@ function Consultation() {
             })
     }
 
+    // Clôture définitive : la consultation passe en lecture seule
     const validFinalConsultation = () => {
-        deletePopup()
-            .then((result) => {
-                if (result.isConfirmed) {
-                    console.log("final consult")
-                }
-            })
+        // Une visite ne se clôture qu'avec son type et son résultat enregistrés
+        if (isVisiteMedicale && !(initConsultation.type_visite && initConsultation.resultat_visite)) {
+            form.validateFields(["type_visite", "resultat_visite"]).catch(() => {});
+            message.warning("Renseignez et enregistrez le type et le résultat de la visite avant de clôturer");
+            return;
+        }
+        Modal.confirm({
+            title: "Clôturer la consultation ?",
+            icon: <LockOutlined style={{ color: token.colorError }} />,
+            content: "Une fois clôturée, la consultation ne pourra plus être modifiée. Pensez à enregistrer vos dernières saisies avant de clôturer.",
+            okText: "Clôturer",
+            okButtonProps: { danger: true },
+            cancelText: "Annuler",
+            onOk: () => putActions(endpoints.consultations.CLOTURER(initConsultation.numcons))
+                .then((response) => {
+                    if (response?.data?.Cloturee) {
+                        message.success("Consultation clôturée");
+                        refreshConsultation();
+                    } else {
+                        message.error("La consultation n'a pas pu être clôturée");
+                    }
+                }),
+        });
     }
 
     const prescrire = (codepresc, route, withDiagnostic) => {
@@ -224,8 +263,19 @@ function Consultation() {
         }
         if (changedValues.code_motifcons) {
             form.setFieldValue("motif_ref", changedValues.code_motifcons)
+            // Le type de visite dépend du motif : à ressaisir (ou présélectionné pour une embauche)
+            form.setFieldValue("type_visite", undefined)
         }
     }
+
+    // Double-clic sur une ligne de la fenêtre de gestion : remplit le champ et ferme la fenêtre.
+    // setFieldValue ne déclenche pas onValuesChange : on l'appelle pour garder les mêmes effets qu'une saisie.
+    const choisirDepuisGestion = (champ, valeur, libelle) => {
+        form.setFieldValue(champ, valeur);
+        onValuesChange({ [champ]: valeur }, form.getFieldsValue());
+        setGestionOuverte(null);
+        message.success(`« ${libelle} » sélectionné`);
+    };
 
     if (initConsultation === null) {
         return <Card><Skeleton active avatar paragraph={{ rows: 10 }} /></Card>;
@@ -255,6 +305,12 @@ function Consultation() {
                                 </Text>
                                 <Tag color="processing">{initConsultation.numcons}</Tag>
                                 {!isConsultationOuverte && <Tag color="default">Non démarrée</Tag>}
+                                {estCloturee && <Tag icon={<LockOutlined />} color="success">{clotureAuto ? "Clôturée (auto)" : "Clôturée"}</Tag>}
+                                {heuresRestantes !== null && (
+                                    <Tooltip title={`Sans clôture de votre part, la consultation sera clôturée automatiquement ${DELAI_CLOTURE_AUTO_HEURES} h après sa date`}>
+                                        <Tag color={heuresRestantes <= 2 ? "warning" : "default"}>Clôture auto dans {heuresRestantes} h</Tag>
+                                    </Tooltip>
+                                )}
                             </Space>
                             <Title level={4} style={{ margin: 0, color: LOGO_BROWN }}>
                                 {currentPatient?.prenom_patient} {currentPatient?.nom_patient}
@@ -276,7 +332,7 @@ function Consultation() {
                             trigger={['click']}
                             menu={{
                                 items: [
-                                    { key: '1', label: "Certificat médical", onClick: () => printPDF(`/api/Print/smed/Consultation/${initConsultation.numcons}/certificat`) },
+                                    { key: '1', label: "Certificat médical", onClick: () => ouvrirCertificatMedical(initConsultation.numcons, appliquerRepos) },
                                     { key: '2', label: "Bulletin de visite", disabled: true },
                                     { key: '3', label: "Certificat d'aptitude", disabled: true },
                                 ]
@@ -285,7 +341,7 @@ function Consultation() {
                             <Button icon={<PrinterOutlined />}>Imprimer</Button>
                         </Dropdown>
                         <Dropdown
-                            disabled={!isConsultationOuverte}
+                            disabled={!isConsultationOuverte || estCloturee}
                             trigger={['click']}
                             menu={{
                                 items: [
@@ -298,13 +354,30 @@ function Consultation() {
                         >
                             <Button type="primary" icon={<FileTextOutlined />}>Prescrire</Button>
                         </Dropdown>
-                        <Button danger icon={<CheckCircleOutlined />} onClick={validFinalConsultation} disabled={!isConsultationOuverte}>
-                            Clôturer
-                        </Button>
+                        {!estCloturee && (
+                            <Tooltip title={!isConsultationOuverte ? "Enregistrez d'abord la consultation" : "Clôture définitive : plus aucune modification possible"}>
+                                <Button danger icon={<CheckCircleOutlined />} onClick={validFinalConsultation} disabled={!isConsultationOuverte}>
+                                    Clôturer
+                                </Button>
+                            </Tooltip>
+                        )}
                     </Space>
                 </Flex>
+                {estCloturee && (
+                    <Alert
+                        style={{ marginTop: 16 }}
+                        type="success"
+                        showIcon
+                        icon={<LockOutlined />}
+                        message={clotureAuto
+                            ? `Consultation clôturée automatiquement (${DELAI_CLOTURE_AUTO_HEURES} h après la consultation) : elle est en lecture seule.`
+                            : `Consultation clôturée${initConsultation.date_cloture ? ` le ${dayjs(initConsultation.date_cloture).format("DD/MM/YYYY à HH:mm")}` : ""} : elle est en lecture seule.`}
+                    />
+                )}
             </Card>
 
+            {/* Consultation clôturée : champs de saisie désactivés (les boutons d'en-tête restent actifs) */}
+            <ConfigProvider componentDisabled={estCloturee}>
             <Row gutter={16}>
                 {/* Colonne principale : démarche clinique */}
                 <Col xs={24} xl={16}>
@@ -336,16 +409,31 @@ function Consultation() {
                         {isVisiteMedicale && (
                             <Row gutter={16}>
                                 <Col xs={24} md={12}>
-                                    <Form.Item label="Type de visite médicale" name="visite">
+                                    <Form.Item label="Type de visite médicale" name="type_visite" rules={[{ required: true, message: "Champ obligatoire" }]}>
                                         <Select placeholder="Sélectionner" options={typesVisiteMedicaleOptions} />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} md={12}>
-                                    <Form.Item label="Résultat de la visite médicale" name="visite">
+                                    {/* Avis d'aptitude : liste fermée (contrôlée aussi côté API et en base) */}
+                                    <Form.Item label="Résultat de la visite médicale" name="resultat_visite" rules={[{ required: true, message: "Champ obligatoire" }]}>
                                         <Select
-                                            placeholder="Sélectionner"
-                                            loading={valeursVisiteMedicalesLoading}
-                                            options={(valeursVisiteMedicales || []).map((item) => ({ value: item.item, label: item.valeur }))}
+                                            allowClear
+                                            placeholder="Avis d'aptitude"
+                                            optionLabelProp="label"
+                                            popupMatchSelectWidth={false}
+                                            options={RESULTATS_VISITE_MEDICALE.map((resultat) => ({
+                                                value: resultat.value,
+                                                // Valeur sélectionnée : pastille colorée bien lisible
+                                                label: <Tag color={resultat.color} style={{ fontWeight: 600, marginInlineEnd: 0 }}>{resultat.label}</Tag>,
+                                                description: resultat.description,
+                                            }))}
+                                            optionRender={(option) => (
+                                                <div style={{ lineHeight: 1.35, padding: "2px 0" }}>
+                                                    {option.data.label}
+                                                    {/* Sous-titre en noir gras (couleur de texte du thème) pour une meilleure lisibilité */}
+                                                    <div><Text strong style={{ fontSize: 12, color: token.colorText }}>{option.data.description}</Text></div>
+                                                </div>
+                                            )}
                                         />
                                     </Form.Item>
                                 </Col>
@@ -508,6 +596,7 @@ function Consultation() {
                     </SectionCard>
                 </Col>
             </Row>
+            </ConfigProvider>
 
             {/* Barre d'actions toujours visible */}
             <Flex
@@ -524,9 +613,9 @@ function Consultation() {
                     borderRadius: 8,
                 }}
             >
-                <Button onClick={() => navigate(-1)}>Annuler</Button>
-                <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
-                    Enregistrer la consultation
+                <Button onClick={() => navigate(-1)}>{estCloturee ? "Retour" : "Annuler"}</Button>
+                <Button type="primary" htmlType="submit" icon={estCloturee ? <LockOutlined /> : <SaveOutlined />} loading={loading} disabled={estCloturee}>
+                    {estCloturee ? "Consultation clôturée" : "Enregistrer la consultation"}
                 </Button>
             </Flex>
 
@@ -538,11 +627,26 @@ function Consultation() {
                 footer={null}
                 destroyOnClose
             >
-                {gestionOuverte === "MOTIF" && <GestionMotifs data={motifs} isLoading={motifsLoading} onRefresh={motifsRefreshList} />}
+                {gestionOuverte === "MOTIF" && (
+                    <GestionMotifs
+                        data={motifs} isLoading={motifsLoading} onRefresh={motifsRefreshList} codeSpe={codeServices.MEDICAL}
+                        onSelect={(record) => choisirDepuisGestion("code_motifcons", record.code_motifcons, record.libelle_motifcons)}
+                    />
+                )}
 
-                {gestionOuverte === "REGION" && <GestionRegions data={regions} isLoading={regionsLoading} onRefresh={regionsRefreshList} />}
+                {gestionOuverte === "REGION" && (
+                    <GestionRegions
+                        data={regions} isLoading={regionsLoading} onRefresh={regionsRefreshList}
+                        onSelect={(record) => choisirDepuisGestion("code_region", record.code_region, record.libelle_region)}
+                    />
+                )}
 
-                {gestionOuverte === "PATHOLOGIE" && <GestionPathologies data={pathologies} isLoading={pathologiesLoading} onRefresh={pathologiesRefreshList} />}
+                {gestionOuverte === "PATHOLOGIE" && (
+                    <GestionPathologies
+                        data={pathologies} isLoading={pathologiesLoading} onRefresh={pathologiesRefreshList} codeSpe={codeServices.MEDICAL}
+                        onSelect={(record) => choisirDepuisGestion("code_patho", record.code_patho, record.libelle_patho)}
+                    />
+                )}
             </Modal>
         </Form>
     )

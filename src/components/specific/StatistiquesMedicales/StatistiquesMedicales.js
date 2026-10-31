@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { useNavigate } from "react-router";
 import {
   Alert, Button, Card, Col, DatePicker, Empty, Flex, Progress, Row, Select, Skeleton, Space, Table, Tabs, Tag, Tooltip, Typography, theme,
 } from "antd";
 import {
-  AlertOutlined, ArrowDownOutlined, SafetyOutlined, ArrowUpOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined,
-  CoffeeOutlined, FileExcelOutlined, FireOutlined, HeartOutlined, LineChartOutlined, ReloadOutlined, SolutionOutlined, TeamOutlined,
+  AlertOutlined, ArrowDownOutlined, AuditOutlined, SafetyOutlined, ArrowUpOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined,
+  CoffeeOutlined, FileExcelOutlined, FilePdfOutlined, FireOutlined, HeartOutlined, LineChartOutlined, ReloadOutlined, SolutionOutlined, TeamOutlined,
 } from "@ant-design/icons";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis,
@@ -21,6 +23,11 @@ import {
   qualiteDonnees, repartitionAge, repartitionHeures, repartitionJours, repartitionSexe, repartitionType, serieEvolution, statistiquesAT, topActes,
 } from "./statsUtils";
 import BodyMap, { ZONES_LESIONS } from "../../common/BodyMap/BodyMap";
+import { getUserConnected } from "../../../utils/profils";
+import "../../common/RapportPdf/RapportPdf.scss";
+import RapportImpression from "./RapportImpression";
+import SyntheseVisites from "../SyntheseVisites/SyntheseVisites";
+import { estVisite, graphiquesExportVisites, lignesExportVisites, statistiquesVisites } from "../../../utils/visites";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -93,12 +100,37 @@ const colonnesClassement = (titre, { inverse = false } = {}) => [
 ];
 
 function StatistiquesMedicales() {
+  const navigate = useNavigate();
   const { token } = theme.useToken();
   const [periode, setPeriode] = useState("mois");
   const [rangePerso, setRangePerso] = useState(null);
   const [service, setService] = useState("MED");
   const [medecins, setMedecins] = useState([]);
   const [refetch, setRefetch] = useState(0);
+  // Mode impression (export PDF) : rapport à largeur A4 paysage, tous les tableaux affichés
+  const [impression, setImpression] = useState(false);
+
+  useEffect(() => {
+    if (!impression) return undefined;
+    const titrePrecedent = document.title;
+    const terminer = () => {
+      document.body.classList.remove("impression-statistiques");
+      document.title = titrePrecedent;
+      setImpression(false);
+    };
+    document.body.classList.add("impression-statistiques");
+    // Nom de fichier proposé pour l'enregistrement en PDF
+    document.title = `Statistiques médicales ${range[0].format("DD-MM-YYYY")} au ${range[1].format("DD-MM-YYYY")}`;
+    window.addEventListener("afterprint", terminer, { once: true });
+    // Laisse le temps au rapport (et au logo) d'être rendus avant d'ouvrir l'impression
+    const timer = setTimeout(() => window.print(), 300);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("afterprint", terminer);
+      document.body.classList.remove("impression-statistiques");
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [impression]);
 
   const range = useMemo(
     () => (periode === "perso" && rangePerso ? [rangePerso[0].startOf("day"), rangePerso[1].endOf("day")] : PERIODES[periode === "perso" ? "mois" : periode].range()),
@@ -209,6 +241,12 @@ function StatistiquesMedicales() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [courant, precedent, regions]);
   const parMedecin = useMemo(() => activiteParMedecin(courant), [courant]);
+  // L'API ne renvoie que le code du motif : le libellé vient du référentiel
+  const visites = useMemo(() => statistiquesVisites(courant.consultations
+    .map((c) => ({ ...c, libelle_motifcons: libelleMotif(c.code_motifcons) }))
+    .filter(estVisite)),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [courant, motifs]);
   const medicaments = useMemo(() => topActes(courant.prescriptions, codesPrescriptions.ORD), [courant]);
   const analyses = useMemo(() => topActes(courant.prescriptions, codesPrescriptions.ANA), [courant]);
   const imageries = useMemo(() => topActes(courant.prescriptions, codesPrescriptions.IMG), [courant]);
@@ -232,7 +270,7 @@ function StatistiquesMedicales() {
     const actesRows = (rows, titre) => rows.map((r) => ({ Rang: r.rang, [titre]: r.libelle, Prescriptions: r.prescriptions, "Quantité": r.quantite }));
     exportWorkbookToExcel([
       {
-        name: "Synthèse",
+        name: "Synthèse", synthese: true,
         rows: [
           { Indicateur: "Période", "Période": libellePeriode, "Période précédente": libellePrecedent, "Évolution (%)": "" },
           { Indicateur: "Service", "Période": libelleService, "Période précédente": "", "Évolution (%)": "" },
@@ -283,6 +321,7 @@ function StatistiquesMedicales() {
         ],
       },
       { name: "Affluence", rows: [...heures.map((h) => ({ "Créneau": h.heure, Consultations: h.Consultations })), ...joursSemaine.map((j) => ({ "Créneau": j.jour, Consultations: j.Consultations }))] },
+      { name: "Visites", rows: lignesExportVisites(visites) },
       { name: "Qualité des données", rows: qualite.map((q) => ({ Champ: q.champ, "Taux de remplissage (%)": q.taux })) },
       {
         name: "Accidents du travail",
@@ -313,15 +352,156 @@ function StatistiquesMedicales() {
           Tension: c.tension, "Température": c.temp, "Repos (jours)": c.nb_jours_rm,
         })),
       },
-    ], `Statistiques_medicales_${range[0].format("YYYYMMDD")}_${range[1].format("YYYYMMDD")}`);
+    ], `Statistiques_medicales_${range[0].format("YYYYMMDD")}_${range[1].format("YYYYMMDD")}`, {
+      titre: "Statistiques médicales",
+      sousTitre: `${libellePeriode} · ${libelleService}`,
+      details: `Comparé à la période précédente (${libellePrecedent})`,
+      indicateurs: [
+        { label: "Consultations", valeur: kpi.consultations, pied: `${kpiPrec.consultations} sur la période précédente`, couleur: token.colorPrimary },
+        { label: "Patients vus", valeur: kpi.patients, pied: `${kpi.consultationsParPatient} consultation(s) par patient`, couleur: "#722ed1" },
+        { label: "Rendez-vous honorés", valeur: `${kpi.tauxHonoration} %`, pied: `${kpi.rendezVous} rendez-vous`, couleur: token.colorSuccess },
+        { label: "Consultations validées", valeur: `${kpi.tauxValidation} %`, pied: `${kpi.tauxPrescription} % avec prescription`, couleur: token.colorSuccess },
+        { label: "Jours de repos médical", valeur: kpi.joursRepos, pied: `${kpiPrec.joursRepos} sur la période précédente`, couleur: "#13c2c2" },
+        { label: "Tensions élevées (≥ 140/90)", valeur: kpi.hta, pied: `${kpi.tauxHta} % des tensions mesurées`, couleur: token.colorError },
+        { label: "Fièvres (> 37,5 °C)", valeur: kpi.fievres, pied: `${kpi.tdrPositifs} TDR positif(s)`, couleur: "#fa541c" },
+        { label: "Prescriptions", valeur: kpi.prescriptions, pied: `${kpi.ordonnances} ord. · ${kpi.analyses} ana. · ${kpi.imageries} img.`, couleur: LOGO_BROWN },
+      ],
+      graphiques: [
+        { titre: "Évolution de l'activité", type: "aire", data: evolutionSerie.data, x: "periode", series: [{ cle: "Rendez-vous", couleur: token.colorPrimary }, { cle: "Consultations", couleur: "#fa8c16" }] },
+        { titre: "Répartition par sexe", type: "donut", data: sexe, x: "name", series: [{ cle: "value" }], demi: true },
+        { titre: "Type de patient", type: "donut", data: types, x: "name", series: [{ cle: "value" }], demi: true },
+        { titre: "Tranches d'âge", type: "barres", data: ages, x: "tranche", series: [{ cle: "Patients", couleur: "#722ed1" }], demi: true },
+        { titre: "Jours de la semaine", type: "barres", data: joursSemaine.map((j) => ({ ...j, jour: j.jour.slice(0, 3) })), x: "jour", series: [{ cle: "Consultations", couleur: token.colorSuccess }], demi: true },
+        { titre: "Heures d'affluence", type: "barres", data: heures, x: "heure", series: [{ cle: "Consultations", couleur: "#fa8c16" }] },
+        { titre: "Diagnostics les plus fréquents", type: "barresH", data: diagnostics.slice(0, 10), x: "libelle", series: [{ cle: "nombre", couleur: token.colorPrimary }] },
+        ...graphiquesExportVisites(visites),
+      ],
+    });
   };
+
+  const champsFaibles = qualite.filter((q) => q.taux < 50);
+
+  const onglets = [
+                {
+                  key: "diagnostics", label: `Diagnostics (${diagnostics.length})`,
+                  children: <Table size="small" className="compact-table" pagination={false} dataSource={diagnostics} columns={colonnesClassement("Diagnostic", { inverse: true })} loading={loading} />,
+                },
+                {
+                  key: "pathologies", label: "Pathologies",
+                  children: <Table size="small" className="compact-table" pagination={false} dataSource={parPathologie} columns={colonnesClassement("Pathologie", { inverse: true })} loading={loading} />,
+                },
+                {
+                  key: "motifs", label: "Motifs",
+                  children: <Table size="small" className="compact-table" pagination={false} dataSource={parMotif} columns={colonnesClassement("Motif")} loading={loading} />,
+                },
+                {
+                  key: "regions", label: "Régions concernées",
+                  children: <Table size="small" className="compact-table" pagination={false} dataSource={parRegion} columns={colonnesClassement("Région", { inverse: true })} loading={loading} />,
+                },
+                {
+                  key: "medecins", label: `Activité par médecin (${parMedecin.length})`,
+                  children: (
+                    <Table
+                      size="small" className="compact-table" pagination={false} dataSource={parMedecin} loading={loading} scroll={{ x: "max-content" }}
+                      columns={[
+                        { title: "Médecin", dataIndex: "medecin", key: "medecin", render: (v) => <Text strong>{v}</Text> },
+                        { title: "Consultations", dataIndex: "consultations", key: "consultations", align: "right", sorter: (a, b) => a.consultations - b.consultations, defaultSortOrder: "descend" },
+                        { title: "Part", dataIndex: "part", key: "part", width: 160, render: (v) => <Progress percent={v} size="small" format={(p) => `${p} %`} /> },
+                        { title: "Patients", dataIndex: "patients", key: "patients", align: "right", sorter: (a, b) => a.patients - b.patients },
+                        { title: "Ordonnances", dataIndex: "ordonnances", key: "ordonnances", align: "right", sorter: (a, b) => a.ordonnances - b.ordonnances },
+                        { title: "Analyses", dataIndex: "analyses", key: "analyses", align: "right", sorter: (a, b) => a.analyses - b.analyses },
+                        { title: "Imageries", dataIndex: "imageries", key: "imageries", align: "right", sorter: (a, b) => a.imageries - b.imageries },
+                        { title: "Repos prescrits", key: "repos", align: "right", sorter: (a, b) => a.joursRepos - b.joursRepos, render: (r) => `${r.repos} (${r.joursRepos} j)` },
+                        { title: "Fièvres", dataIndex: "fievres", key: "fievres", align: "right" },
+                      ]}
+                    />
+                  ),
+                },
+                ...[
+                  { key: "medicaments", label: "Médicaments", rows: medicaments, titre: "Médicament" },
+                  { key: "analyses", label: "Analyses prescrites", rows: analyses, titre: "Analyse" },
+                  { key: "imageries", label: "Imageries prescrites", rows: imageries, titre: "Imagerie" },
+                ].map(({ key, label, rows, titre }) => ({
+                  key, label,
+                  children: (
+                    <Table
+                      size="small" className="compact-table" pagination={false} dataSource={rows} loading={loading}
+                      columns={[
+                        { title: "#", dataIndex: "rang", key: "rang", width: 50, align: "center" },
+                        { title: titre, dataIndex: "libelle", key: "libelle", render: (v) => <Text strong>{v}</Text> },
+                        { title: "Prescriptions", dataIndex: "prescriptions", key: "prescriptions", align: "right" },
+                        { title: "Quantité prescrite", dataIndex: "quantite", key: "quantite", align: "right" },
+                      ]}
+                    />
+                  ),
+                })),
+                {
+                  key: "accidents", label: `Accidents du travail (${courant.accidents.length})`,
+                  children: (
+                    <Table
+                      size="small" className="compact-table" pagination={{ pageSize: 20, hideOnSinglePage: true }} loading={loading}
+                      dataSource={courant.accidents} rowKey="num_at" scroll={{ x: "max-content" }}
+                      locale={{ emptyText: "Aucun accident du travail sur cette période" }}
+                      columns={[
+                        { title: "N° AT", dataIndex: "num_at", key: "num_at" },
+                        { title: "Date", dataIndex: "date_at", key: "date_at", render: (v) => (v ? dayjs(v).format("DD/MM/YYYY HH:mm") : "-"), sorter: (a, b) => dayjs(a.date_at).valueOf() - dayjs(b.date_at).valueOf(), defaultSortOrder: "descend" },
+                        { title: "Victime", key: "victime", render: (r) => <Text strong>{`${r.prenoms || ""} ${r.nom || ""}`.trim()}</Text> },
+                        { title: "Service", dataIndex: "service", key: "service" },
+                        { title: "Lieu", dataIndex: "lieu_at", key: "lieu_at", render: (v) => (v ? <Tag>{v}</Tag> : "-") },
+                        { title: "ITT", dataIndex: "itt", key: "itt", align: "right", render: (v) => (v ? `${v} j` : "-") },
+                        { title: "Lésions", dataIndex: "nature_lesions", key: "nature_lesions", render: (v) => <Text ellipsis={{ tooltip: v }} style={{ maxWidth: 260 }}>{v || "-"}</Text> },
+                      ]}
+                    />
+                  ),
+                },
+                {
+                  key: "qualite", label: <span>Qualité des données {champsFaibles.length > 0 && <Tag color="warning">{champsFaibles.length}</Tag>}</span>,
+                  children: (
+                    <>
+                      <Alert
+                        type="info" showIcon style={{ marginBottom: 12 }}
+                        message="Fiabilité des statistiques"
+                        description="Les classements par motif, pathologie ou région ne portent que sur les consultations où ces champs sont renseignés. Un taux de remplissage faible rend ces statistiques peu représentatives."
+                      />
+                      <Table
+                        size="small" className="compact-table" pagination={false} dataSource={qualite}
+                        columns={[
+                          { title: "Champ de la consultation", dataIndex: "champ", key: "champ", render: (v) => <Text strong>{v}</Text> },
+                          {
+                            title: "Taux de remplissage", dataIndex: "taux", key: "taux", width: 320,
+                            render: (v) => (
+                              <Progress percent={v} size="small" format={(p) => `${p} %`}
+                                status={v < 50 ? "exception" : v < 80 ? "normal" : "success"}
+                                strokeColor={v < 50 ? token.colorError : v < 80 ? token.colorWarning : token.colorSuccess} />
+                            ),
+                          },
+                        ]}
+                      />
+                    </>
+                  ),
+                },
+];
 
   const pieLabel = ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)} %`;
   const pasDeDonnees = !loading && courant.consultations.length === 0;
-  const champsFaibles = qualite.filter((q) => q.taux < 50);
+
+  const user = getUserConnected();
 
   return (
     <div>
+      {/* Rapport A4 préparé hors de l'écran et imprimé seul (export PDF) */}
+      {impression && createPortal(
+        <RapportImpression
+          libelleService={libelleService} libellePeriode={libellePeriode} libellePrecedent={libellePrecedent}
+          medecins={medecins} user={user} kpi={kpi} kpiPrec={kpiPrec} evolutionSerie={evolutionSerie} visites={visites}
+          sexe={sexe} ages={ages} types={types} heures={heures} joursSemaine={joursSemaine}
+          diagnostics={diagnostics} parPathologie={parPathologie} parMotif={parMotif} parRegion={parRegion}
+          parMedecin={parMedecin} medicaments={medicaments} analyses={analyses} imageries={imageries}
+          qualite={qualite} at={at} atPrec={atPrec} accidents={courant.accidents}
+        />,
+        document.body
+      )}
+
       {/* En-tête et filtres */}
       <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 20 } }}>
         <Flex justify="space-between" align="flex-start" wrap gap={16}>
@@ -345,6 +525,15 @@ function StatistiquesMedicales() {
               style={{ color: "#1d6f42", borderColor: "#1d6f42" }}
             >
               Export Excel
+            </Button>
+            <Button
+              icon={<FilePdfOutlined />}
+              onClick={() => setImpression(true)}
+              loading={impression}
+              disabled={loading || pasDeDonnees}
+              style={{ color: "#c0392b", borderColor: "#c0392b" }}
+            >
+              Export PDF
             </Button>
           </Space>
         </Flex>
@@ -499,6 +688,12 @@ function StatistiquesMedicales() {
                 )}
               </ChartCard>
             </Col>
+            <Col xs={24}>
+              <SyntheseVisites
+                stats={visites} loading={loading}
+                extra={<Button type="link" icon={<AuditOutlined />} onClick={() => navigate("/espace-medical/consultations/visites", { state: { periode: 9, dateRange: range.map((d) => d.toISOString()) } })}>Détails des visites</Button>}
+              />
+            </Col>
             <Col xs={24} xl={16}>
               <ChartCard title="Diagnostics les plus fréquents" icon={<BarChartOutlined />} height={300}>
                 {loading ? <Skeleton active /> : (
@@ -610,108 +805,7 @@ function StatistiquesMedicales() {
 
           {/* Tableaux détaillés */}
           <Card size="small" styles={{ body: { paddingTop: 0 } }}>
-            <Tabs
-              items={[
-                {
-                  key: "diagnostics", label: `Diagnostics (${diagnostics.length})`,
-                  children: <Table size="small" className="compact-table" pagination={false} dataSource={diagnostics} columns={colonnesClassement("Diagnostic", { inverse: true })} loading={loading} />,
-                },
-                {
-                  key: "pathologies", label: "Pathologies",
-                  children: <Table size="small" className="compact-table" pagination={false} dataSource={parPathologie} columns={colonnesClassement("Pathologie", { inverse: true })} loading={loading} />,
-                },
-                {
-                  key: "motifs", label: "Motifs",
-                  children: <Table size="small" className="compact-table" pagination={false} dataSource={parMotif} columns={colonnesClassement("Motif")} loading={loading} />,
-                },
-                {
-                  key: "regions", label: "Régions concernées",
-                  children: <Table size="small" className="compact-table" pagination={false} dataSource={parRegion} columns={colonnesClassement("Région", { inverse: true })} loading={loading} />,
-                },
-                {
-                  key: "medecins", label: `Activité par médecin (${parMedecin.length})`,
-                  children: (
-                    <Table
-                      size="small" className="compact-table" pagination={false} dataSource={parMedecin} loading={loading} scroll={{ x: "max-content" }}
-                      columns={[
-                        { title: "Médecin", dataIndex: "medecin", key: "medecin", render: (v) => <Text strong>{v}</Text> },
-                        { title: "Consultations", dataIndex: "consultations", key: "consultations", align: "right", sorter: (a, b) => a.consultations - b.consultations, defaultSortOrder: "descend" },
-                        { title: "Part", dataIndex: "part", key: "part", width: 160, render: (v) => <Progress percent={v} size="small" format={(p) => `${p} %`} /> },
-                        { title: "Patients", dataIndex: "patients", key: "patients", align: "right", sorter: (a, b) => a.patients - b.patients },
-                        { title: "Ordonnances", dataIndex: "ordonnances", key: "ordonnances", align: "right", sorter: (a, b) => a.ordonnances - b.ordonnances },
-                        { title: "Analyses", dataIndex: "analyses", key: "analyses", align: "right", sorter: (a, b) => a.analyses - b.analyses },
-                        { title: "Imageries", dataIndex: "imageries", key: "imageries", align: "right", sorter: (a, b) => a.imageries - b.imageries },
-                        { title: "Repos prescrits", key: "repos", align: "right", sorter: (a, b) => a.joursRepos - b.joursRepos, render: (r) => `${r.repos} (${r.joursRepos} j)` },
-                        { title: "Fièvres", dataIndex: "fievres", key: "fievres", align: "right" },
-                      ]}
-                    />
-                  ),
-                },
-                ...[
-                  { key: "medicaments", label: "Médicaments", rows: medicaments, titre: "Médicament" },
-                  { key: "analyses", label: "Analyses prescrites", rows: analyses, titre: "Analyse" },
-                  { key: "imageries", label: "Imageries prescrites", rows: imageries, titre: "Imagerie" },
-                ].map(({ key, label, rows, titre }) => ({
-                  key, label,
-                  children: (
-                    <Table
-                      size="small" className="compact-table" pagination={false} dataSource={rows} loading={loading}
-                      columns={[
-                        { title: "#", dataIndex: "rang", key: "rang", width: 50, align: "center" },
-                        { title: titre, dataIndex: "libelle", key: "libelle", render: (v) => <Text strong>{v}</Text> },
-                        { title: "Prescriptions", dataIndex: "prescriptions", key: "prescriptions", align: "right" },
-                        { title: "Quantité prescrite", dataIndex: "quantite", key: "quantite", align: "right" },
-                      ]}
-                    />
-                  ),
-                })),
-                {
-                  key: "accidents", label: `Accidents du travail (${courant.accidents.length})`,
-                  children: (
-                    <Table
-                      size="small" className="compact-table" pagination={{ pageSize: 20, hideOnSinglePage: true }} loading={loading}
-                      dataSource={courant.accidents} rowKey="num_at" scroll={{ x: "max-content" }}
-                      locale={{ emptyText: "Aucun accident du travail sur cette période" }}
-                      columns={[
-                        { title: "N° AT", dataIndex: "num_at", key: "num_at" },
-                        { title: "Date", dataIndex: "date_at", key: "date_at", render: (v) => (v ? dayjs(v).format("DD/MM/YYYY HH:mm") : "-"), sorter: (a, b) => dayjs(a.date_at).valueOf() - dayjs(b.date_at).valueOf(), defaultSortOrder: "descend" },
-                        { title: "Victime", key: "victime", render: (r) => <Text strong>{`${r.prenoms || ""} ${r.nom || ""}`.trim()}</Text> },
-                        { title: "Service", dataIndex: "service", key: "service" },
-                        { title: "Lieu", dataIndex: "lieu_at", key: "lieu_at", render: (v) => (v ? <Tag>{v}</Tag> : "-") },
-                        { title: "ITT", dataIndex: "itt", key: "itt", align: "right", render: (v) => (v ? `${v} j` : "-") },
-                        { title: "Lésions", dataIndex: "nature_lesions", key: "nature_lesions", render: (v) => <Text ellipsis={{ tooltip: v }} style={{ maxWidth: 260 }}>{v || "-"}</Text> },
-                      ]}
-                    />
-                  ),
-                },
-                {
-                  key: "qualite", label: <span>Qualité des données {champsFaibles.length > 0 && <Tag color="warning">{champsFaibles.length}</Tag>}</span>,
-                  children: (
-                    <>
-                      <Alert
-                        type="info" showIcon style={{ marginBottom: 12 }}
-                        message="Fiabilité des statistiques"
-                        description="Les classements par motif, pathologie ou région ne portent que sur les consultations où ces champs sont renseignés. Un taux de remplissage faible rend ces statistiques peu représentatives."
-                      />
-                      <Table
-                        size="small" className="compact-table" pagination={false} dataSource={qualite}
-                        columns={[
-                          { title: "Champ de la consultation", dataIndex: "champ", key: "champ", render: (v) => <Text strong>{v}</Text> },
-                          {
-                            title: "Taux de remplissage", dataIndex: "taux", key: "taux", width: 320,
-                            render: (v) => (
-                              <Progress percent={v} size="small" format={(p) => `${p} %`}
-                                status={v < 50 ? "exception" : v < 80 ? "normal" : "success"}
-                                strokeColor={v < 50 ? token.colorError : v < 80 ? token.colorWarning : token.colorSuccess} />
-                            ),
-                          },
-                        ]}
-                      />
-                    </>
-                  ),
-                },
-              ]}
-            />
+            <Tabs items={onglets} />
           </Card>
         </>
       )}

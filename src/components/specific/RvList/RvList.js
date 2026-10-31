@@ -2,6 +2,7 @@ import {
   EditOutlined,
   FileAddOutlined,
   FolderOpenOutlined,
+  HeartOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
@@ -25,6 +26,7 @@ import useFetch from "../../../utils/hooks/useFetch";
 import { endpoints } from "../../../constants/endpoints.constants";
 import PeriodeSelect from "../../common/PeriodeSelect/PeriodeSelect";
 import { RiStethoscopeLine } from "react-icons/ri";
+import { FaTooth } from "react-icons/fa";
 import { AiOutlineFolder } from "react-icons/ai";
 import Examen from "../Examen/Examen";
 import {
@@ -45,6 +47,8 @@ import EditButton from "../../common/EditButton/EditButton.js";
 import TotalTag from "../../common/TotalTag/TotalTag.js";
 import AddAnalyseExterne from "../AddAnalyseExterne/AddAnalyseExterne.js";
 import { LOGO_BROWN } from "../../../constants/app.constants.js";
+import { isAdmin, isAssistantEspace } from "../../../utils/profils.js";
+import ConstantesDentaires from "../ConstantesDentaires/ConstantesDentaires.js";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -78,6 +82,30 @@ const RvList = ({ serviceType, today }) => {
   const [prescriptionPatient, setPrescriptionPatient] = useState(null);
 
   const [segmentedValue, setSegmentedValue] = useState("attente");
+  const [constantesPatient, setConstantesPatient] = useState(null);
+  const [demarrageEnCours, setDemarrageEnCours] = useState(null);
+
+  const estDentaire = serviceType === ServiceType.DENTAIRE;
+  const assistantEspace = isAssistantEspace(serviceType, userConnected);
+
+  // Dentaire : pas de pré-examen médical. La consultation est créée au besoin, puis ouverte directement
+  const demarrerConsultationDentaire = async (record) => {
+    setDemarrageEnCours(record.num_ordre);
+    try {
+      const response = await getActions(`${endpoints.consultations.FIND_CONSULTATIONS}?numRV=${record.num_ordre}`);
+      if (!response?.data) throw new Error("Consultation introuvable");
+      if (!response.data.numcons) {
+        const creation = await postActions(endpoints.consultations.SAVE, { ...response.data, numpat: record.num_patient, numrv: record.num_ordre });
+        if (creation?.data?.Saved !== true) throw new Error("Consultation non créée");
+      }
+      sessionStorage.setItem("currentPatient", JSON.stringify(record));
+      navigate(`/espace-dentist/consultation/${record.num_patient}/${record.num_ordre}?serviceType=${serviceType}`, { state: { patient: record } });
+    } catch (error) {
+      console.log(error);
+      message.error("La consultation n'a pas pu être démarrée, veuillez réessayer");
+      setDemarrageEnCours(null);
+    }
+  };
 
   const onAddPrescription = (record) => {
     setPrescriptionPatient(record);
@@ -168,20 +196,16 @@ const RvList = ({ serviceType, today }) => {
     sessionStorage.setItem("currentPatient", JSON.stringify(record));
   };
 
+  // Accueil, administrateurs et assistant(e)s de l'espace : tous les RV (du service) ; praticiens : uniquement leurs propres RV
+  const voitTousLesRv = serviceType === ServiceType.ACCUEIL || isAdmin(userConnected) || assistantEspace;
+  const estVisible = (element) =>
+    serviceType === ServiceType.ACCUEIL
+    || (element.service_medical === serviceType
+      && (voitTousLesRv || element.id_medecin === userConnected?.login));
+
   const getFilteredData = () => {
-    if (segmentedValue === "attente") {
-      if (serviceType === ServiceType.ACCUEIL) {
-        return dataCopy.filter(element => element.effectue === false).reverse()
-      } else {
-        return dataCopy.filter(element => element.effectue === false && element.service_medical === serviceType && element.id_medecin === userConnected.login).reverse()
-      }
-    } else {
-      if (serviceType === ServiceType.ACCUEIL) {
-        return dataCopy.filter(element => element.effectue === true).reverse()
-      } else {
-        return dataCopy.filter(element => element.effectue === true && element.service_medical === serviceType && element.id_medecin === userConnected.login).reverse()
-      }
-    }
+    const effectue = segmentedValue !== "attente";
+    return dataCopy.filter(element => element.effectue === effectue && estVisible(element)).reverse()
   }
 
   return (
@@ -252,7 +276,7 @@ const RvList = ({ serviceType, today }) => {
 
       <DataTable
         compact
-        dataSource={serviceType === ServiceType.ACCUEIL ? data : data.filter((element) => element.id_medecin === userConnected.login)}
+        dataSource={data.filter(estVisible)}
         rowSelected
         selectedRowKeys={selectedRows}
         setSelectedRowKeys={setSelectedRows}
@@ -380,8 +404,29 @@ const RvList = ({ serviceType, today }) => {
                           />
                         )}
                       </Tooltip>
+                      {estDentaire && (
+                        <>
+                          <Tooltip title="Constantes avant le soin">
+                            <Button
+                              type="text"
+                              onClick={() => setConstantesPatient(record)}
+                              icon={<HeartOutlined style={{ fontSize: 18, color: "#eb3b5a" }} />}
+                            />
+                          </Tooltip>
+                          {!assistantEspace && (
+                            <Tooltip title={record.effectue ? "Ouvrir la consultation" : "Démarrer la consultation"}>
+                              <Button
+                                type="text"
+                                loading={demarrageEnCours === record.num_ordre}
+                                onClick={() => demarrerConsultationDentaire(record)}
+                                icon={<FaTooth size={17} color="#3867d6" />}
+                              />
+                            </Tooltip>
+                          )}
+                        </>
+                      )}
                       {
-                        serviceType !== ServiceType.ACCUEIL &&
+                        serviceType !== ServiceType.ACCUEIL && !estDentaire &&
                         <Tooltip title="Données cliniques">
                           <Button
                             type="text"
@@ -469,8 +514,19 @@ const RvList = ({ serviceType, today }) => {
         )}
       </Modal>
 
+      {constantesPatient && (
+        <ConstantesDentaires
+          record={constantesPatient}
+          onFermer={() => setConstantesPatient(null)}
+          onEnregistre={() => {
+            setConstantesPatient(null);
+            onRefresh();
+          }}
+        />
+      )}
+
       <Modal
-        style={{ top: 20, maxWidth: 850 }}
+        style={{ top: 20, maxWidth: "95vw" }}
         styles={{
           body: {
             overflowY: "auto",
@@ -478,7 +534,7 @@ const RvList = ({ serviceType, today }) => {
             maxHeight: "90vh",
           },
         }}
-        width="80%"
+        width={1150}
         title="Nouvelle prescription d'analyse externe"
         open={isAddPrescriptionModalVisible}
         onCancel={() => {

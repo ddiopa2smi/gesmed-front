@@ -128,6 +128,7 @@ const AddAT = ({ setOpen, currentRecord, operationType, onRefresh }) => {
                     datenaiss: toDayjs(patient.datenaiss_patient),
                     service: patient.lib_dept || patient.code_dir || undefined,
                     lieu_residence: patient.adresse_patient || undefined,
+                    emploi: patient.emploi_patient || undefined,
                 });
                 message.success(`Fiche de ${patient.prenom_patient} ${patient.nom_patient} chargée`);
             })
@@ -220,8 +221,9 @@ const AddAT = ({ setOpen, currentRecord, operationType, onRefresh }) => {
                         type="info"
                         showIcon
                         style={{ marginBottom: 16 }}
-                        message="Saisissez le matricule du patient puis appuyez sur Entrée pour charger sa fiche."
+                        message="Saisissez le matricule du patient puis appuyez sur Entrée : les autres informations sont reprises de sa fiche et ne sont pas modifiables ici."
                     />
+                    {/* Seul le matricule est saisi : les autres champs viennent de la fiche patient (lecture seule) */}
                     <Row gutter={[24, 0]}>
                         <Col xs={24} md={8}>
                             <Form.Item name="matricule" label="Matricule Patient" rules={[{ required: true, message: 'Champ obligatoire' }]}>
@@ -235,17 +237,17 @@ const AddAT = ({ setOpen, currentRecord, operationType, onRefresh }) => {
                         </Col>
                         <Col xs={24} md={8}>
                             <Form.Item name="nom" label="Nom" rules={[{ required: true, message: 'Champ obligatoire' }]}>
-                                <Input placeholder="Nom" />
+                                <Input placeholder="Nom" readOnly variant="filled" />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
                             <Form.Item name="prenoms" label="Prénom(s)" rules={[{ required: true, message: 'Champ obligatoire' }]}>
-                                <Input placeholder="Prénom(s)" />
+                                <Input placeholder="Prénom(s)" readOnly variant="filled" />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
                             <Form.Item name="sexe" label="Sexe">
-                                <Radio.Group optionType="button" buttonStyle="solid">
+                                <Radio.Group optionType="button" buttonStyle="solid" disabled>
                                     <Radio value="MA">Masculin</Radio>
                                     <Radio value="FE">Féminin</Radio>
                                 </Radio.Group>
@@ -253,22 +255,31 @@ const AddAT = ({ setOpen, currentRecord, operationType, onRefresh }) => {
                         </Col>
                         <Col xs={24} md={8}>
                             <Form.Item name="datenaiss" label="Date de naissance">
-                                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Sélectionner" />
+                                <DatePicker
+                                    style={{ width: "100%" }}
+                                    format="DD/MM/YYYY"
+                                    placeholder="-"
+                                    variant="filled"
+                                    inputReadOnly
+                                    open={false}
+                                    allowClear={false}
+                                    suffixIcon={null}
+                                />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
                             <Form.Item name="lieu_residence" label="Lieu de résidence">
-                                <Input placeholder="Lieu de résidence" />
+                                <Input placeholder="-" readOnly variant="filled" />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={12}>
                             <Form.Item name="service" label="Service">
-                                <Input placeholder="Service" />
+                                <Input placeholder="-" readOnly variant="filled" />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={12}>
                             <Form.Item name="emploi" label="Emploi">
-                                <Input placeholder="Emploi occupé" />
+                                <Input placeholder="-" readOnly variant="filled" />
                             </Form.Item>
                         </Col>
                     </Row>

@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Button, Flex, Input, Modal, Space, Tooltip, message } from "antd";
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Flex, Input, Modal, Space, Tooltip, Typography, message } from "antd";
+import { DeleteOutlined, EditOutlined, InfoCircleOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import DataTable from "../DataTable/DataTable";
 import { deleteActions } from "../../../actions/actions";
 import { deletePopup } from "../../../utils/helpers";
+
+const { Text } = Typography;
 
 /**
  * Liste d'un paramètre (forme galénique, famille, conditionnement...) avec les actions
@@ -11,6 +13,7 @@ import { deletePopup } from "../../../utils/helpers";
  *
  * renderForm({ operationType, currentRecord, setOpen, onRefresh }) rend le formulaire d'ajout/modification.
  * getDeleteUrl(record) renvoie l'URL de suppression de la ligne.
+ * onSelect(record) (facultatif) : appelé au double-clic sur une ligne, pour choisir directement la valeur.
  */
 function GestionParametres({
     data,
@@ -22,6 +25,7 @@ function GestionParametres({
     renderForm,
     addTitle = "Ajouter",
     updateTitle = "Modifier",
+    onSelect,
 }) {
     const [open, setOpen] = useState(false);
     const [operationType, setOperationType] = useState("add");
@@ -73,9 +77,16 @@ function GestionParametres({
                     onChange={(e) => setSearch(e.target.value)}
                     allowClear
                 />
-                <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-                    Ajouter
-                </Button>
+                <Space>
+                    {onSelect && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                            <InfoCircleOutlined /> Double-cliquez sur une ligne pour la sélectionner
+                        </Text>
+                    )}
+                    <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+                        Ajouter
+                    </Button>
+                </Space>
             </Flex>
 
             <DataTable
@@ -84,6 +95,11 @@ function GestionParametres({
                 dataSourceCopy={filteredData}
                 tableLoading={isLoading}
                 rowKey={rowKey}
+                onRow={onSelect ? (record) => ({
+                    onDoubleClick: () => onSelect(record),
+                    style: { cursor: "pointer" },
+                    title: "Double-cliquer pour sélectionner",
+                }) : undefined}
                 columns={[
                     ...columns,
                     {

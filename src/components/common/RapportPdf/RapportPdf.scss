@@ -1,0 +1,46 @@
+// Export PDF des rapports de statistiques.
+// Le rapport est rendu directement dans <body>, hors de l'écran ; pendant l'impression,
+// seul ce rapport est imprimé (le reste de l'application est masqué, sans pages vides).
+
+.stats-print-portal {
+    position: fixed;
+    top: 0;
+    left: -10000px;
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 12mm 12mm 14mm 12mm;
+
+        // Pied de page propre au rapport (remplace l'adresse / la date ajoutées par le navigateur)
+        @bottom-left {
+            content: "GESMED · Rapport de statistiques · Document confidentiel";
+            font-family: Arial, sans-serif;
+            font-size: 7.5pt;
+            color: #777;
+        }
+
+        @bottom-right {
+            content: "Page " counter(page) " / " counter(pages);
+            font-family: Arial, sans-serif;
+            font-size: 7.5pt;
+            color: #777;
+        }
+    }
+
+    body.impression-statistiques {
+        background: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+
+        > *:not(.stats-print-portal) {
+            display: none !important;
+        }
+
+        .stats-print-portal {
+            position: static;
+            left: auto;
+        }
+    }
+}

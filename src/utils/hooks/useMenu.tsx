@@ -25,7 +25,7 @@ import { useNavigate } from "react-router";
 import { ServiceType } from "../types/types.ts";
 import { ItemType, MenuItemType } from "antd/es/menu/interface";
 import { RiStethoscopeLine } from "react-icons/ri";
-import { isMedecinOuAdmin } from "../profils";
+import { peutVoirStatistiques } from "../profils";
 
 function useMenu({ serviceType }: { serviceType: ServiceType }) {
   const [sideBarMenu, setSideBarMenu] = useState<ItemType<MenuItemType>[]>([]);
@@ -136,7 +136,7 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
       },
     },
     // Statistiques : visibles uniquement pour les médecins et les administrateurs
-    ...(isMedecinOuAdmin()
+    ...(peutVoirStatistiques("medical")
       ? [{
           key: "statistiques",
           icon: <BarChartOutlined />,
@@ -224,6 +224,18 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-pharmacie/fournisseurs");
       },
     },
+    // Visible uniquement pour les profils autorisés (ACCES_STATISTIQUES)
+    ...(peutVoirStatistiques("pharmacie")
+      ? [{
+          key: "statistiques",
+          icon: <BarChartOutlined />,
+          label: "Statistiques",
+          title: "Statistiques de la pharmacie",
+          onClick: () => {
+            navigate("/espace-pharmacie/statistiques");
+          },
+        }]
+      : []),
   ];
 
   const dentistMenu: ItemType<MenuItemType>[] = [
@@ -368,6 +380,18 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-analyse/consultations");
       },
     },
+    // Visible uniquement pour les profils autorisés (ACCES_STATISTIQUES)
+    ...(peutVoirStatistiques("analyse")
+      ? [{
+          key: "statistiques",
+          icon: <BarChartOutlined />,
+          label: "Statistiques",
+          title: "Statistiques",
+          onClick: () => {
+            navigate("/espace-analyse/statistiques");
+          },
+        }]
+      : []),
   ];
 
   const radiologieMenu: ItemType<MenuItemType>[] = [
@@ -416,6 +440,18 @@ function useMenu({ serviceType }: { serviceType: ServiceType }) {
         navigate("/espace-radiologie/consultations");
       },
     },
+    // Visible uniquement pour les profils autorisés (ACCES_STATISTIQUES)
+    ...(peutVoirStatistiques("imagerie")
+      ? [{
+          key: "statistiques",
+          icon: <BarChartOutlined />,
+          label: "Statistiques",
+          title: "Statistiques",
+          onClick: () => {
+            navigate("/espace-radiologie/statistiques");
+          },
+        }]
+      : []),
   ];
 
   const hospitalisationMenu: ItemType<MenuItemType>[] = [

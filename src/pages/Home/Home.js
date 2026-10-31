@@ -26,7 +26,7 @@ import { FaTruckMedical } from "react-icons/fa6";
 import { FaVirus } from "react-icons/fa";
 import { TbGenderAndrogyne } from "react-icons/tb";
 import { IoMdQrScanner } from "react-icons/io";
-import { PROFILS } from "../../utils/profils";
+import { ASSISTANTS_PAR_ESPACE, PROFILS } from "../../utils/profils";
 
 const { Title } = Typography;
 
@@ -54,6 +54,7 @@ function Home() {
       id: 1,
       label: "Service médical",
       code: codeServices.MEDICAL,
+      roleAssistant: ASSISTANTS_PAR_ESPACE[ServiceType.MEDICAL],
       cover: medicine_image,
       onClick: () => {
         navigate("/espace-medical/dashboard");
@@ -84,6 +85,7 @@ function Home() {
       id: 3,
       label: "Service dentaire",
       code: codeServices.DENTAIRE,
+      roleAssistant: ASSISTANTS_PAR_ESPACE[ServiceType.DENTAIRE],
       cover: dentist_image,
       onClick: () => {
         navigate("/espace-dentist");
@@ -295,6 +297,7 @@ function Home() {
               canAccess={
                 userConnected.code_serv === item.code ||
                 userConnected.role_name === "Admin" ||
+                userConnected.role_name === item.roleAssistant ||
                 (item.profilsAutorises || []).includes(userConnected.profil)
               }
             />

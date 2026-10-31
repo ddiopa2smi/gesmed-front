@@ -115,6 +115,15 @@ function DossierAT() {
                   sorter: (a, b) => a.age_patient - b.age_patient,
               } ,
               {
+                  title: 'Emploi',
+                  dataIndex: 'emploi',
+                  key: 'emploi',
+                  sorter: (a, b) => (a.emploi || "").localeCompare(b.emploi || "", "fr"),
+                  render: (value) => value
+                      ? <Text ellipsis={{ tooltip: value }} style={{ maxWidth: 180, display: "inline-block" }}>{value}</Text>
+                      : <Text type="secondary">-</Text>,
+              } ,
+              {
                   title: 'Date',
                   dataIndex: 'date_at',
                   key: 'date_at',

@@ -11,6 +11,7 @@ import {
   CoffeeOutlined,
 } from "@ant-design/icons";
 import { Evolution, IndicatorRow, KpiCard } from "../../common/KpiCard/KpiCard";
+import { getResultatTdr } from "../../../utils/tdr";
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import dayjs from "dayjs";
 import RvList from "../RvList/RvList";
@@ -91,7 +92,7 @@ function DashboardComponent({ serviceType, title }) {
   const tauxValidation = listCons.length ? Math.round((consValidees / listCons.length) * 100) : 0;
   const patientsVus = new Set(listCons.map((c) => c.numpat)).size;
   const nbFievres = listCons.filter((c) => c.temp > SEUIL_FIEVRE).length;
-  const nbTdrPositifs = listCons.filter((c) => c.test_tdr === "positif").length;
+  const nbTdrPositifs = listCons.filter((c) => getResultatTdr(c) === "positif").length;
   const nbRepos = listCons.filter((c) => c.nb_jours_rm > 0).length;
 
   // Activité jour par jour depuis le début du mois

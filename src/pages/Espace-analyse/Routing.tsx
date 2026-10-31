@@ -9,6 +9,8 @@ import Consultations from "./Consultations/Consultations";
 import DossierMedical from "./DossierMedical/DossierMedical";
 import ConsultationPage from "../ConsultationPage/ConsultationPage";
 import InfosCliniques from "./InfosCliniques/InfosCliniques";
+import StatistiquesExamens from "../../components/specific/StatistiquesExamens/StatistiquesExamens";
+import AccesReserve from "../../components/common/AccesReserve/AccesReserve";
 
 export const analyseRouter: RouteObject = {
     path: "espace-analyse",
@@ -64,6 +66,14 @@ export const analyseRouter: RouteObject = {
         {
             path: "consultation/:numPatient/:numRv",
             element: <ConsultationPage />
+        },
+        {
+            path: "statistiques",
+            element: (
+                <AccesReserve espace="analyse" message="Les statistiques du laboratoire sont accessibles uniquement aux médecins, aux techniciens bio et aux administrateurs.">
+                    <StatistiquesExamens type="analyse" />
+                </AccesReserve>
+            )
         },
     ]
 }

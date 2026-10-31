@@ -5,9 +5,10 @@ import { endpoints } from "../../../constants/endpoints.constants";
 /**
  * Liste des motifs de consultation avec les actions d'ajout, de modification et de suppression.
  */
-function GestionMotifs({ data, isLoading, onRefresh }) {
+function GestionMotifs({ data, isLoading, onRefresh, codeSpe, onSelect }) {
     return (
         <GestionParametres
+            onSelect={onSelect}
             data={data}
             isLoading={isLoading}
             onRefresh={onRefresh}
@@ -15,7 +16,7 @@ function GestionMotifs({ data, isLoading, onRefresh }) {
             getDeleteUrl={(record) => `${endpoints.motifs.DELETE}/${record?.code_motifcons}`}
             addTitle="Nouveau motif"
             updateTitle="Modifier le motif"
-            renderForm={(props) => <AddMotif {...props} />}
+            renderForm={(props) => <AddMotif {...props} codeSpe={codeSpe} />}
             columns={[
                 {
                     title: "Code",

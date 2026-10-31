@@ -443,7 +443,7 @@ function AnalysesList({ onDataChange }) {
               </Modal>
 
               <Modal
-                style={{ top: 20, maxWidth: 850 }}
+                style={{ top: 20, maxWidth: "95vw" }}
                 styles={{
                   body: {
                     overflowY: "auto",
@@ -451,7 +451,7 @@ function AnalysesList({ onDataChange }) {
                     maxHeight: "90vh",
                   },
                 }}
-                width="80%"
+                width={1150}
                 title="Nouvelle prescription d'analyse externe"
                 open={isExternalModalVisible}
                 onCancel={() => setIsExternalModalVisible(false)}

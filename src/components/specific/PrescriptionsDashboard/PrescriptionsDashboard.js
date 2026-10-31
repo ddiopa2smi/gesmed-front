@@ -1,5 +1,5 @@
-import React from "react";
-import { Card, Col, Empty, Flex, Progress, Row, Skeleton, Space, Tag, Typography, theme } from "antd";
+import React, { useState } from "react";
+import { Card, Col, DatePicker, Empty, Flex, Progress, Row, Skeleton, Space, Tag, Typography, theme } from "antd";
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -15,11 +15,39 @@ import useFetch from "../../../utils/hooks/useFetch";
 import { endpoints } from "../../../constants/endpoints.constants";
 import { LOGO_BROWN } from "../../../constants/app.constants.js";
 import { Evolution, IndicatorRow, KpiCard } from "../../common/KpiCard/KpiCard";
+import PeriodeSelect from "../../common/PeriodeSelect/PeriodeSelect";
 
 const { Text, Title } = Typography;
+const { RangePicker } = DatePicker;
 
-// Période "ce mois" des listes de prescriptions
+// Périodes des listes de prescriptions (mêmes codes que l'API, cf. periodeOptions)
 const PERIODE_MOIS = 5;
+const PERIODE_DATE_A_DATE = 9;
+
+/**
+ * Bornes [début, fin] d'une période (mêmes règles que l'API : semaine du lundi au dimanche),
+ * son libellé ("ce mois-ci", "du 01/10 au 15/10"...) et si elle contient aujourd'hui.
+ */
+const decrirePeriode = (periode, plage) => {
+  const today = dayjs();
+  const p = {
+    1: [today.startOf("day"), today.endOf("day"), "aujourd'hui"],
+    2: [today.subtract(1, "day").startOf("day"), today.subtract(1, "day").endOf("day"), "hier"],
+    3: [today.startOf("week"), today.endOf("week"), "cette semaine"],
+    4: [today.subtract(1, "week").startOf("week"), today.subtract(1, "week").endOf("week"), "la semaine dernière"],
+    5: [today.startOf("month"), today.endOf("month"), `ce mois-ci (${today.format("MMMM YYYY")})`],
+    6: [today.subtract(1, "month").startOf("month"), today.subtract(1, "month").endOf("month"), `le mois dernier (${today.subtract(1, "month").format("MMMM YYYY")})`],
+    7: [today.startOf("year"), today.endOf("year"), `cette année (${today.year()})`],
+    8: [today.subtract(1, "year").startOf("year"), today.subtract(1, "year").endOf("year"), `l'année dernière (${today.year() - 1})`],
+  }[periode];
+  if (periode === PERIODE_DATE_A_DATE) {
+    if (!plage?.[0] || !plage?.[1]) return null;
+    const [debut, fin] = [plage[0].startOf("day"), plage[1].endOf("day")];
+    return { debut, fin, libelle: `du ${debut.format("DD/MM/YYYY")} au ${fin.format("DD/MM/YYYY")}`, inclutAujourdhui: !today.isBefore(debut) && !today.isAfter(fin) };
+  }
+  const [debut, fin, libelle] = p || [];
+  return { debut, fin, libelle, inclutAujourdhui: !today.isBefore(debut) && !today.isAfter(fin) };
+};
 
 const isSameDay = (value, day) => value && dayjs(value).isSame(day, "day");
 
@@ -30,6 +58,14 @@ const formatDuree = (minutes) => {
   if (minutes < 60 * 24) return `${(minutes / 60).toFixed(1).replace(".", ",")} h`;
   return `${(minutes / 60 / 24).toFixed(1).replace(".", ",")} j`;
 };
+
+// Libellé d'indicateur sur deux lignes : intitulé, puis période concernée
+const LibelleKpi = ({ titre, periode }) => (
+  <span style={{ display: "block", lineHeight: 1.35 }}>
+    {titre}
+    <span style={{ display: "block", fontSize: 11, fontStyle: "italic" }}>{periode}</span>
+  </span>
+);
 
 const TopList = ({ items, color, emptyText }) => {
   if (items.length === 0) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} />;
@@ -57,8 +93,20 @@ const TopList = ({ items, color, emptyText }) => {
 function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, withResultats = false, workList, basePath }) {
   const { token } = theme.useToken();
 
-  const { data: enAttenteData, isLoading: enAttenteLoading, onRefresh: refreshEnAttente } = useFetch(endpoints.prescriptions.LIST(PERIODE_MOIS, "Non"));
-  const { data: clotureesData, isLoading: clotureesLoading, onRefresh: refreshCloturees } = useFetch(endpoints.prescriptions.LIST(PERIODE_MOIS, "Oui"));
+  // Période analysée par les indicateurs (par défaut : le mois en cours)
+  const [periode, setPeriode] = useState(PERIODE_MOIS);
+  const [plage, setPlage] = useState(null);
+  const infosPeriode = decrirePeriode(periode, plage);
+  const libellePeriode = infosPeriode?.libelle || "période à préciser";
+
+  // En "date à date", rien n'est chargé tant que les deux dates ne sont pas choisies
+  const urlListe = (etat) => {
+    if (periode !== PERIODE_DATE_A_DATE) return endpoints.prescriptions.LIST(periode, etat);
+    return infosPeriode ? endpoints.prescriptions.LIST_BY_DATE(infosPeriode.debut.format("YYYY-MM-DD"), infosPeriode.fin.format("YYYY-MM-DD"), etat) : null;
+  };
+
+  const { data: enAttenteData, isLoading: enAttenteLoading, onRefresh: refreshEnAttente } = useFetch(urlListe("Non"));
+  const { data: clotureesData, isLoading: clotureesLoading, onRefresh: refreshCloturees } = useFetch(urlListe("Oui"));
   const { data: stock, isLoading: stockLoading, onRefresh: refreshStock } = useFetch(withStock ? endpoints.situation_stock.LIST : null);
   const { data: commandes, isLoading: commandesLoading } = useFetch(withStock ? endpoints.commande_produit.LIST : null);
 
@@ -100,15 +148,22 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
   const commandesEnCours = (commandes || []).filter((c) => c.etat !== "received");
   const montantCommandes = commandesEnCours.reduce((acc, c) => acc + (c.montant_bc || 0), 0);
 
-  // Activité jour par jour depuis le début du mois
-  const activite = Array.from({ length: today.date() }, (_, index) => {
-    const day = today.startOf("month").add(index, "day");
-    return {
-      jour: day.format("DD/MM"),
-      Reçues: toutes.filter((p) => isSameDay(p.datepresc, day)).length,
-      [labels.traitees]: cloturees.filter((p) => isSameDay(p.date_effet, day)).length,
-    };
-  });
+  // Activité sur la période : par jour, ou par mois au-delà de deux mois (année...).
+  // La période en cours s'arrête à aujourd'hui (pas de jours futurs vides).
+  const parMois = infosPeriode ? infosPeriode.fin.diff(infosPeriode.debut, "day") > 62 : false;
+  const uniteActivite = parMois ? "month" : "day";
+  const finActivite = infosPeriode && (infosPeriode.fin.isAfter(today) ? today : infosPeriode.fin);
+  const activite = [];
+  if (infosPeriode) {
+    for (let pas = infosPeriode.debut.startOf(uniteActivite); !pas.isAfter(finActivite, uniteActivite); pas = pas.add(1, uniteActivite)) {
+      const courant = pas;
+      activite.push({
+        jour: parMois ? courant.format("MMM YY") : courant.format("DD/MM"),
+        Reçues: toutes.filter((p) => p.datepresc && dayjs(p.datepresc).isSame(courant, uniteActivite)).length,
+        [labels.traitees]: cloturees.filter((p) => p.date_effet && dayjs(p.date_effet).isSame(courant, uniteActivite)).length,
+      });
+    }
+  }
 
   // Actes / médicaments les plus demandés
   const topActes = Object.entries(
@@ -129,12 +184,25 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
 
   return (
     <div>
-      {title && (
-        <div style={{ marginBottom: 16 }}>
-          <Title level={3} style={{ color: LOGO_BROWN, margin: 0 }}>{title}</Title>
+      {/* En-tête : titre + choix de la période analysée par les indicateurs */}
+      <Flex justify="space-between" align="flex-end" wrap gap={12} style={{ marginBottom: 16 }}>
+        <div>
+          {title && <Title level={3} style={{ color: LOGO_BROWN, margin: 0 }}>{title}</Title>}
           <Text type="secondary" style={{ textTransform: "capitalize" }}>{today.format("dddd DD MMMM YYYY")}</Text>
         </div>
-      )}
+        <Space wrap>
+          <Text type="secondary">Indicateurs sur :</Text>
+          <PeriodeSelect value={periode} onChange={setPeriode} />
+          {periode === PERIODE_DATE_A_DATE && (
+            <RangePicker
+              format="DD/MM/YYYY"
+              value={plage}
+              onChange={setPlage}
+              disabledDate={(date) => date && date.isAfter(dayjs(), "day")}
+            />
+          )}
+        </Space>
+      </Flex>
 
       {/* Indicateurs clés */}
       <Row gutter={[16, 16]}>
@@ -142,21 +210,35 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
           <KpiCard
             icon={<ClockCircleOutlined />}
             color={token.colorWarning}
-            label={`${labels.pluriel} en attente`}
+            label={<LibelleKpi titre={`${labels.pluriel} en attente`} periode={`prescrites ${libellePeriode}`} />}
             value={enAttente.length}
             loading={enAttenteLoading}
-            footer={<Text type="secondary">dont <Text strong>{enAttenteToday}</Text> reçue(s) aujourd'hui</Text>}
+            footer={infosPeriode?.inclutAujourdhui
+              ? <Text type="secondary">dont <Text strong>{enAttenteToday}</Text> reçue(s) aujourd'hui</Text>
+              : <Text type="secondary">non encore {labels.traitees.toLowerCase()}</Text>}
           />
         </Col>
         <Col xs={24} sm={12} xl={6}>
-          <KpiCard
-            icon={<CheckCircleOutlined />}
-            color={token.colorSuccess}
-            label={`${labels.traitees} aujourd'hui`}
-            value={traiteesToday}
-            loading={clotureesLoading}
-            footer={<Evolution current={traiteesToday} previous={traiteesYesterday} label="hier" />}
-          />
+          {/* Période contenant aujourd'hui : activité du jour ; sinon total de la période */}
+          {infosPeriode?.inclutAujourdhui ? (
+            <KpiCard
+              icon={<CheckCircleOutlined />}
+              color={token.colorSuccess}
+              label={`${labels.traitees} aujourd'hui`}
+              value={traiteesToday}
+              loading={clotureesLoading}
+              footer={<Evolution current={traiteesToday} previous={traiteesYesterday} label="hier" />}
+            />
+          ) : (
+            <KpiCard
+              icon={<CheckCircleOutlined />}
+              color={token.colorSuccess}
+              label={<LibelleKpi titre={labels.traitees} periode={libellePeriode} />}
+              value={cloturees.length}
+              loading={clotureesLoading}
+              footer={<Text type="secondary">sur <Text strong>{toutes.length}</Text> reçue(s) sur la période</Text>}
+            />
+          )}
         </Col>
         {withStock ? (
           <>
@@ -192,7 +274,7 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
                 label="Résultats déposés"
                 value={avecResultat}
                 loading={clotureesLoading}
-                footer={<Text type="secondary"><Text strong>{tauxResultat} %</Text> des {labels.pluriel.toLowerCase()} clôturées ce mois</Text>}
+                footer={<Text type="secondary"><Text strong>{tauxResultat} %</Text> des {labels.pluriel.toLowerCase()} clôturées {libellePeriode}</Text>}
               />
             </Col>
             <Col xs={24} sm={12} xl={6}>
@@ -202,7 +284,7 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
                 label="Délai moyen de traitement"
                 value={formatDuree(delaiMoyen)}
                 loading={clotureesLoading}
-                footer={<Text type="secondary">entre la prescription et la clôture</Text>}
+                footer={<Text type="secondary">prescription → clôture, {libellePeriode}</Text>}
               />
             </Col>
           </>
@@ -215,12 +297,12 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
 
       <br />
 
-      {/* Activité et synthèse du mois */}
+      {/* Activité et synthèse de la période choisie */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
           <Card
-            title="Activité du mois"
-            extra={<Text type="secondary" style={{ textTransform: "capitalize" }}>{today.format("MMMM YYYY")}</Text>}
+            title={parMois ? "Activité par mois" : "Activité par jour"}
+            extra={<Tag color="processing" style={{ marginInlineEnd: 0 }}>{libellePeriode}</Tag>}
             style={{ height: "100%" }}
           >
             {loading ? <Skeleton active paragraph={{ rows: 8 }} /> : (
@@ -251,18 +333,20 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
 
         <Col xs={24} lg={8}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <Card title={`${labels.actes} les plus demandés`} extra={<Text type="secondary">ce mois</Text>}>
+            <Card title={`${labels.actes} les plus demandés`} extra={<Text type="secondary">{libellePeriode}</Text>}>
               {loading ? <Skeleton active /> : (
-                <TopList items={topActes} color={token.colorPrimary} emptyText="Aucune prescription ce mois" />
+                <TopList items={topActes} color={token.colorPrimary} emptyText="Aucune prescription sur la période" />
               )}
             </Card>
 
-            <Card title="Synthèse du mois">
+            <Card title="Synthèse de la période" extra={<Text type="secondary">{libellePeriode}</Text>}>
               {loading ? <Skeleton active /> : (
                 <>
                   <IndicatorRow icon={<InboxOutlined />} color={token.colorPrimary} label={`${labels.pluriel} reçues`} value={toutes.length} />
                   <IndicatorRow icon={<CheckCircleOutlined />} color={token.colorSuccess} label={labels.traitees} value={cloturees.length} />
-                  <IndicatorRow icon={<ClockCircleOutlined />} color={token.colorWarning} label="Reçues aujourd'hui" value={recuesToday} />
+                  {infosPeriode?.inclutAujourdhui
+                    ? <IndicatorRow icon={<ClockCircleOutlined />} color={token.colorWarning} label="Reçues aujourd'hui" value={recuesToday} />
+                    : <IndicatorRow icon={<ClockCircleOutlined />} color={token.colorWarning} label="En attente" value={enAttente.length} />}
                   <Flex justify="space-between" align="center" style={{ paddingTop: 8 }}>
                     <Text type="secondary">Origine</Text>
                     <Space size={4}>
@@ -274,9 +358,9 @@ function PrescriptionsDashboard({ codepresc, title, labels, withStock = false, w
               )}
             </Card>
 
-            <Card title="Principaux prescripteurs" extra={<Text type="secondary">ce mois</Text>}>
+            <Card title="Principaux prescripteurs" extra={<Text type="secondary">{libellePeriode}</Text>}>
               {loading ? <Skeleton active /> : (
-                <TopList items={topPrescripteurs} color={LOGO_BROWN} emptyText="Aucune prescription ce mois" />
+                <TopList items={topPrescripteurs} color={LOGO_BROWN} emptyText="Aucune prescription sur la période" />
               )}
             </Card>
 

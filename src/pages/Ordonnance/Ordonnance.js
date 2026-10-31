@@ -64,6 +64,8 @@ const Ordonnance = () => {
   const editPrescription = JSON.parse(
     sessionStorage.getItem("editPrescription"),
   );
+  // Ordonnance existante rouverte pour modification (numpresc connu)
+  const estModification = !!editPrescription?.numpresc;
   const [formLoading, setFormLoading] = useState(false);
   const [operationType] = useState("add");
   const [medicamentSelected, setMedicamentSelected] = useState(null);
@@ -123,9 +125,19 @@ const Ordonnance = () => {
               postActions(endpoints.prescriptions.ADD, payload)
                 .then((response) => {
                   if (response?.data?.Saved) {
+                    if (estModification) {
+                      // Modification d'une ordonnance non servie (depuis le dossier médical) : retour au dossier
+                      message.success(`Ordonnance ${editPrescription.numpresc} modifiée avec succès`);
+                      sessionStorage.removeItem("editPrescription");
+                      navigate(-1);
+                      return;
+                    }
                     message.success("Nouvelle ordonnance ajoutée avec succès");
                     setIsPrintDisabled(false);
                     setNumCons(response?.data?.Saved);
+                  } else if (response?.data?.Erreur) {
+                    // Refus de l'API : ordonnance servie entre-temps
+                    message.error(response.data.Erreur);
                   }
                 })
                 .finally(() => {
@@ -311,13 +323,14 @@ const Ordonnance = () => {
             </Avatar>
             <div>
               <Text style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: colorPrimary }}>
-                <MedicineBoxOutlined /> Prescription ordonnance
+                <MedicineBoxOutlined /> {estModification ? "Modification de l'ordonnance" : "Prescription ordonnance"}
               </Text>
               <Title level={4} style={{ margin: 0, color: LOGO_BROWN }}>
                 {currentPatient?.prenom_patient} {currentPatient?.nom_patient}
               </Title>
               <Space size={8} wrap>
                 <Text strong>N° {currentPatient?.num_patient}</Text>
+                {estModification && <Tag color="orange">{editPrescription.numpresc}</Tag>}
                 {(editPrescription?.numcons || prescription?.numcons) && (
                   <Tag color="processing">Consultation {editPrescription?.numcons || prescription?.numcons}</Tag>
                 )}
@@ -496,9 +509,9 @@ const Ordonnance = () => {
             loading={formLoading}
             disabled={medicamentsPrescrites.length === 0}
           >
-            Enregistrer l'ordonnance
+            {estModification ? "Enregistrer les modifications" : "Enregistrer l'ordonnance"}
           </Button>
-          <Button danger icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+          <Button danger icon={<CloseOutlined />} onClick={() => { sessionStorage.removeItem("editPrescription"); navigate(-1); }}>
             Annuler
           </Button>
         </Space>

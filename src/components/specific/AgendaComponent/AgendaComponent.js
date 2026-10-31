@@ -4,20 +4,25 @@ import useFetch from "../../../utils/hooks/useFetch.js";
 import { endpoints } from "../../../constants/endpoints.constants.js";
 import DayAppointment from "../DayAppointment/DayAppointment.tsx";
 import ReloadButton from "../../common/ReloadButton/ReloadButton.js";
+import { isAssistantEspace } from "../../../utils/profils.js";
 
 const { Title } = Typography;
+
+const PERIODE_ANNEE = 7;
 
 function AgendaComponent({ author, serviceType }) {
   const [open, setOpen] = useState(false);
 
-  const { data, isLoading, onRefresh } = useFetch(endpoints.rendezVous.LIST);
+  const { data, isLoading, onRefresh } = useFetch(endpoints.rendezVous.LIST(PERIODE_ANNEE));
+  // L'assistant(e) suit l'agenda de tout le service
+  const assistantEspace = isAssistantEspace(serviceType);
   const [listRv, setListRv] = useState([]);
   const [selectedDateList, setSelectedDateList] = useState([]);
   useEffect(() => {
     setListRv(
       data.filter(
         (item) =>
-          item?.service_medical === serviceType && item?.id_medecin === author
+          item?.service_medical === serviceType && (assistantEspace || item?.id_medecin === author)
       )
     );
  
@@ -26,7 +31,7 @@ function AgendaComponent({ author, serviceType }) {
   return (
     <Card loading={isLoading} >
       <Flex justify="space-between" align="center">
-        <Title level={3}>Mon agenda</Title>
+        <Title level={3}>{assistantEspace ? "Agenda du service" : "Mon agenda"}</Title>
         <ReloadButton onRefresh={onRefresh} />
       </Flex>
       <Tabs
@@ -34,7 +39,7 @@ function AgendaComponent({ author, serviceType }) {
         items={[
           {
             key: "1",
-            label: "Mes rendez-vous",
+            label: assistantEspace ? "Rendez-vous du service" : "Mes rendez-vous",
             children: (
               <div>
                 <Calendar

@@ -21,6 +21,8 @@ function DataTable({
     compact,
     onTableChange,
     totalCount,
+    // Événements de ligne transmis tels quels à la Table AntD (clic, double-clic...)
+    onRow,
     // Masque le compteur "N ligne(s) au total" (quand la page affiche déjà ses propres totaux)
     hideTotal = false
 }) {
@@ -116,6 +118,7 @@ function DataTable({
             scroll={scroll === null ? undefined : (scroll || { x: "max-content" })}
             className={compact ? "compact-table" : undefined}
             rowClassName={rowClassName}
+            onRow={onRow}
             components={components}
             pagination={pagination}
             summary={summary}

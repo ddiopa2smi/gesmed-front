@@ -1,26 +1,13 @@
-import { Button, Card, Result } from "antd";
-import { useNavigate } from "react-router";
 import StatistiquesMedicalesComponent from "../../components/specific/StatistiquesMedicales/StatistiquesMedicales";
-import { isMedecinOuAdmin } from "../../utils/profils";
+import AccesReserve from "../../components/common/AccesReserve/AccesReserve";
 
-// Statistiques médicales : réservées aux médecins et aux administrateurs
+// Statistiques médicales : réservées aux profils définis dans ACCES_STATISTIQUES (utils/profils)
 function StatistiquesMedicales() {
-  const navigate = useNavigate();
-
-  if (!isMedecinOuAdmin()) {
-    return (
-      <Card>
-        <Result
-          status="403"
-          title="Accès réservé"
-          subTitle="Les statistiques médicales sont accessibles uniquement aux médecins et aux administrateurs."
-          extra={<Button type="primary" onClick={() => navigate(-1)}>Retour</Button>}
-        />
-      </Card>
-    );
-  }
-
-  return <StatistiquesMedicalesComponent />;
+  return (
+    <AccesReserve espace="medical" message="Les statistiques médicales sont accessibles uniquement aux médecins et aux administrateurs.">
+      <StatistiquesMedicalesComponent />
+    </AccesReserve>
+  );
 }
 
 export default StatistiquesMedicales;

@@ -27,16 +27,17 @@ import Consultations from "./pages/Consultations/Consultations";
 import Visites from "./pages/Visites/Visites";
 import DossierAT from "./pages/DossierAT/DossierAT";
 import StatistiquesMedicales from "./pages/StatistiquesMedicales/StatistiquesMedicales";
+import StatistiquesPharmacie from "./pages/StatistiquesPharmacie/StatistiquesPharmacie";
 import Privileges from "./pages/Privileges/Privileges";
 import Privilege from "./pages/Privilege/Privilege";
 import DetailsConsultation from "./pages/DetailsConsultation/DetailsConsultation";
+import DetailsVisites from "./pages/DetailsVisites/DetailsVisites";
 import GestionPassword from "./pages/GestionPassword/GestionPassword";
 import GestionFicheProduits from "./pages/GestionFicheProduits/GestionFicheProduits";
 import ProtectedRoute from "./components/specific/ProtectedRoute/ProtectedRoute";
 import AgendaMedecin from "./pages/AgendaMedecin/AgendaMedecin";
 import { gynecologieRouter } from "./pages/Espace-Gynecologue/Routing.tsx";
 import { dentistRouter } from "./pages/Espace-Dentiste/Routing.tsx";
-import { pharmacieRouter } from "./pages/Espace-Pharmacie/Routing.tsx";
 import { radiologieRouter } from "./pages/Espace-Radiologie/Routing.tsx";
 import { analyseRouter } from "./pages/Espace-analyse/Routing.tsx";
 import ConfigPage from "./pages/ConfigPage/ConfigPage.js";
@@ -270,6 +271,10 @@ export const router = createHashRouter(
                             path: "details-consultation",
                             element: <DetailsConsultation />
                         },
+                        {
+                            path: "visites",
+                            element: <DetailsVisites />
+                        },
                     ]
                 },
                 {
@@ -383,10 +388,13 @@ export const router = createHashRouter(
                     path: "fournisseurs",
                     element: <Fournisseurs />
                 },
+                {
+                    path: "statistiques",
+                    element: <StatistiquesPharmacie />
+                },
             ]
         },
         accueilRouter,
-        pharmacieRouter,
         gynecologieRouter,
         dentistRouter,
         radiologieRouter,

@@ -1,32 +1,26 @@
 import Swal from "sweetalert2";
 import printJS from "print-js";
-import * as XLSX from "xlsx";
 import { API_URL } from "../constants/environment.constants";
 import { message } from "antd";
 import { v4 as uuidv4 } from "uuid";
 
-export const exportToExcel = (rows, fileName = "export") => {
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Feuille1");
-  XLSX.writeFile(workbook, `${fileName}.xlsx`);
+// Classeur Excel mis en forme : sheets = [{ name, rows }], options : cf. utils/exportExcel.js
+export const exportWorkbookToExcel = async (sheets, fileName = "export", options = {}) => {
+  const key = "export-excel";
+  message.loading({ content: "Préparation du fichier Excel...", key, duration: 0 });
+  try {
+    // Chargé à la demande : exceljs est volumineux
+    const { exporterClasseurExcel } = await import("./exportExcel");
+    await exporterClasseurExcel(sheets, fileName, options);
+    message.success({ content: "Fichier Excel généré", key });
+  } catch (error) {
+    console.log(error);
+    message.error({ content: "Impossible de générer le fichier Excel", key });
+  }
 };
 
-// Classeur Excel en plusieurs feuilles : sheets = [{ name, rows }]
-export const exportWorkbookToExcel = (sheets, fileName = "export") => {
-  const workbook = XLSX.utils.book_new();
-  sheets.forEach(({ name, rows }) => {
-    const worksheet = XLSX.utils.json_to_sheet(rows && rows.length ? rows : [{ Information: "Aucune donnée" }]);
-    // Largeur de colonne ajustée au contenu
-    const colonnes = Object.keys((rows && rows[0]) || { Information: "" });
-    worksheet["!cols"] = colonnes.map((col) => ({
-      wch: Math.min(60, Math.max(col.length, ...(rows || []).map((row) => String(row[col] ?? "").length)) + 2),
-    }));
-    // Nom de feuille : 31 caractères maximum, sans caractères interdits
-    XLSX.utils.book_append_sheet(workbook, worksheet, name.replace(/[\\/?*[\]:]/g, " ").slice(0, 31));
-  });
-  XLSX.writeFile(workbook, `${fileName}.xlsx`);
-};
+export const exportToExcel = (rows, fileName = "export") =>
+  exportWorkbookToExcel([{ name: fileName.split("_")[0] || "Export", rows }], fileName);
 
 export const formatDate = (record) => {
   return record === null || record === ""

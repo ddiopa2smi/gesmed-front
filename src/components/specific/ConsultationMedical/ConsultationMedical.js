@@ -12,9 +12,10 @@ import GestionRegions from '../../../components/specific/GestionRegions/GestionR
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons';
 import BackButton from '../../../components/common/BackButton/BackButton';
 import ReloadButton from '../../../components/common/ReloadButton/ReloadButton';
-import { deletePopup, printPDF } from '../../../utils/helpers';
-import { codesPrescriptions } from '../../../constants/app.constants';
+import { deletePopup } from '../../../utils/helpers';
+import { codesPrescriptions, codeServices } from '../../../constants/app.constants';
 import useObjectFetch from '../../../utils/hooks/useObjectFetch';
+import { ouvrirCertificatMedical } from '../CertificatMedical/CertificatMedical';
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -28,9 +29,11 @@ const getInitCons = (initCons) => {
     return initCons;
 }
 
-function ConsultationMedical({ numPatient, numRV, serviceType }) {
+function ConsultationMedical({ numPatient, numRV, serviceType, codeService = codeServices.MEDICAL }) {
     const navigate = useNavigate();
     const [form] = Form.useForm();
+    // Repos saisi sur le certificat : repris par le formulaire, pour ne pas être écrasé au prochain enregistrement
+    const appliquerRepos = (repos) => form.setFieldsValue(repos);
     const { state } = useLocation();
     // const currentPatient = state?.currentPatient;
     // const consultationObject = state?.consultationObject;
@@ -189,7 +192,7 @@ function ConsultationMedical({ numPatient, numRV, serviceType }) {
                                 {
                                     key: '1',
                                     label: (
-                                        <span onClick={() => { printPDF(`/api/Print/smed/Consultation/${initConsultation.numcons}/certificat`) }} >
+                                        <span onClick={() => { ouvrirCertificatMedical(initConsultation.numcons, appliquerRepos) }} >
                                             Certificat Médical
                                         </span>
                                     ),
@@ -668,11 +671,39 @@ function ConsultationMedical({ numPatient, numRV, serviceType }) {
                 footer={null}
                 destroyOnClose
             >
-                {gestionOuverte === "MOTIF" && <GestionMotifs data={motifs} isLoading={motifsLoading} onRefresh={motifsRefreshList} />}
+                {/* Double-clic sur une ligne : remplit le champ correspondant et ferme la fenêtre */}
+                {gestionOuverte === "MOTIF" && (
+                    <GestionMotifs
+                        data={motifs} isLoading={motifsLoading} onRefresh={motifsRefreshList} codeSpe={codeService}
+                        onSelect={(record) => {
+                            form.setFieldsValue({ code_motifcons: record.code_motifcons, motif_ref: record.code_motifcons });
+                            setGestionOuverte(null);
+                            message.success(`« ${record.libelle_motifcons} » sélectionné`);
+                        }}
+                    />
+                )}
 
-                {gestionOuverte === "REGION" && <GestionRegions data={regions} isLoading={regionsLoading} onRefresh={regionsRefreshList} />}
+                {gestionOuverte === "REGION" && (
+                    <GestionRegions
+                        data={regions} isLoading={regionsLoading} onRefresh={regionsRefreshList}
+                        onSelect={(record) => {
+                            form.setFieldValue("code_region", record.code_region);
+                            setGestionOuverte(null);
+                            message.success(`« ${record.libelle_region} » sélectionné`);
+                        }}
+                    />
+                )}
 
-                {gestionOuverte === "PATHOLOGIE" && <GestionPathologies data={pathologies} isLoading={pathologiesLoading} onRefresh={pathologiesRefreshList} />}
+                {gestionOuverte === "PATHOLOGIE" && (
+                    <GestionPathologies
+                        data={pathologies} isLoading={pathologiesLoading} onRefresh={pathologiesRefreshList} codeSpe={codeService}
+                        onSelect={(record) => {
+                            form.setFieldValue("code_patho", record.code_patho);
+                            setGestionOuverte(null);
+                            message.success(`« ${record.libelle_patho} » sélectionné`);
+                        }}
+                    />
+                )}
             </Modal>
 
 
